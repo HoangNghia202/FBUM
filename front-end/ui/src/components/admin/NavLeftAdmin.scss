@@ -1,0 +1,26 @@
+.nav-left {
+  height: 100vh;
+}
+
+.nav-contain {
+  margin: 0.5em 0;
+  .nav-item {
+    justify-items: center;
+    a {
+      color: rgb(23, 22, 22);
+      font-weight: bolder;
+      text-decoration: none;
+      border-radius: 0 20px 20px 0;
+      width: 200px;
+      text-align: left;
+      &:hover {
+        background-color: whitesmoke;
+      }
+    }
+  }
+}
+
+.active {
+  background-color: rgb(164, 114, 254);
+  color: white !important;
+}
