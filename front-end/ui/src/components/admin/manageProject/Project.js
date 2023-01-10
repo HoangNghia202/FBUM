@@ -5,14 +5,63 @@ import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
+import Fab from "@mui/material/Fab";
+import AddIcon from "@mui/icons-material/Add";
+import Tooltip from "@mui/joy/Tooltip";
+import TextField from "@mui/material/TextField";
+import "@fontsource/public-sans";
+
+import SearchAutoComplete from "./SearchAutoComplete";
+import { useState } from "react";
+import Button from "react-bootstrap/Button";
+import Modal from "react-bootstrap/Modal";
+import moment from "moment/moment";
+
 function Project(props) {
-  const [value, setValue] = React.useState("1");
+  const [value, setValue] = useState("1");
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
+  const [show, setShow] = useState(false);
+
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+
+  const handleSubmitForm = (event) => {
+    event.preventDefault();
+    const values = {
+      name: event.target.projectName.value,
+      company: event.target.companyName.value,
+      startDate: moment(event.target.startDay.value).format("MM-DD-YYYY"),
+      endDate: moment(event.target.endDay.value).format("MM-DD-YYYY"),
+    };
+    console.log("values", values);
+
+    alert(JSON.stringify(values));
+  };
+
   return (
     <div className="manage-project col-9 ">
+      <div className="sticky-btn">
+        <Box sx={{ "& > :not(style)": { m: 1 } }}>
+          <Tooltip
+            title="Add new project"
+            color="info"
+            placement="top"
+            variant={"soft"}
+          >
+            <Fab
+              size="small"
+              color="secondary"
+              aria-label="add"
+              onClick={() => handleShow()}
+            >
+              <AddIcon />
+            </Fab>
+          </Tooltip>
+        </Box>
+      </div>
       <div className="container row">
         <Box sx={{ width: "100%", typography: "body1" }}>
           <TabContext value={value}>
@@ -26,7 +75,10 @@ function Project(props) {
               </TabList>
             </Box>
             <TabPanel value="1">
-              {" "}
+              <div>
+                {" "}
+                <SearchAutoComplete />{" "}
+              </div>
               <div className="processing-proj row d-flex">
                 <div className="col-2 col-md-3 row">
                   <div className="container">
@@ -76,6 +128,7 @@ function Project(props) {
             </TabPanel>
             <TabPanel value="2">
               {" "}
+              <SearchAutoComplete />
               <div className="ended-proj row">
                 <div className="processing-proj row d-flex">
                   <div className="col-2 col-md-3 row">
@@ -99,6 +152,78 @@ function Project(props) {
           </TabContext>
         </Box>
       </div>
+
+      {/* modal input create new project */}
+      <Modal show={show} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Create new project</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <form onSubmit={(event) => handleSubmitForm(event)}>
+            <div className="row"></div>
+            <TextField
+              className=" my-2"
+              label="Project name"
+              variant="outlined"
+              size="small"
+              name="projectName"
+              fullWidth
+            />
+            <TextField
+              className="my-2"
+              label="Company's name"
+              variant="outlined"
+              size="small"
+              name="companyName"
+              fullWidth
+            />
+
+            <div className="d-flex justify-content-between">
+              <TextField
+                className="my-2"
+                label="Start day"
+                variant="filled"
+                size="small"
+                name="startDay"
+                type={"date"}
+                defaultValue={new Date().toISOString().slice(0, 10)}
+              />
+
+              <TextField
+                className="my-2"
+                label="End day"
+                variant="filled"
+                size="small"
+                name="endDay"
+                type={"date"}
+                defaultValue={new Date().toISOString().slice(0, 10)}
+              />
+            </div>
+            <div className="d-flex">
+              <Button
+                variant="secondary"
+                onClick={handleClose}
+                className="mr-2"
+              >
+                Cancel
+              </Button>
+              <Button
+                className="ml-2"
+                variant="primary"
+                onClick={handleClose}
+                style={{
+                  backgroundColor: "rgb(164,114,254)",
+                  border: "none",
+                  marginLeft: "2px",
+                }}
+                type="submit"
+              >
+                Create
+              </Button>
+            </div>
+          </form>
+        </Modal.Body>
+      </Modal>
     </div>
   );
 }

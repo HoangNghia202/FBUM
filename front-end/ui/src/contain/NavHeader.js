@@ -22,7 +22,7 @@ function NavBar() {
     <div>
       <Navbar color="light" light expand="md" className="">
         <div></div>
-        <NavbarBrand href="/">reactstrap</NavbarBrand>
+        <NavbarBrand href="/">FBUM</NavbarBrand>
         <NavbarToggler onClick={toggle} />
         <Collapse isOpen={isOpen} navbar>
           <Nav className="mr-auto" navbar>
@@ -47,11 +47,6 @@ function NavBar() {
                 <DropdownItem>Reset</DropdownItem>
               </DropdownMenu>
             </UncontrolledDropdown>
-          </Nav>
-          <Nav className="ml-auto float-right" navbar>
-            <NavLink className="nav-link" to="/cart">
-              Cart:
-            </NavLink>
           </Nav>
         </Collapse>
       </Navbar>
