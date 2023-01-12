@@ -10,12 +10,15 @@ import AddIcon from "@mui/icons-material/Add";
 import Tooltip from "@mui/joy/Tooltip";
 import TextField from "@mui/material/TextField";
 import "@fontsource/public-sans";
-
 import SearchAutoComplete from "./SearchAutoComplete";
 import { useState } from "react";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import moment from "moment/moment";
+import { dataProject } from "../dataAdmin";
+import { Progress } from "reactstrap";
+import { Outlet } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function Project(props) {
   const [value, setValue] = useState("1");
@@ -28,6 +31,19 @@ function Project(props) {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
+  let inprogressPrj = [];
+  let endedPrj = [];
+  dataProject.map((item) => {
+    if (Date.parse(item.dayEnd) > Date.now()) {
+      inprogressPrj.push(item);
+    } else {
+      endedPrj.push(item);
+    }
+  });
+
+  console.log("inprogressPrj", inprogressPrj);
+  console.log("endedPrj", endedPrj);
+
   const handleSubmitForm = (event) => {
     event.preventDefault();
     const values = {
@@ -39,6 +55,12 @@ function Project(props) {
     console.log("values", values);
 
     alert(JSON.stringify(values));
+  };
+
+  let navigate = useNavigate();
+  const ViewDetailProject = (id) => {
+    console.log("id", id);
+    navigate(`/admin/project/${id}`);
   };
 
   return (
@@ -80,50 +102,41 @@ function Project(props) {
                 <SearchAutoComplete />{" "}
               </div>
               <div className="processing-proj row d-flex">
-                <div className="col-2 col-md-3 row">
-                  <div className="container">
-                    <div className="card ">
-                      <div className="card-body">
-                        <h5 className="card-title">FBUM</h5>
-                        <hr className="m-0"></hr>
-                        <p className="card-text">Company: Fsoft</p>
-                        <a href="#" className="card-link">
-                          View details
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                {inprogressPrj.map((item) => {
+                  let percent = Math.floor(
+                    ((Date.now() - Date.parse(item.dayStart)) /
+                      (Date.parse(item.dayEnd) - Date.parse(item.dayStart))) *
+                      100
+                  );
 
-                <div className="col-2 col-md-3 row">
-                  <div className="container">
-                    <div className="card ">
-                      <div className="card-body">
-                        <h5 className="card-title">FBUM</h5>
-                        <hr className="m-0"></hr>
-                        <p className="card-text">Company: Nghia company hehe</p>
-                        <a href="#" className="card-link">
-                          View details
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  console.log("percent", percent);
 
-                <div className="col-2 col-md-3 row">
-                  <div className="container">
-                    <div className="card ">
-                      <div className="card-body">
-                        <h5 className="card-title">FBUM</h5>
-                        <hr className="m-0"></hr>
-                        <p className="card-text">Company: Nghia company hehe</p>
-                        <a href="#" className="card-link">
-                          View details
-                        </a>
+                  return (
+                    <div
+                      className="col-2 col-md-3 row"
+                      onClick={() => {
+                        ViewDetailProject(item.id);
+                      }}
+                    >
+                      <div className="container">
+                        <div className="card ">
+                          <div className="card-body">
+                            <h5 className="card-title">{item.projectName}</h5>
+
+                            <Progress
+                              striped
+                              animated
+                              color="warning"
+                              value={percent}
+                            >
+                              {percent}%
+                            </Progress>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
+                  );
+                })}
               </div>
             </TabPanel>
             <TabPanel value="2">
@@ -131,20 +144,26 @@ function Project(props) {
               <SearchAutoComplete />
               <div className="ended-proj row">
                 <div className="processing-proj row d-flex">
-                  <div className="col-2 col-md-3 row">
-                    <div className="container">
-                      <div className="card card-end">
-                        <div className="card-body">
-                          <h5 className="card-title">FBUM</h5>
-                          <hr className="m-0"></hr>
-                          <p className="card-text">Company: Fsoft</p>
-                          <a href="#" className="card-link">
-                            View details
-                          </a>
+                  {endedPrj.map((item, index) => {
+                    return (
+                      <div
+                        key={index}
+                        className="col-2 col-md-3 row"
+                        onClick={() => {
+                          ViewDetailProject(item.id);
+                        }}
+                      >
+                        <div className="container">
+                          <div className="card card-end">
+                            <div className="card-body">
+                              <h5 className="card-title">{item.projectName}</h5>
+                              <hr className="m-0"></hr>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
+                    );
+                  })}
                 </div>
               </div>
             </TabPanel>

@@ -6,6 +6,8 @@ import { Route, Routes } from "react-router-dom";
 import Project from "./components/admin/manageProject/Project";
 import ManageLeader from "./components/admin/manageLeader/ManageLeader";
 import ManageStaff from "./components/admin/manageStaff/ManageStaff";
+import ViewDetailProject from "./components/admin/manageProject/ViewDetailProject";
+import { dataProject } from "./components/admin/dataAdmin";
 function App() {
   return (
     <div className="App">
@@ -15,7 +17,11 @@ function App() {
       <div className="app-body">
         <Routes>
           <Route path="/admin" element={<AdminPage />}>
-            <Route path="project" element={<Project />} />
+            <Route path="project" element={<Project />}></Route>
+            <Route
+              path="project/:projectId"
+              element={<ViewDetailProject projects={dataProject} />}
+            />
             <Route path="leader" element={<ManageLeader />} />
             <Route path="staff" element={<ManageStaff />} />
           </Route>
@@ -33,5 +39,4 @@ function App() {
     </div>
   );
 }
-
 export default App;
