@@ -1,0 +1,247 @@
+{
+    "projects": [
+        {
+            "id": 0,
+            "projectName": "Project 1",
+            "workStart": "02/01/2022",
+            "workEnd": "02/01/2024",
+            "projectManager": "John Doe",
+            "staffs": [
+                {
+                    "id": 0,
+                    "name": "Hoang nghia",
+                    "position": "Developer",
+                    "level": 1,
+                    "timeStart": "02/01/2022",
+                    "timeEnd": "02/03/2023"
+                },
+                {
+                    "id": 1,
+                    "name": "Tony",
+                    "position": "Developer",
+                    "level": 1,
+                    "timeStart": "02/01/2022",
+                    "timeEnd": "02/03/2023"
+                },
+                {
+                    "id": 2,
+                    "name": "Otis",
+                    "position": "Developer",
+                    "level": 2,
+                    "timeStart": "02/01/2022",
+                    "timeEnd": "02/03/2023"
+                },
+                {
+                    "id": 3,
+                    "name": "Mark",
+                    "position": "Developer",
+                    "level": 3,
+                    "timeStart": "02/01/2022",
+                    "timeEnd": "02/03/2023"
+                },
+                {
+                    "id": 4,
+                    "name": "Stone",
+                    "position": "Business Analyst",
+                    "level": 3,
+                    "timeStart": "02/01/2022",
+                    "timeEnd": "02/03/2023"
+                },
+                {
+                    "id": 5,
+                    "name": "Leo",
+                    "position": "Business Analyst",
+                    "level": 2,
+                    "timeStart": "02/01/2022",
+                    "timeEnd": "02/03/2023"
+                },
+                {
+                    "id": 6,
+                    "name": "Mark",
+                    "position": "Business Analyst",
+                    "level": 1,
+                    "timeStart": "02/01/2022",
+                    "timeEnd": "02/03/2023"
+                },
+                {
+                    "id": 6,
+                    "name": "Elpunga",
+                    "position": "Tester",
+                    "level": 2,
+                    "timeStart": "02/01/2022",
+                    "timeEnd": "02/03/2023"
+                },
+                {
+                    "id": 8,
+                    "name": "Ronaldo",
+                    "position": "Business Analyst",
+                    "level": 1,
+                    "timeStart": "02/01/2022",
+                    "timeEnd": "02/03/2023"
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "projectName": "Project 2",
+            "workStart": "02/01/2022",
+            "workEnd": "02/01/2024",
+            "projectManager": "John Doe",
+            "staffs": [
+                {
+                    "id": 7,
+                    "name": "Hoang nghia",
+                    "position": "Developer",
+                    "level": 1,
+                    "timeStart": "02/01/2022",
+                    "timeEnd": "02/03/2023"
+                },
+                {
+                    "id": 8,
+                    "name": "Tony",
+                    "position": "Developer",
+                    "level": 1,
+                    "timeStart": "02/01/2022",
+                    "timeEnd": "02/03/2023"
+                },
+                {
+                    "id": 9,
+                    "name": "Otis",
+                    "position": "Developer",
+                    "level": 2,
+                    "timeStart": "02/01/2022",
+                    "timeEnd": "02/03/2023"
+                },
+                {
+                    "id": 10,
+                    "name": "Mark",
+                    "position": "Developer",
+                    "level": 3,
+                    "timeStart": "02/01/2022",
+                    "timeEnd": "02/03/2023"
+                },
+                {
+                    "id": 11,
+                    "name": "Stone",
+                    "position": "Business Analyst",
+                    "level": 3,
+                    "timeStart": "02/01/2022",
+                    "timeEnd": "02/03/2023"
+                },
+                {
+                    "id": 12,
+                    "name": "Leo",
+                    "position": "Business Analyst",
+                    "level": 2,
+                    "timeStart": "02/01/2022",
+                    "timeEnd": "02/03/2023"
+                },
+                {
+                    "id": 13,
+                    "name": "Mark",
+                    "position": "Business Analyst",
+                    "level": 1,
+                    "timeStart": "02/01/2022",
+                    "timeEnd": "02/03/2023"
+                },
+                {
+                    "id": 14,
+                    "name": "Elpunga",
+                    "position": "Tester",
+                    "level": 2,
+                    "timeStart": "02/01/2022",
+                    "timeEnd": "02/03/2023"
+                },
+                {
+                    "id": 15,
+                    "name": "Ronaldo",
+                    "position": "Business Analyst",
+                    "level": 1,
+                    "timeStart": "02/01/2022",
+                    "timeEnd": "02/03/2023"
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "projectName": "Project 3",
+            "workStart": "02/01/2022",
+            "workEnd": "10/01/2022",
+            "projectManager": "John Doe",
+            "staffs": [
+                {
+                    "id": 16,
+                    "name": "Hoang nghia",
+                    "position": "Developer",
+                    "level": 1,
+                    "timeStart": "02/01/2022",
+                    "timeEnd": "02/03/2022"
+                },
+                {
+                    "id": 17,
+                    "name": "Tony",
+                    "position": "Developer",
+                    "level": 1,
+                    "timeStart": "02/01/2022",
+                    "timeEnd": "02/03/2022"
+                },
+                {
+                    "id": 18,
+                    "name": "Otis",
+                    "position": "Developer",
+                    "level": 2,
+                    "timeStart": "02/01/2022",
+                    "timeEnd": "02/03/2022"
+                },
+                {
+                    "id": 19,
+                    "name": "Mark",
+                    "position": "Developer",
+                    "level": 3,
+                    "timeStart": "02/01/2022",
+                    "timeEnd": "02/03/2022"
+                },
+                {
+                    "id": 20,
+                    "name": "Stone",
+                    "position": "Business Analyst",
+                    "level": 3,
+                    "timeStart": "02/01/2022",
+                    "timeEnd": "02/03/2022"
+                },
+                {
+                    "id": 21,
+                    "name": "Leo",
+                    "position": "Business Analyst",
+                    "level": 2,
+                    "timeStart": "02/01/2022",
+                    "timeEnd": "02/03/2022"
+                },
+                {
+                    "id": 22,
+                    "name": "Mark",
+                    "position": "Business Analyst",
+                    "level": 1,
+                    "timeStart": "02/01/2022",
+                    "timeEnd": "02/03/2022"
+                },
+                {
+                    "id": 23,
+                    "name": "Elpunga",
+                    "position": "Tester",
+                    "level": 2,
+                    "timeStart": "02/01/2022",
+                    "timeEnd": "02/03/2022"
+                },
+                {
+                    "id": 24,
+                    "name": "Ronaldo",
+                    "position": "Business Analyst",
+                    "level": 1,
+                    "timeStart": "02/01/2022",
+                    "timeEnd": "02/03/2022"
+                }
+            ]
+        }
+    ]
+}

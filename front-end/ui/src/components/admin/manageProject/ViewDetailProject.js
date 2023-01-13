@@ -5,17 +5,12 @@ import StaffOfProject from "./StaffOfProject";
 
 function ViewDetailProject(props) {
   const { projectId } = useParams();
-  const [project, setProject] = useState({});
   console.log(projectId);
 
   const projects = props.projects;
   console.log("projects", projects);
   const mainProject = projects.filter((item) => item.id == projectId)[0];
-
   console.log("mainProject", mainProject);
-  useEffect(() => {
-    setProject(mainProject);
-  }, [mainProject]);
 
   return (
     <div className="col-9">
@@ -27,13 +22,13 @@ function ViewDetailProject(props) {
           className="col-md-4 mt-2 text-white"
           style={{ backgroundColor: "#A472FE" }}
         >
-          <h4>{project.projectName}</h4>
+          <h4>{mainProject.projectName}</h4>
           <hr></hr>
-          <h5>Start Date: {project.dayStart}</h5>
-          <h5>End Date: {project.dayEnd}</h5>
+          <h5>Start Date: {mainProject.dayStart}</h5>
+          <h5>End Date: {mainProject.dayEnd}</h5>
         </div>
         <div className="col-md-8 mt-2 p-0">
-          <StaffOfProject staff={project.staff} />
+          <StaffOfProject staff={mainProject} />
         </div>
       </div>
     </div>

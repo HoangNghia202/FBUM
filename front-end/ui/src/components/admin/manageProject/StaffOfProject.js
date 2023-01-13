@@ -11,9 +11,13 @@ import "./staffOfProject.scss";
 
 const rows = [];
 const StaffOfProject = (props) => {
-  console.log("props", props);
+  const [data, setData] = useState([]);
   let staff = props.staff;
-  console.log("staff", staff);
+  console.log("staff>>>>", staff);
+  useEffect(() => {
+    setData(staff.staff);
+  }, [staff]);
+  console.log("data>>>>", data);
 
   return (
     <>
@@ -28,7 +32,7 @@ const StaffOfProject = (props) => {
             </tr>
           </thead>
           <tbody>
-            {staff.map((item, index) => (
+            {data.map((item, index) => (
               <tr>
                 <th scope="row">{index + 1}</th>
                 <td>{item.name}</td>

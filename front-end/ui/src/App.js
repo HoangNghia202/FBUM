@@ -8,7 +8,19 @@ import ManageLeader from "./components/admin/manageLeader/ManageLeader";
 import ManageStaff from "./components/admin/manageStaff/ManageStaff";
 import ViewDetailProject from "./components/admin/manageProject/ViewDetailProject";
 import { dataProject } from "./components/admin/dataAdmin";
+import { fetchProduct } from "./redux/ProductSlider";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+
 function App() {
+  const dispatch = useDispatch();
+  const projects = useSelector((state) => state.productSlider);
+  console.log(process.env);
+  useEffect(() => {
+    dispatch(fetchProduct());
+  });
+  console.log("projects: ", projects);
+
   return (
     <div className="App">
       <div className="app-nav">
