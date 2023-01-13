@@ -9,101 +9,188 @@ using System.Net.Http;
 using System.Web.Http;
 using BUResourcesManagementAPI.Models;
 using System.Web.ModelBinding;
+using Antlr.Runtime.Misc;
 
 namespace BUResourcesManagementAPI.Controllers
 {
     public class StaffController : ApiController
     {
-        [HttpGet]
+        [HttpGet] // api/staff
         public HttpResponseMessage Get()
-        {
-            DataTable dataTable = new DataTable();
-
-            String query = @"SELECT StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition 
-                            FROM Staff, Role, Position
-                            WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID;";
-
-            using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
-            using (var command = new SqlCommand(query, connection))
-            using (var data = new SqlDataAdapter(command))
-            {
-                command.CommandType = CommandType.Text;
-                data.Fill(dataTable);
-            }
-
-            return Request.CreateResponse(HttpStatusCode.OK, dataTable);
-        }
-
-        [HttpGet]
-        public HttpResponseMessage Get(int id)
-        {
-            DataTable dataTable = new DataTable();
-
-            String query = @"SELECT StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition 
-                            FROM Staff, Role, Position
-                            WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND StaffID = " + id;
-
-            using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
-            using (var command = new SqlCommand(query, connection))
-            using (var data = new SqlDataAdapter(command))
-            {
-                command.CommandType = CommandType.Text;
-                data.Fill(dataTable);
-            }
-
-            return Request.CreateResponse(HttpStatusCode.OK, dataTable);
-        }
-
-        [HttpPost]
-        public String Post([FromBody] Staff staff)
         {
             try
             {
-                String query = @"INSERT INTO Staff VALUES (N'"
-                                + staff.StaffName + @"', '"
-                                + staff.Password + @"', "
-                                + staff.StaffRole + @", "
-                                + staff.Level + @", "
-                                + staff.MainPosition + @");";
+                List<Staff> listStaff = null;
+
+                String query = @"SELECT StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition 
+                            FROM Staff, Role, Position
+                            WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID;";
 
                 using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
-                using (var command = new SqlCommand())
+                using (var command = new SqlCommand(query, connection))
                 {
                     connection.Open();
-                    command.Connection = connection;
-                    command.CommandText = query;
-                    if (command.ExecuteNonQuery() == 1) return "Staff was added successfully";
-                    else return "Error";
+                    command.CommandType = CommandType.Text;
+                    var reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        listStaff = new List<Staff>();
+                        while (reader.Read())
+                        {
+                            int staffID = reader.GetInt32(0);
+                            String staffName = reader.GetString(1);
+                            String password = reader.GetString(2);
+                            String staffRole = reader.GetString(3);
+                            int level = reader.GetInt32(4);
+                            String mainPosition = reader.GetString(5);
+                            listStaff.Add(new Staff(staffID, staffName, password, staffRole, level, mainPosition));
+                        }
+                        connection.Close();
+                    }
+                    else
+                    {
+                        connection.Close();
+                        return Request.CreateResponse(HttpStatusCode.NotFound, listStaff);
+                    }
+                }
+
+                return Request.CreateResponse(HttpStatusCode.OK, listStaff);
+            }
+            catch (Exception ex)
+            {
+                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex);
+            }
+        }
+
+        [HttpGet] // api/staff/id
+        public HttpResponseMessage Get(int id)
+        {
+            try
+            {
+                Staff staff = null;
+                String query = @"SELECT StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition 
+                            FROM Staff, Role, Position
+                            WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND StaffID = " + id;
+
+                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    command.CommandType = CommandType.Text;
+                    var reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            int staffID = reader.GetInt32(0);
+                            String staffName = reader.GetString(1);
+                            String password = reader.GetString(2);
+                            String staffRole = reader.GetString(3);
+                            int level = reader.GetInt32(4);
+                            String mainPosition = reader.GetString(5);
+                            staff = new Staff(staffID, staffName, password, staffRole, level, mainPosition);
+                        }
+                        connection.Close();
+                    }
+                    else
+                    {
+                        connection.Close();
+                        return Request.CreateResponse(HttpStatusCode.NotFound, staff);
+                    }
+                }
+
+                return Request.CreateResponse(HttpStatusCode.OK, staff);
+            }
+            catch (Exception ex)
+            {
+                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex);
+            }
+        }
+
+        [HttpPost] // api/staff
+        public HttpResponseMessage Post([FromBody] Staff staff)
+        {
+            try
+            {
+                String query = @"INSERT INTO Staff VALUES (@StaffName, @Password, @StaffRole, @Level, @MainPosition)";
+
+                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    command.Parameters.AddWithValue("@StaffName", staff.StaffName);
+                    command.Parameters.AddWithValue("@Password", staff.Password);
+                    command.Parameters.AddWithValue("@StaffRole", int.Parse(staff.StaffRole));
+                    command.Parameters.AddWithValue("@Level", staff.Level);
+                    command.Parameters.AddWithValue("@MainPosition", int.Parse(staff.MainPosition));
+                    if (command.ExecuteNonQuery() != 1) return Request.CreateErrorResponse(HttpStatusCode.ExpectationFailed, "Create new staff failed");
+                    else return Request.CreateResponse(HttpStatusCode.OK, "Create new staff successfully");
                 }
             }
             catch (Exception ex)
             {
-                return $"{ex}";
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, ex);
             }
         }
 
         [HttpPost]
-        [Route("api/login")]
-        public String Login([FromBody] Staff staff)
+        [Route("api/staff/login")] // api/staff/login/{id}
+        public HttpResponseMessage Login([FromBody] Staff staff)
         {
-            String query = @"SELECT * FROM Staff WHERE StaffID = " + staff.StaffID + " AND Password = '" + staff.Password + "';";
-
-            using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
-            using (var command = new SqlCommand())
+            try
             {
-                connection.Open();
-                command.Connection = connection;
-                command.CommandText = query;
-                var reader = command.ExecuteReader();
-                if (reader.HasRows) return "Login successfully";
-                else return "Incorrect ID or password";
-            };
+                int id = 1;
+                Staff login = null;
+                String query = @"SELECT StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition 
+                                FROM Staff, Role, Position  
+                                WHERE 
+                                Staff.StaffRole = Role.RoleID AND 
+                                Staff.MainPosition = Position.PositionID AND
+                                StaffID = @StaffID AND 
+                                Password = @Password AND 
+                                StaffRole = @StaffRole;";
+
+                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    command.Parameters.AddWithValue("@StaffID", staff.StaffID);
+                    command.Parameters.AddWithValue("@Password", staff.Password);
+                    command.Parameters.AddWithValue("@StaffRole", id);
+                    var reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            int staffID = reader.GetInt32(0);
+                            String staffName = reader.GetString(1);
+                            String password = reader.GetString(2);
+                            String staffRole = reader.GetString(3);
+                            int level = reader.GetInt32(4);
+                            String mainPosition = reader.GetString(5);
+                            login = new Staff(staffID, staffName, password, staffRole, level, mainPosition);
+                        }
+                    }
+                    else
+                    {
+                        return Request.CreateResponse(HttpStatusCode.Conflict, login);
+                    }
+                }
+
+                return Request.CreateResponse(HttpStatusCode.OK, login);
+            }
+            catch (Exception ex)
+            {
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, ex);
+            }
         }
 
-        [HttpPut]
-        public String Put([FromBody] Staff staff)
+        [HttpPut] // api/staff
+        public HttpResponseMessage Put([FromBody] Staff staff)
         {
-            String query = @"UPDATE Staff SET 
+            try
+            {
+                String query = @"UPDATE Staff SET 
                             StaffName = @StaffName, 
                             Password =  @Password,
                             StaffRole = @StaffRole,
@@ -111,38 +198,46 @@ namespace BUResourcesManagementAPI.Controllers
                             MainPosition = @MainPosition 
                             WHERE StaffID = @StaffID;";
 
-            using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
-            using (var command = new SqlCommand())
+                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    command.Parameters.AddWithValue("@StaffName", staff.StaffName);
+                    command.Parameters.AddWithValue("@Password", staff.Password);
+                    command.Parameters.AddWithValue("@StaffRole", staff.StaffRole);
+                    command.Parameters.AddWithValue("@Level", staff.Level);
+                    command.Parameters.AddWithValue("@MainPosition", staff.MainPosition);
+                    command.Parameters.AddWithValue("@StaffID", staff.StaffID);
+                    if (command.ExecuteNonQuery() != 1) return Request.CreateErrorResponse(HttpStatusCode.ExpectationFailed, "Update staff failed");
+                    else return Request.CreateResponse(HttpStatusCode.OK, "Update staff successfully");
+                }
+            }
+            catch (Exception ex)
             {
-                connection.Open();
-                command.Connection = connection;
-                command.CommandText = query;
-                command.Parameters.AddWithValue("@StaffName", staff.StaffName);
-                command.Parameters.AddWithValue("@Password", staff.Password);
-                command.Parameters.AddWithValue("@StaffRole", staff.StaffRole);
-                command.Parameters.AddWithValue("@Level", staff.Level);
-                command.Parameters.AddWithValue("@MainPosition", staff.MainPosition);
-                if (command.ExecuteNonQuery() == 1) return "Update successfully";
-                else return "Error";
-            };
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, ex);
+            }
         }
 
-        [HttpDelete]
-        public String Delete(int id)
+        [HttpDelete] // api/staff/{id}
+        public HttpResponseMessage Delete(int id)
         {
-            String query = @"DELETE FROM Staff WHERE StaffID = @StaffID;";
-
-            using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
-            using (var command = new SqlCommand())
+            try
             {
-                connection.Open();
-                command.Connection = connection;
-                command.CommandText = query;
-                command.Parameters.AddWithValue("@StaffID", id);
-                if (command.ExecuteNonQuery() == 1) return "Delete successfully";
-                else return "Error";
-            };
+                String query = @"DELETE FROM Staff WHERE StaffID = @StaffID;";
+
+                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    command.Parameters.AddWithValue("@StaffID", id);
+                    if (command.ExecuteNonQuery() != 1) return Request.CreateErrorResponse(HttpStatusCode.ExpectationFailed, "Delete staff failed");
+                    else return Request.CreateResponse(HttpStatusCode.OK, "Delete staff successfully");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, ex);
+            }
         }
     }
 }
-
