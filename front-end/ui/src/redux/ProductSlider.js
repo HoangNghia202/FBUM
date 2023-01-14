@@ -13,7 +13,7 @@ const productSliderSlice = createSlice({
   },
 });
 
-export const fetchProduct = () => {
+export const fetchProjects = () => {
   return async (dispatch) => {
     try {
       const res = await axios.get(`${baseUrl}/projects`);

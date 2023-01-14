@@ -9,14 +9,13 @@ import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import "./staffOfProject.scss";
 
-const rows = [];
 const StaffOfProject = (props) => {
   const [data, setData] = useState([]);
-  let staff = props.staff;
-  console.log("staff>>>>", staff);
+  const { staffs } = props;
+  console.log("staffs>>>>", staffs);
   useEffect(() => {
-    setData(staff.staff);
-  }, [staff]);
+    setData(staffs);
+  }, [staffs]);
   console.log("data>>>>", data);
 
   return (

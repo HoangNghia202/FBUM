@@ -21,6 +21,7 @@ import { Outlet } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
 function Project(props) {
+  const { projects } = props;
   const [value, setValue] = useState("1");
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -33,8 +34,8 @@ function Project(props) {
 
   let inprogressPrj = [];
   let endedPrj = [];
-  dataProject.map((item) => {
-    if (Date.parse(item.dayEnd) > Date.now()) {
+  projects.map((item) => {
+    if (Date.parse(item.workEnd) > Date.now()) {
       inprogressPrj.push(item);
     } else {
       endedPrj.push(item);
@@ -49,8 +50,8 @@ function Project(props) {
     const values = {
       name: event.target.projectName.value,
       company: event.target.companyName.value,
-      startDate: moment(event.target.startDay.value).format("MM-DD-YYYY"),
-      endDate: moment(event.target.endDay.value).format("MM-DD-YYYY"),
+      workStart: moment(event.target.startDay.value).format("MM-DD-YYYY"),
+      workEnd: moment(event.target.endDay.value).format("MM-DD-YYYY"),
     };
     console.log("values", values);
 
@@ -98,14 +99,13 @@ function Project(props) {
             </Box>
             <TabPanel value="1">
               <div>
-                {" "}
-                <SearchAutoComplete />{" "}
+                <SearchAutoComplete searchData={inprogressPrj} />
               </div>
               <div className="processing-proj row d-flex">
                 {inprogressPrj.map((item) => {
                   let percent = Math.floor(
-                    ((Date.now() - Date.parse(item.dayStart)) /
-                      (Date.parse(item.dayEnd) - Date.parse(item.dayStart))) *
+                    ((Date.now() - Date.parse(item.workStart)) /
+                      (Date.parse(item.workEnd) - Date.parse(item.workStart))) *
                       100
                   );
 
@@ -140,8 +140,7 @@ function Project(props) {
               </div>
             </TabPanel>
             <TabPanel value="2">
-              {" "}
-              <SearchAutoComplete />
+              <SearchAutoComplete searchData={endedPrj} />
               <div className="ended-proj row">
                 <div className="processing-proj row d-flex">
                   {endedPrj.map((item, index) => {
