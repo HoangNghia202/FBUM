@@ -15,6 +15,7 @@ namespace BUResourcesManagementAPI.Models
         public String ProjectName { get; set; }
         public String TimeStart { get; set; }
         public String TimeEnd { get; set; }
+        public List<Staff> Staffs { get; set; }
 
         public Project() { }
 
@@ -33,45 +34,27 @@ namespace BUResourcesManagementAPI.Models
             TimeEnd = timeEnd;
         }
 
-        public Project GetProject(int projectID)
+        public Project(int projectID, string projectName, string timeStart, string timeEnd, List<Staff> staffs) : this(projectID, projectName, timeStart, timeEnd)
         {
+            Staffs = staffs;
+        }
+
+        public bool CheckValidProject()
+        {
+            if (ProjectName == null || ProjectName.Length == 0) return false;
             try
             {
-                String query = @"SELECT ProjectID, ProjectName, CONVERT(VARCHAR(10), TimeStart) AS TimeStart, CONVERT(VARCHAR(10), TimeEnd) AS TimeEnd 
-                            FROM Project WHERE ProjectID = @ProjectID";
-
-                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
-                using (var command = new SqlCommand(query, connection))
-                {
-                    connection.Open();
-                    command.CommandType = CommandType.Text;
-                    command.Parameters.AddWithValue("ProjectID", projectID);
-                    var reader = command.ExecuteReader();
-                    if (reader.HasRows)
-                    {
-                        while (reader.Read())
-                        {
-                            projectID = reader.GetInt32(0);
-                            String projectName = reader.GetString(1);
-                            String dateStart = reader.GetString(2);
-                            String dateEnd = reader.GetString(3);
-                            return new Project(projectID, projectName, dateStart, dateEnd);
-                        }
-                        connection.Close();
-                    }
-                    else
-                    {
-                        connection.Close();
-                        return null;
-                    }
-                }
-
-                return null;
+                DateTime.Parse(TimeStart);
+                DateTime.Parse(TimeEnd);
             }
-            catch (Exception ex)
+            catch
             {
-                return null;
+                return false;
             }
+            DateTime dateTime = DateTime.Now;
+            if (String.Compare(dateTime.ToString("yyyy-MM-dd"), TimeStart, true) > 0) return false;
+            if (String.Compare(TimeStart, TimeEnd, 0) >= 0) return false;
+            return true;
         }
     }
 }

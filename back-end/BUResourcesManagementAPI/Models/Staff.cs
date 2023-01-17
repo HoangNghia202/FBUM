@@ -45,48 +45,20 @@ namespace BUResourcesManagementAPI.Models
             MainPosition = mainPosition;
         }
 
-        public Staff GetStaff(int staffID)
+        public bool CheckValidStaff()
         {
+            if (StaffName == null || StaffName.Length == 0) return false;
+            if (Password == null || Password.Length == 0) return false;
             try
             {
-                Staff staff = null;
-                String query = @"SELECT StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition 
-                            FROM Staff, Role, Position
-                            WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND StaffID = " + StaffID;
-
-                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
-                using (var command = new SqlCommand(query, connection))
-                {
-                    connection.Open();
-                    command.CommandType = CommandType.Text;
-                    var reader = command.ExecuteReader();
-                    if (reader.HasRows)
-                    {
-                        while (reader.Read())
-                        {
-                            staffID = reader.GetInt32(0);
-                            String staffName = reader.GetString(1);
-                            String password = reader.GetString(2);
-                            String staffRole = reader.GetString(3);
-                            int level = reader.GetInt32(4);
-                            String mainPosition = reader.GetString(5);
-                            staff = new Staff(staffID, staffName, password, staffRole, level, mainPosition);
-                        }
-                        connection.Close();
-                    }
-                    else
-                    {
-                        connection.Close();
-                        return null;
-                    }
-                }
-
-                return staff;
+                int.Parse(StaffRole);
+                int.Parse(MainPosition);
             }
-            catch (Exception ex)
+            catch
             {
-                return null;
+                return false;
             }
+            return true;
         }
     }
 }

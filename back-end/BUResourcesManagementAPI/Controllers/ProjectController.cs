@@ -10,7 +10,6 @@ using System.Data.SqlClient;
 using System.Configuration;
 using Antlr.Runtime.Misc;
 using System.Collections;
-using BUResourcesManagementAPI.Models;
 
 namespace BUResourcesManagementAPI.Controllers
 {
@@ -18,7 +17,7 @@ namespace BUResourcesManagementAPI.Controllers
     {
 
         [HttpGet] // api/project
-        public HttpResponseMessage Get()
+        public List<Project> Get()
         {
             try
             {
@@ -43,32 +42,23 @@ namespace BUResourcesManagementAPI.Controllers
                             String dateEnd = reader.GetString(3);
                             listProject.Add(new Project(projectID, projectName, dateStart, dateEnd));
                         }
-                        connection.Close();
                     }
-                    else
-                    {
-                        connection.Close();
-                        return Request.CreateResponse(HttpStatusCode.NotFound, listProject);
-                    }
+                    connection.Close();
                 }
 
-                return Request.CreateResponse(HttpStatusCode.OK, listProject);
+                return listProject;
             }
             catch (Exception ex)
             {
-                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex);
+                throw ex;
             }
         }
 
         [HttpGet] // api/project/{id}
-        public HttpResponseMessage Get(int id)
+        public Project Get(int id)
         {
             try
             {
-
-
-                Project project = null;
-
                 String query = @"SELECT ProjectID, ProjectName, CONVERT(VARCHAR(10), TimeStart) AS TimeStart, CONVERT(VARCHAR(10), TimeEnd) AS TimeEnd 
                             FROM Project WHERE ProjectID = @ProjectID";
 
@@ -87,28 +77,23 @@ namespace BUResourcesManagementAPI.Controllers
                             String projectName = reader.GetString(1);
                             String dateStart = reader.GetString(2);
                             String dateEnd = reader.GetString(3);
-                            project = new Project(projectID, projectName, dateStart, dateEnd);
+                            return new Project(projectID, projectName, dateStart, dateEnd);
                         }
-                        connection.Close();
                     }
-                    else
-                    {
-                        connection.Close();
-                        return Request.CreateResponse(HttpStatusCode.NotFound, project);
-                    }
+                    connection.Close();
                 }
 
-                return Request.CreateResponse(HttpStatusCode.OK, project);
+                return null;
             }
             catch (Exception ex)
             {
-                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex);
+                throw ex;
             }
         }
 
         [HttpGet] // api/project/staff/{id}
-        [Route("api/project/staff")]
-        public HttpResponseMessage GetStaff(int id)
+        [Route("api/project/staff/{id}")]
+        public List<Staff> GetStaff(int id)
         {
             try
             {
@@ -117,13 +102,14 @@ namespace BUResourcesManagementAPI.Controllers
                 String query = @"SELECT Staff.StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition 
                             FROM Staff, Role, Position, Project, WorkOn
                             WHERE 
-                            Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND Staff.StaffID = WorkOn.StaffID AND Project.ProjectID = WorkOn.ProjectID AND Project.ProjectID = " + id;
+                            Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND Staff.StaffID = WorkOn.StaffID AND Project.ProjectID = WorkOn.ProjectID AND Project.ProjectID = @ProjectID";
 
                 using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
                 using (var command = new SqlCommand(query, connection))
                 {
                     connection.Open();
                     command.CommandType = CommandType.Text;
+                    command.Parameters.AddWithValue("@ProjectID", id);
                     var reader = command.ExecuteReader();
                     if (reader.HasRows)
                     {
@@ -138,32 +124,28 @@ namespace BUResourcesManagementAPI.Controllers
                             String mainPosition = reader.GetString(5);
                             listStaff.Add(new Staff(staffID, staffName, password, staffRole, level, mainPosition));
                         }
-                        connection.Close();
                     }
-                    else
-                    {
-                        connection.Close();
-                        return Request.CreateResponse(HttpStatusCode.NotFound, listStaff);
-                    }
+                    connection.Close();
                 }
 
-                return Request.CreateResponse(HttpStatusCode.OK, listStaff);
+                return listStaff;
             }
             catch (Exception ex)
             {
-                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex);
+                throw ex;
             }
         }
 
         [HttpGet] // api/project/staff_available/{id}
-        [Route("api/project/staff_available")]
-        public HttpResponseMessage GetStaffAvailable(int id)
+        [Route("api/project/staff_available/{id}")]
+        public List<Staff> GetStaffAvailable(int id)
         {
             try
             {
                 List<Staff> listStaff = null;
 
-                String query = @"SELECT * FROM Staff WHERE StaffID NOT IN (
+                String query = @"SELECT StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition FROM Staff, Role, Position
+                                WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND StaffID NOT IN (
                                 SELECT a.StaffID
                                 FROM WorkOn AS a, (SELECT ProjectID, TimeStart, TimeEnd FROM Project WHERE ProjectID = @ProjectID) AS b
                                 WHERE 
@@ -191,28 +173,152 @@ namespace BUResourcesManagementAPI.Controllers
                             String mainPosition = reader.GetString(5);
                             listStaff.Add(new Staff(staffID, staffName, password, staffRole, level, mainPosition));
                         }
-                        connection.Close();
                     }
-                    else
-                    {
-                        connection.Close();
-                        return Request.CreateResponse(HttpStatusCode.NotFound, listStaff);
-                    }
+                    connection.Close();
                 }
 
-                return Request.CreateResponse(HttpStatusCode.OK, listStaff);
+                return listStaff;
             }
             catch (Exception ex)
             {
-                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex);
+                throw ex;
+            }
+        }
+
+        [HttpGet] // api/projectInProgress/page/{id}
+        [Route("api/projectInProgress/page/{id}")]
+        public List<Project> GetProjectInProgress(int id)
+        {
+            try
+            {
+                List<Project> listProject = null;
+
+                String query = @"WITH NewTable AS (SELECT ROW_NUMBER() OVER(ORDER BY TimeStart) AS RowNumber, * FROM Project WHERE GETDATE() <= TimeEnd) 
+                                SELECT ProjectID, ProjectName, CONVERT(VARCHAR(10), TimeStart) AS TimeStart, CONVERT(VARCHAR(10), TimeEnd) AS TimeEnd FROM NewTable WHERE RowNumber BETWEEN @Start AND @End;";
+
+                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    command.CommandType = CommandType.Text;
+                    command.Parameters.AddWithValue("@Start", 10 * id - 9);
+                    command.Parameters.AddWithValue("@End", 10 * id);
+                    var reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        listProject = new List<Project>();
+                        while (reader.Read())
+                        {
+                            int projectID = reader.GetInt32(0);
+                            String projectName = reader.GetString(1);
+                            String dateStart = reader.GetString(2);
+                            String dateEnd = reader.GetString(3);
+                            List<Staff> listStaff = GetStaff(projectID);
+                            listProject.Add(new Project(projectID, projectName, dateStart, dateEnd, listStaff));
+                        }
+                    }
+                    connection.Close();
+                }
+
+                return listProject;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [HttpGet] // api/projectEnded/page/{id}
+        [Route("api/projectEnded/page/{id}")]
+        public List<Project> GetProjectEnded(int id)
+        {
+            try
+            {
+                List<Project> listProject = null;
+
+                String query = @"WITH NewTable AS (SELECT ROW_NUMBER() OVER(ORDER BY TimeStart) AS RowNumber, * FROM Project WHERE GETDATE() > TimeEnd) 
+                                SELECT ProjectID, ProjectName, CONVERT(VARCHAR(10), TimeStart) AS TimeStart, CONVERT(VARCHAR(10), TimeEnd) AS TimeEnd FROM NewTable WHERE RowNumber BETWEEN @Start AND @End;";
+
+                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    command.CommandType = CommandType.Text;
+                    command.Parameters.AddWithValue("@Start", 10 * id - 9);
+                    command.Parameters.AddWithValue("@End", 10 * id);
+                    var reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        listProject = new List<Project>();
+                        while (reader.Read())
+                        {
+                            int projectID = reader.GetInt32(0);
+                            String projectName = reader.GetString(1);
+                            String dateStart = reader.GetString(2);
+                            String dateEnd = reader.GetString(3);
+                            List<Staff> listStaff = GetStaff(projectID);
+                            listProject.Add(new Project(projectID, projectName, dateStart, dateEnd, listStaff));
+                        }
+                    }
+                    connection.Close();
+                }
+
+                return listProject;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [HttpGet] // api/project/search/{keyword}
+        [Route("api/project/search/{keyword}")]
+        public List<Project> Search(String keyword)
+        {
+            try
+            {
+                List<Project> listProject = null;
+
+                String query = @"SELECT ProjectID, ProjectName, CONVERT(VARCHAR(10), TimeStart) AS TimeStart, CONVERT(VARCHAR(10), TimeEnd) AS TimeEnd FROM Project WHERE ProjectName LIKE @Keyword";
+
+                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    command.CommandType = CommandType.Text;
+                    command.Parameters.AddWithValue("@Keyword", "%" + keyword + "%");
+                    var reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        listProject = new List<Project>();
+                        while (reader.Read())
+                        {
+                            int projectID = reader.GetInt32(0);
+                            String projectName = reader.GetString(1);
+                            String dateStart = reader.GetString(2);
+                            String dateEnd = reader.GetString(3);
+                            List<Staff> listStaff = GetStaff(projectID);
+                            listProject.Add(new Project(projectID, projectName, dateStart, dateEnd, listStaff));
+                        }
+                    }
+                    connection.Close();
+                }
+
+                return listProject;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
             }
         }
 
         [HttpPost] // api/project
-        public HttpResponseMessage Post(Project project)
+        public String Post(Project project)
         {
             try
             {
+                if (!project.CheckValidProject()) return "Project's information is invalid";
+
                 String query = @"INSERT INTO Project VALUES (@ProjectName, @TimeStart, @TimeEnd);";
 
                 using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
@@ -222,24 +328,24 @@ namespace BUResourcesManagementAPI.Controllers
                     command.Parameters.AddWithValue("@ProjectName", project.ProjectName);
                     command.Parameters.AddWithValue("@TimeStart", project.TimeStart);
                     command.Parameters.AddWithValue("@TimeEnd", project.TimeEnd);
-                    if (command.ExecuteNonQuery() != 1) return Request.CreateErrorResponse(HttpStatusCode.ExpectationFailed, "Create new project failed");
-                    else return Request.CreateResponse(HttpStatusCode.OK, "Create new project successfully");
+                    if (command.ExecuteNonQuery() != 1) return "Create new project failed";
+                    else return "Create new project successfully";
                 }
             }
             catch (Exception ex)
             {
-                return Request.CreateResponse(HttpStatusCode.InternalServerError, ex);
+                return ex.ToString();
             }
         }
 
         [HttpPut] // api/project/{projectID}/{staffID}
         [Route("api/project/{projectID}/{staffID}")]
-        public HttpResponseMessage PutStaff(int projectID, int staffID)
+        public String PutStaff(int projectID, int staffID)
         {
             try
             {
-                Staff staff = new Staff().GetStaff(projectID);
-                Project project = new Project().GetProject(projectID);
+                Project project = Get(projectID);
+                Staff staff = new StaffController().Get(staffID);
 
                 String query = @"INSERT INTO WorkOn VALUES (@ProjectID, @StaffID, @Position, @TimeStart, @TimeEnd);";
 
@@ -253,7 +359,7 @@ namespace BUResourcesManagementAPI.Controllers
                     DateTime dateTime = DateTime.Now;
                     if (String.Compare(dateTime.ToString("yyyy-MM-dd"), project.TimeEnd, true) >= 0)
                     {
-                        throw new Exception("Project was done");
+                        return "Can't add staff to this project. Project was done";
                     }
                     if (String.Compare(dateTime.ToString("yyyy-MM-dd"), project.TimeStart, true) <= 0)
                     {
@@ -264,16 +370,71 @@ namespace BUResourcesManagementAPI.Controllers
                         command.Parameters.AddWithValue("@TimeStart", dateTime.ToString("yyyy-MM-dd"));
                     }
                     command.Parameters.AddWithValue("@TimeEnd", project.TimeEnd);
-                    if (command.ExecuteNonQuery() != 1) return Request.CreateErrorResponse(HttpStatusCode.ExpectationFailed, "Add staff to project failed");
-                    else return Request.CreateResponse(HttpStatusCode.OK, "Add staff to project successfully");
+                    if (command.ExecuteNonQuery() != 1) return "Add staff to project failed";
+                    else return "Add staff to project successfully";
                 }
             }
             catch (Exception ex)
             {
-                return Request.CreateResponse(HttpStatusCode.InternalServerError, ex);
+                return ex.ToString();
             }
         }
 
-        
+        [HttpDelete] // api/project/{id}
+        public String Delete(int id)
+        {
+            try
+            {
+                String query = @"DELETE FROM Project WHERE ProjectID = @ProjectID;";
+
+                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    command.Parameters.AddWithValue("@ProjectID", id);
+                    if (command.ExecuteNonQuery() != 1) return "Delete project failed";
+                    else return "Delete project successfully";
+                }
+            }
+            catch (Exception ex)
+            {
+                return ex.ToString();
+            }
+        }
+
+        [HttpDelete] // api/project/{projectID}/{staffID}
+        [Route("api/project/{projectID}/{staffID}")]
+        public String Delete(int projectID, int staffID)
+        {
+            try
+            {
+                Project project = Get(projectID);
+
+                String query = @"UPDATE WorkOn SET WorkEnd = @WorkEnd WHERE ProjectID = @ProjectID AND StaffID = @StaffID;";
+
+                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    DateTime dateTime = DateTime.Now;
+                    if (String.Compare(dateTime.ToString("yyyy-MM-dd"), project.TimeEnd, true) > 0)
+                    {
+                        return "Project was done";
+                    }
+                    else
+                    {
+                        command.Parameters.AddWithValue("@WorkEnd", dateTime.ToString("yyyy-MM-dd"));
+                        command.Parameters.AddWithValue("@ProjectID", projectID);
+                        command.Parameters.AddWithValue("@ProjectID", staffID);
+                    }
+                    if (command.ExecuteNonQuery() != 1) return "Delete project failed";
+                    else return "Delete project successfully";
+                }
+            }
+            catch (Exception ex)
+            {
+                return ex.ToString();
+            }
+        }
     }
 }

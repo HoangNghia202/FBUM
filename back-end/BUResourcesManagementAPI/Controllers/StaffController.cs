@@ -16,7 +16,7 @@ namespace BUResourcesManagementAPI.Controllers
     public class StaffController : ApiController
     {
         [HttpGet] // api/staff
-        public HttpResponseMessage Get()
+        public List<Staff> Get()
         {
             try
             {
@@ -45,38 +45,33 @@ namespace BUResourcesManagementAPI.Controllers
                             String mainPosition = reader.GetString(5);
                             listStaff.Add(new Staff(staffID, staffName, password, staffRole, level, mainPosition));
                         }
-                        connection.Close();
                     }
-                    else
-                    {
-                        connection.Close();
-                        return Request.CreateResponse(HttpStatusCode.NotFound, listStaff);
-                    }
+                    connection.Close();
                 }
 
-                return Request.CreateResponse(HttpStatusCode.OK, listStaff);
+                return listStaff;
             }
             catch (Exception ex)
             {
-                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex);
+                throw ex;
             }
         }
 
         [HttpGet] // api/staff/id
-        public HttpResponseMessage Get(int id)
+        public Staff Get(int id)
         {
             try
             {
-                Staff staff = null;
                 String query = @"SELECT StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition 
                             FROM Staff, Role, Position
-                            WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND StaffID = " + id;
+                            WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND StaffID = @StaffID";
 
                 using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
                 using (var command = new SqlCommand(query, connection))
                 {
                     connection.Open();
                     command.CommandType = CommandType.Text;
+                    command.Parameters.AddWithValue("@StaffID", id);
                     var reader = command.ExecuteReader();
                     if (reader.HasRows)
                     {
@@ -88,30 +83,145 @@ namespace BUResourcesManagementAPI.Controllers
                             String staffRole = reader.GetString(3);
                             int level = reader.GetInt32(4);
                             String mainPosition = reader.GetString(5);
-                            staff = new Staff(staffID, staffName, password, staffRole, level, mainPosition);
+                            return new Staff(staffID, staffName, password, staffRole, level, mainPosition);
                         }
-                        connection.Close();
                     }
-                    else
-                    {
-                        connection.Close();
-                        return Request.CreateResponse(HttpStatusCode.NotFound, staff);
-                    }
+                    connection.Close();
                 }
 
-                return Request.CreateResponse(HttpStatusCode.OK, staff);
+                return null;
             }
             catch (Exception ex)
             {
-                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex);
+                throw ex;
+            }
+        }
+
+        [HttpGet] // api/staff/role
+        [Route("api/staff/role")]
+        public List<Role> GetRole()
+        {
+            try
+            {
+                List<Role> roles = null;
+
+                String query = @"SELECT * FROM Role";
+
+                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    command.CommandType = CommandType.Text;
+                    var reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        roles = new List<Role>();
+                        while (reader.Read())
+                        {
+                            int roleID = reader.GetInt32(0);
+                            String roleName = reader.GetString(1);
+                            roles.Add(new Role(roleID, roleName));
+                        }
+                    }
+                    connection.Close();
+                }
+
+                return roles;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [HttpGet] // api/staff/position
+        [Route("api/staff/position")]
+        public List<Position> GetPosition()
+        {
+            try
+            {
+                List<Position> positions = null;
+
+                String query = @"SELECT * FROM Position";
+
+                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    command.CommandType = CommandType.Text;
+                    var reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        positions = new List<Position>();
+                        while (reader.Read())
+                        {
+                            int positionID = reader.GetInt32(0);
+                            String positionName = reader.GetString(1);
+                            positions.Add(new Position(positionID, positionName));
+                        }
+                    }
+                    connection.Close();
+                }
+
+                return positions;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [HttpGet] // api/staff/search/{keyword}
+        [Route("api/staff/search/{keyword}")]
+        public List<Staff> Search(String keyword)
+        {
+            try
+            {
+                List<Staff> listStaff = null;
+
+                String query = @"SELECT StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition 
+                                FROM Staff, Role, Position
+                                WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND StaffName LIKE @Keyword";
+
+                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    command.CommandType = CommandType.Text;
+                    command.Parameters.AddWithValue("@Keyword", "%" + keyword + "%");
+                    var reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        listStaff = new List<Staff>();
+                        while (reader.Read())
+                        {
+                            int staffID = reader.GetInt32(0);
+                            String staffName = reader.GetString(1);
+                            String password = reader.GetString(2);
+                            String staffRole = reader.GetString(3);
+                            int level = reader.GetInt32(4);
+                            String mainPosition = reader.GetString(5);
+                            listStaff.Add(new Staff(staffID, staffName, password, staffRole, level, mainPosition));
+                        }
+                    }
+                    connection.Close();
+                }
+
+                return listStaff;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
             }
         }
 
         [HttpPost] // api/staff
-        public HttpResponseMessage Post([FromBody] Staff staff)
+        public String Post([FromBody] Staff staff)
         {
             try
             {
+                if (!staff.CheckValidStaff()) return "Staff's information is invalid";
+
                 String query = @"INSERT INTO Staff VALUES (@StaffName, @Password, @StaffRole, @Level, @MainPosition)";
 
                 using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
@@ -123,24 +233,22 @@ namespace BUResourcesManagementAPI.Controllers
                     command.Parameters.AddWithValue("@StaffRole", int.Parse(staff.StaffRole));
                     command.Parameters.AddWithValue("@Level", staff.Level);
                     command.Parameters.AddWithValue("@MainPosition", int.Parse(staff.MainPosition));
-                    if (command.ExecuteNonQuery() != 1) return Request.CreateErrorResponse(HttpStatusCode.ExpectationFailed, "Create new staff failed");
-                    else return Request.CreateResponse(HttpStatusCode.OK, "Create new staff successfully");
+                    if (command.ExecuteNonQuery() != 1) return "Create new staff failed";
+                    else return "Create new staff successfully";
                 }
             }
             catch (Exception ex)
             {
-                return Request.CreateResponse(HttpStatusCode.InternalServerError, ex);
+                return ex.ToString();
             }
         }
 
         [HttpPost]
-        [Route("api/staff/login")] // api/staff/login/{id}
-        public HttpResponseMessage Login([FromBody] Staff staff)
+        [Route("api/staff/login/{id}")] // api/staff/login/{id}
+        public Staff Login(int id, [FromBody] Staff staff)
         {
             try
             {
-                int id = 1;
-                Staff login = null;
                 String query = @"SELECT StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition 
                                 FROM Staff, Role, Position  
                                 WHERE 
@@ -168,28 +276,27 @@ namespace BUResourcesManagementAPI.Controllers
                             String staffRole = reader.GetString(3);
                             int level = reader.GetInt32(4);
                             String mainPosition = reader.GetString(5);
-                            login = new Staff(staffID, staffName, password, staffRole, level, mainPosition);
+                            return new Staff(staffID, staffName, password, staffRole, level, mainPosition);
                         }
                     }
-                    else
-                    {
-                        return Request.CreateResponse(HttpStatusCode.Conflict, login);
-                    }
+                    connection.Close();
                 }
 
-                return Request.CreateResponse(HttpStatusCode.OK, login);
+                return null;
             }
             catch (Exception ex)
             {
-                return Request.CreateResponse(HttpStatusCode.InternalServerError, ex);
+                throw ex;
             }
         }
 
         [HttpPut] // api/staff
-        public HttpResponseMessage Put([FromBody] Staff staff)
+        public String Put([FromBody] Staff staff)
         {
             try
             {
+                if (!staff.CheckValidStaff()) return "Staff's information is invalid";
+
                 String query = @"UPDATE Staff SET 
                             StaffName = @StaffName, 
                             Password =  @Password,
@@ -208,18 +315,18 @@ namespace BUResourcesManagementAPI.Controllers
                     command.Parameters.AddWithValue("@Level", staff.Level);
                     command.Parameters.AddWithValue("@MainPosition", staff.MainPosition);
                     command.Parameters.AddWithValue("@StaffID", staff.StaffID);
-                    if (command.ExecuteNonQuery() != 1) return Request.CreateErrorResponse(HttpStatusCode.ExpectationFailed, "Update staff failed");
-                    else return Request.CreateResponse(HttpStatusCode.OK, "Update staff successfully");
+                    if (command.ExecuteNonQuery() != 1) return "Update staff failed";
+                    else return "Update staff successfully";
                 }
             }
             catch (Exception ex)
             {
-                return Request.CreateResponse(HttpStatusCode.InternalServerError, ex);
+                return ex.ToString();
             }
         }
 
         [HttpDelete] // api/staff/{id}
-        public HttpResponseMessage Delete(int id)
+        public String Delete(int id)
         {
             try
             {
@@ -230,13 +337,13 @@ namespace BUResourcesManagementAPI.Controllers
                 {
                     connection.Open();
                     command.Parameters.AddWithValue("@StaffID", id);
-                    if (command.ExecuteNonQuery() != 1) return Request.CreateErrorResponse(HttpStatusCode.ExpectationFailed, "Delete staff failed");
-                    else return Request.CreateResponse(HttpStatusCode.OK, "Delete staff successfully");
+                    if (command.ExecuteNonQuery() != 1) return "Delete staff failed";
+                    else return "Delete staff successfully";
                 }
             }
             catch (Exception ex)
             {
-                return Request.CreateResponse(HttpStatusCode.InternalServerError, ex);
+                return ex.ToString();
             }
         }
     }
