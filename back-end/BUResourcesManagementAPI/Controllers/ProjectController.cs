@@ -91,8 +91,8 @@ namespace BUResourcesManagementAPI.Controllers
             }
         }
 
-        [HttpGet] // api/project/staff/{id}
-        [Route("api/project/staff/{id}")]
+        [HttpGet] // api/staffInProject/{id}
+        [Route("api/staffInProject/{id}")]
         public List<Staff> GetStaff(int id)
         {
             try
@@ -312,7 +312,8 @@ namespace BUResourcesManagementAPI.Controllers
             }
         }
 
-        [HttpPost] // api/project
+        [HttpPost] // api/createProject
+        [Route("api/createProject")]
         public String Post(Project project)
         {
             try
@@ -338,8 +339,29 @@ namespace BUResourcesManagementAPI.Controllers
             }
         }
 
-        [HttpPut] // api/project/{projectID}/{staffID}
-        [Route("api/project/{projectID}/{staffID}")]
+        [HttpPost] // api/transfer/{fromId}/{toId}
+        [Route("api/transfer/{fromId}/{toId}")]
+        public String MoveStaff(int fromID, int toID, [FromBody] String staffIDs)
+        {
+            try
+            {
+                String[] ids = staffIDs.Split(',');
+
+                foreach (String id in ids)
+                {
+                    Delete(fromID, int.Parse(id.Trim()));
+                    PutStaff(toID, int.Parse(id.Trim()));
+                }
+                return "Move staff successfully";
+            }
+            catch (Exception ex)
+            {
+                return ex.ToString();
+            }
+        }
+
+        [HttpPut] // api/insertToFroject/{projectID}/{staffID}
+        [Route("api/insertToFroject/{projectID}/{staffID}")]
         public String PutStaff(int projectID, int staffID)
         {
             try
@@ -380,7 +402,8 @@ namespace BUResourcesManagementAPI.Controllers
             }
         }
 
-        [HttpDelete] // api/project/{id}
+        [HttpDelete] // api/deleteProject/{id}
+        [Route("api/deleteProject/{id}")]
         public String Delete(int id)
         {
             try
@@ -402,8 +425,8 @@ namespace BUResourcesManagementAPI.Controllers
             }
         }
 
-        [HttpDelete] // api/project/{projectID}/{staffID}
-        [Route("api/project/{projectID}/{staffID}")]
+        [HttpDelete] // api/deleteStaffInproject/{projectID}/{staffID}
+        [Route("api/deleteStaffInproject/{projectID}/{staffID}")]
         public String Delete(int projectID, int staffID)
         {
             try

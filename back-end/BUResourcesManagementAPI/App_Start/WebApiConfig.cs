@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web.Http;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Web.Http.Cors;
 
 namespace BUResourcesManagementAPI
 {
@@ -23,6 +24,8 @@ namespace BUResourcesManagementAPI
             );
 
             config.Formatters.JsonFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("text/html"));
+
+            config.EnableCors(new EnableCorsAttribute("https://localhost:3000", "*", "*"));
         }
     }
 }

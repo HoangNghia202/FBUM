@@ -97,8 +97,8 @@ namespace BUResourcesManagementAPI.Controllers
             }
         }
 
-        [HttpGet] // api/staff/role
-        [Route("api/staff/role")]
+        [HttpGet] // api/role
+        [Route("api/role")]
         public List<Role> GetRole()
         {
             try
@@ -134,8 +134,8 @@ namespace BUResourcesManagementAPI.Controllers
             }
         }
 
-        [HttpGet] // api/staff/position
-        [Route("api/staff/position")]
+        [HttpGet] // api/position
+        [Route("api/position")]
         public List<Position> GetPosition()
         {
             try
@@ -215,7 +215,8 @@ namespace BUResourcesManagementAPI.Controllers
             }
         }
 
-        [HttpPost] // api/staff
+        [HttpPost] // api/createNewStaff
+        [Route("api/createNewStaff")]
         public String Post([FromBody] Staff staff)
         {
             try
@@ -244,8 +245,8 @@ namespace BUResourcesManagementAPI.Controllers
         }
 
         [HttpPost]
-        [Route("api/staff/login/{id}")] // api/staff/login/{id}
-        public Staff Login(int id, [FromBody] Staff staff)
+        [Route("api/login")] // api/login
+        public Staff Login([FromBody] Staff staff)
         {
             try
             {
@@ -255,8 +256,7 @@ namespace BUResourcesManagementAPI.Controllers
                                 Staff.StaffRole = Role.RoleID AND 
                                 Staff.MainPosition = Position.PositionID AND
                                 StaffID = @StaffID AND 
-                                Password = @Password AND 
-                                StaffRole = @StaffRole;";
+                                Password = @Password;";
 
                 using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
                 using (var command = new SqlCommand(query, connection))
@@ -264,7 +264,6 @@ namespace BUResourcesManagementAPI.Controllers
                     connection.Open();
                     command.Parameters.AddWithValue("@StaffID", staff.StaffID);
                     command.Parameters.AddWithValue("@Password", staff.Password);
-                    command.Parameters.AddWithValue("@StaffRole", id);
                     var reader = command.ExecuteReader();
                     if (reader.HasRows)
                     {
@@ -290,7 +289,8 @@ namespace BUResourcesManagementAPI.Controllers
             }
         }
 
-        [HttpPut] // api/staff
+        [HttpPut] // api/updateStaff
+        [Route("api/updateStaff")]
         public String Put([FromBody] Staff staff)
         {
             try
@@ -325,7 +325,8 @@ namespace BUResourcesManagementAPI.Controllers
             }
         }
 
-        [HttpDelete] // api/staff/{id}
+        [HttpDelete] // api/deleteStaff/{id}
+        [Route("api/deleteStaff/{id}")]
         public String Delete(int id)
         {
             try
