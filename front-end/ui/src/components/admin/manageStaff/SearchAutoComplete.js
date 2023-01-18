@@ -4,15 +4,15 @@ import Stack from "@mui/material/Stack";
 import Autocomplete from "@mui/material/Autocomplete";
 import { useState } from "react";
 export default function SearchAutoComplete(props) {
-  const { searchData } = props;
+  const { searchData, showResult } = props;
   console.log("searchData", searchData);
   const handleChange = (value) => {
     console.log("value", value);
     let searchResult = searchData.filter((item) =>
-      item.projectName.toLowerCase().includes(value.toLowerCase())
-    )[0];
+      item.name.toLowerCase().includes(value.toLowerCase())
+    );
     console.log("searchResult", searchResult);
-    props.setProject(searchResult);
+    showResult(searchResult);
   };
   return (
     <>
@@ -21,7 +21,7 @@ export default function SearchAutoComplete(props) {
           <Autocomplete
             freeSolo
             disableClearable
-            options={searchData.map((option) => option.projectName)}
+            options={searchData.map((option) => option.name)}
             onChange={(event, newValue) => {
               handleChange(newValue);
             }}

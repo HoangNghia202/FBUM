@@ -245,13 +245,5 @@
                 }
             ]
         }
-    ],
-    "users": [
-        {
-            "name": "nghia",
-            "userId": 1,
-            "role": "admin",
-            "password": "12345"
-        }
     ]
 }

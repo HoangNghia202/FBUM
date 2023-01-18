@@ -14,15 +14,24 @@ import {
 } from "reactstrap";
 import { NavLink } from "react-router-dom";
 import { useState } from "react";
+import Avatar from "@mui/material/Avatar";
+import Stack from "@mui/material/Stack";
 
 function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
   const toggle = () => setIsOpen(!isOpen);
   return (
-    <div>
-      <Navbar color="light" light expand="md" className="">
+    <div className="navbar-header">
+      <Navbar
+        light
+        expand="md"
+        className="navbar navbar-expand-lg navbar-dark bg-dark"
+      >
         <div></div>
-        <NavbarBrand href="/">FBUM</NavbarBrand>
+        <NavbarBrand href="/">
+          {" "}
+          <b>FBUM</b>
+        </NavbarBrand>
         <NavbarToggler onClick={toggle} />
         <Collapse isOpen={isOpen} navbar>
           <Nav className="mr-auto" navbar>
@@ -49,6 +58,12 @@ function NavBar() {
             </UncontrolledDropdown>
           </Nav>
         </Collapse>
+
+        <div className="d-flex text-white justify-content-center align-items-center">
+          <span className="px-2">Nghia</span>
+
+          <Avatar alt="Nghia Hoang" src=""></Avatar>
+        </div>
       </Navbar>
     </div>
   );

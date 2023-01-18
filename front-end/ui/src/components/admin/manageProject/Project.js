@@ -19,31 +19,21 @@ import { dataProject } from "../dataAdmin";
 import { Progress } from "reactstrap";
 import { Outlet } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 
 function Project(props) {
-  const { projects } = props;
-  const [value, setValue] = useState("1");
+  const { projectEnded, projectInprogress } = props.projects;
+  
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
+
+  const [value, setValue] = useState("1");
 
   const [show, setShow] = useState(false);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
-
-  let inprogressPrj = [];
-  let endedPrj = [];
-  projects.map((item) => {
-    if (Date.parse(item.workEnd) > Date.now()) {
-      inprogressPrj.push(item);
-    } else {
-      endedPrj.push(item);
-    }
-  });
-
-  console.log("inprogressPrj", inprogressPrj);
-  console.log("endedPrj", endedPrj);
 
   const handleSubmitForm = (event) => {
     event.preventDefault();
@@ -99,10 +89,10 @@ function Project(props) {
             </Box>
             <TabPanel value="1">
               <div>
-                <SearchAutoComplete searchData={inprogressPrj} />
+                <SearchAutoComplete searchData={projectInprogress} />
               </div>
               <div className="processing-proj row d-flex">
-                {inprogressPrj.map((item) => {
+                {projectInprogress.map((item) => {
                   let percent = Math.floor(
                     ((Date.now() - Date.parse(item.workStart)) /
                       (Date.parse(item.workEnd) - Date.parse(item.workStart))) *
@@ -140,10 +130,10 @@ function Project(props) {
               </div>
             </TabPanel>
             <TabPanel value="2">
-              <SearchAutoComplete searchData={endedPrj} />
+              <SearchAutoComplete searchData={projectEnded} />
               <div className="ended-proj row">
                 <div className="processing-proj row d-flex">
-                  {endedPrj.map((item, index) => {
+                  {projectEnded.map((item, index) => {
                     return (
                       <div
                         key={index}

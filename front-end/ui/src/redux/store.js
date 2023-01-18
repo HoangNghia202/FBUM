@@ -1,10 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
-import productSliderReducer from "./ProductSlider";
+import projectSliderReducer from "./ProjectSlider";
 import userSliderReducer from "./UserSlider";
 
 const store = configureStore({
   reducer: {
-    productSlider: productSliderReducer,
+    projectSlider: projectSliderReducer,
     userSlider: userSliderReducer,
   },
 });

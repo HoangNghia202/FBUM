@@ -18,7 +18,7 @@ import {
 import { NavLink } from "react-router-dom";
 function NavLeft(props) {
   return (
-    <div className="col-3 nav-left">
+    <div className="col-3 nav-left pt-5">
       <Nav className="nav-contain">
         <NavItem className="nav-item">
           <NavLink className="nav-link" end to="project">

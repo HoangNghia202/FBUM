@@ -6,13 +6,15 @@ function HomePage(props) {
   const checkLogin = () => {
     if (userLogin.isUserLogin && userLogin.userInfo.role === "admin") {
       navigate("/admin/project");
+    } else {
+      navigate("/login");
     }
   };
 
   useEffect(() => {
     checkLogin();
   }, [userLogin]);
-  return <>Hompage</>;
+  return <div></div>;
 }
 
 export default HomePage;

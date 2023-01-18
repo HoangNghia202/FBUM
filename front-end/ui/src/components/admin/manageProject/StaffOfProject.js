@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -10,8 +10,8 @@ import TableRow from "@mui/material/TableRow";
 import "./staffOfProject.scss";
 
 const StaffOfProject = (props) => {
+  const staffs = props.staffs;
   const [data, setData] = useState([]);
-  const { staffs } = props;
   console.log("staffs>>>>", staffs);
   useEffect(() => {
     setData(staffs);
@@ -34,9 +34,8 @@ const StaffOfProject = (props) => {
             {data.map((item, index) => (
               <tr>
                 <th scope="row">{index + 1}</th>
-                <td>{item.name}</td>
-                <td>{item.position}</td>
-
+                <td className="text-left">{item.name}</td>
+                <td className="text-left">{item.position}</td>
                 <td>{item.level}</td>
               </tr>
             ))}
