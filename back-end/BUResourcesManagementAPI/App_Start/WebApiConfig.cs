@@ -25,7 +25,7 @@ namespace BUResourcesManagementAPI
 
             config.Formatters.JsonFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("text/html"));
 
-            config.EnableCors(new EnableCorsAttribute("https://localhost:3000", "*", "*"));
+            config.EnableCors(new EnableCorsAttribute("*", "*", "*"));
         }
     }
 }

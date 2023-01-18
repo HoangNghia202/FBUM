@@ -185,6 +185,57 @@ namespace BUResourcesManagementAPI.Controllers
             }
         }
 
+        [HttpGet] // api/project/staff_available/{fromID}/{toID}
+        [Route("api/project/staff_available/{fromID}/{toID}")]
+        public List<Staff> GetStaffAvailable(int fromID, int toID)
+        {
+            try
+            {
+                List<Staff> listStaff = null;
+
+                String query = @"SELECT Staff.StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition FROM Staff, Role, Position, Project, WorkOn
+                                WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND Staff.StaffID = WorkOn.StaffID AND Project.ProjectID = WorkOn.ProjectID AND Project.ProjectID = @FromProjectID AND Staff.StaffID NOT IN (
+                                SELECT a.StaffID
+                                FROM WorkOn AS a, (SELECT ProjectID, TimeStart, TimeEnd FROM Project WHERE ProjectID = @ToProjectID) AS b
+                                WHERE 
+                                (a.WorkStart >= b.TimeStart AND a.WorkStart < b.TimeEnd) OR
+                                (a.WorkEnd > b.TimeStart AND a.WorkEnd <= b.TimeEnd) OR
+                                (a.WorkStart <= b.TimeStart AND a.WorkEnd >= b.TimeEnd) AND
+                                a.ProjectID != @FromProjectID);";
+
+                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    command.CommandType = CommandType.Text;
+                    command.Parameters.AddWithValue("@ToProjectID", toID);
+                    command.Parameters.AddWithValue("@FromProjectID", fromID);
+                    var reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        listStaff = new List<Staff>();
+                        while (reader.Read())
+                        {
+                            int staffID = reader.GetInt32(0);
+                            String staffName = reader.GetString(1);
+                            String password = reader.GetString(2);
+                            String staffRole = reader.GetString(3);
+                            int level = reader.GetInt32(4);
+                            String mainPosition = reader.GetString(5);
+                            listStaff.Add(new Staff(staffID, staffName, password, staffRole, level, mainPosition));
+                        }
+                    }
+                    connection.Close();
+                }
+
+                return listStaff;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         [HttpGet] // api/projectInProgress/page/{id}
         [Route("api/projectInProgress/page/{id}")]
         public List<Project> GetProjectInProgress(int id)

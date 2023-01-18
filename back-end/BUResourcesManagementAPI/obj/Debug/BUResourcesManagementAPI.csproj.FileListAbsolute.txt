@@ -204,3 +204,6 @@ D:\Visual Studio 2022\FBUM\back-end\BUResourcesManagementAPI\obj\Debug\BUResourc
 D:\Visual Studio 2022\FBUM\back-end\BUResourcesManagementAPI\obj\Debug\BUResourcesManagementAPI.csproj.CopyComplete
 D:\Visual Studio 2022\FBUM\back-end\BUResourcesManagementAPI\obj\Debug\BUResourcesManagementAPI.dll
 D:\Visual Studio 2022\FBUM\back-end\BUResourcesManagementAPI\obj\Debug\BUResourcesManagementAPI.pdb
+D:\Visual Studio 2022\FBUM\back-end\BUResourcesManagementAPI\bin\System.Web.Cors.dll
+D:\Visual Studio 2022\FBUM\back-end\BUResourcesManagementAPI\bin\System.Web.Http.Cors.dll
+D:\Visual Studio 2022\FBUM\back-end\BUResourcesManagementAPI\bin\System.Web.Http.Cors.xml
