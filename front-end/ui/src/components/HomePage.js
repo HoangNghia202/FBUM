@@ -4,7 +4,7 @@ function HomePage(props) {
   const navigate = useNavigate();
   const { userLogin } = props;
   const checkLogin = () => {
-    if (userLogin.isUserLogin && userLogin.userInfo.role === "admin") {
+    if (userLogin.isUserLogin && userLogin.userInfo.StaffRole === "Admin") {
       navigate("/admin/project");
     } else {
       navigate("/login");

@@ -5,7 +5,9 @@ import React from "react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import NavHeader from "../../contain/NavHeader";
-function AdminPage() {
+function AdminPage(props) {
+  console.log("props in adminPage: ", props);
+
   let navigate = useNavigate();
   useEffect(() => {
     navigate("/admin/project");
@@ -13,7 +15,7 @@ function AdminPage() {
   return (
     <div className="row">
       <div className="app-nav">
-        <NavHeader />
+        <NavHeader userInfo={props.userInfo} />
       </div>
       <NavLeftAdmin />
       <Outlet />

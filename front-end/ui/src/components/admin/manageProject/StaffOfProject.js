@@ -10,18 +10,26 @@ import TableRow from "@mui/material/TableRow";
 import "./staffOfProject.scss";
 
 const StaffOfProject = (props) => {
+  console.log("props>>>>", props);
+
   const staffs = props.staffs;
+  console.log("staffs>>>>", staffs);
+
+  console.log("staffs = null >>>", staffs == null);
+
   const [data, setData] = useState([]);
   console.log("staffs>>>>", staffs);
   useEffect(() => {
-    setData(staffs);
+    if (staffs != null) {
+      setData(staffs);
+    }
   }, [staffs]);
   console.log("data>>>>", data);
 
   return (
     <>
-      <div class="table-wrapper-scroll-y my-custom-scrollbar">
-        <table class="table table-bordered table-striped mb-0">
+      <div className="table-wrapper-scroll-y my-custom-scrollbar">
+        <table className="table table-bordered table-striped mb-0">
           <thead>
             <tr>
               <th scope="col">#</th>
@@ -34,11 +42,16 @@ const StaffOfProject = (props) => {
             {data.map((item, index) => (
               <tr>
                 <th scope="row">{index + 1}</th>
-                <td className="text-left">{item.name}</td>
-                <td className="text-left">{item.position}</td>
-                <td>{item.level}</td>
+                <td className="text-left">{item.StaffName}</td>
+                <td className="text-left">{item.MainPosition}</td>
+                <td>{item.Level}</td>
               </tr>
             ))}
+            {data.length == 0 && (
+              <tr>
+                <td colSpan="4">No data</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

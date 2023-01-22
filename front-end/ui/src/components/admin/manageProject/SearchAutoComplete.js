@@ -9,8 +9,8 @@ export default function SearchAutoComplete(props) {
   const handleChange = (value) => {
     console.log("value", value);
     let searchResult = searchData.filter((item) =>
-      item.projectName.toLowerCase().includes(value.toLowerCase())
-    )[0];
+      item.ProjectName.toLowerCase().includes(value.toLowerCase())
+    );
     console.log("searchResult", searchResult);
     props.setProject(searchResult);
   };
@@ -21,7 +21,7 @@ export default function SearchAutoComplete(props) {
           <Autocomplete
             freeSolo
             disableClearable
-            options={searchData.map((option) => option.projectName)}
+            options={searchData.map((option) => option.ProjectName)}
             onChange={(event, newValue) => {
               handleChange(newValue);
             }}

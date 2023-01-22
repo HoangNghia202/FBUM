@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./Project.scss";
 import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
@@ -20,32 +20,59 @@ import { Progress } from "reactstrap";
 import { Outlet } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { handleCreateProject } from "../../../services/adminServices/AdminServices";
+import { fetchProjects } from "../../../redux/ProjectSlider";
 
 function Project(props) {
-  const { projectEnded, projectInprogress } = props.projects;
-  
+  const dispatch = useDispatch();
+  console.log("props >>>", props);
+  const projects = props.projects;
+
+  const [projectEnded, setProjectEnded] = useState([]);
+  const [projectInprogress, setProjectInprogress] = useState([]);
+
+  useEffect(() => {
+    if (projects) {
+      setProjectEnded(projects.projectEnded);
+      setProjectInprogress(projects.projectInprogress);
+    }
+  }, [projects]);
+
+  console.log("projectEnded", projectEnded);
+  console.log("projectInprogress", projectInprogress);
+
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
-
   const [value, setValue] = useState("1");
-
   const [show, setShow] = useState(false);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
-  const handleSubmitForm = (event) => {
+  const handleSubmitForm = async (event) => {
     event.preventDefault();
     const values = {
-      name: event.target.projectName.value,
-      company: event.target.companyName.value,
-      workStart: moment(event.target.startDay.value).format("MM-DD-YYYY"),
-      workEnd: moment(event.target.endDay.value).format("MM-DD-YYYY"),
+      ProjectName: event.target.projectName.value,
+      TimeStart: moment(event.target.startDay.value).format("YYYY-MM-DD"),
+      TimeEnd: moment(event.target.endDay.value).format("YYYY-MM-DD"),
     };
     console.log("values", values);
-
-    alert(JSON.stringify(values));
+    try {
+      const res = await handleCreateProject(values);
+      console.log("res>>>", res);
+      if (res.errCode === 0) {
+        dispatch(fetchProjects(1));
+        console.log(
+          "create project successfully, and go to fecth project again"
+        );
+        handleClose();
+      } else {
+        handleShow();
+      }
+    } catch (error) {
+      console.log("error", error);
+    }
   };
 
   let navigate = useNavigate();
@@ -89,13 +116,16 @@ function Project(props) {
             </Box>
             <TabPanel value="1">
               <div>
-                <SearchAutoComplete searchData={projectInprogress} />
+                <SearchAutoComplete
+                  searchData={props.projects.projectInprogress}
+                  setProject={(data) => setProjectInprogress(data)}
+                />
               </div>
               <div className="processing-proj row d-flex">
                 {projectInprogress.map((item) => {
                   let percent = Math.floor(
-                    ((Date.now() - Date.parse(item.workStart)) /
-                      (Date.parse(item.workEnd) - Date.parse(item.workStart))) *
+                    ((Date.now() - Date.parse(item.TimeStart)) /
+                      (Date.parse(item.TimeEnd) - Date.parse(item.TimeStart))) *
                       100
                   );
 
@@ -105,19 +135,19 @@ function Project(props) {
                     <div
                       className="col-2 col-md-3 row"
                       onClick={() => {
-                        ViewDetailProject(item.id);
+                        ViewDetailProject(item.ProjectID);
                       }}
                     >
                       <div className="container">
                         <div className="card ">
                           <div className="card-body">
-                            <h5 className="card-title">{item.projectName}</h5>
+                            <h5 className="card-title">{item.ProjectName}</h5>
 
                             <Progress
                               striped
                               animated
                               color="warning"
-                              value={percent}
+                              value={percent > 0 ? percent : 0}
                             >
                               {percent}%
                             </Progress>
@@ -133,30 +163,32 @@ function Project(props) {
               <SearchAutoComplete searchData={projectEnded} />
               <div className="ended-proj row">
                 <div className="processing-proj row d-flex">
-                  {projectEnded.map((item, index) => {
-                    return (
-                      <div
-                        key={index}
-                        className="col-2 col-md-3 row"
-                        onClick={() => {
-                          ViewDetailProject(item.id);
-                        }}
-                      >
-                        <div className="container">
-                          <div className="card card-end">
-                            <div className="card-body">
-                              <h5 className="card-title">{item.projectName}</h5>
-                              <hr className="m-0"></hr>
+                  {projectEnded.length > 0 &&
+                    projectEnded.map((item, index) => {
+                      return (
+                        <div
+                          key={index}
+                          className="col-2 col-md-3 row"
+                          onClick={() => {
+                            ViewDetailProject(item.ProjectID);
+                          }}
+                        >
+                          <div className="container">
+                            <div className="card card-end">
+                              <div className="card-body">
+                                <h5 className="card-title">
+                                  {item.ProjectName}
+                                </h5>
+                                <hr className="m-0"></hr>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
                 </div>
               </div>
             </TabPanel>
-            <TabPanel value="3">Item Three</TabPanel>
           </TabContext>
         </Box>
       </div>
@@ -175,14 +207,6 @@ function Project(props) {
               variant="outlined"
               size="small"
               name="projectName"
-              fullWidth
-            />
-            <TextField
-              className="my-2"
-              label="Company's name"
-              variant="outlined"
-              size="small"
-              name="companyName"
               fullWidth
             />
 

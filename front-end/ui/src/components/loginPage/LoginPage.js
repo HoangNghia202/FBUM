@@ -26,7 +26,7 @@ function LoginPage(props) {
         dispatch(setUserSlider(res.data));
         navigate("/");
       } else {
-        setErrLogin(res.errMsg);
+        setErrLogin(res.message);
       }
     } catch (error) {}
   };

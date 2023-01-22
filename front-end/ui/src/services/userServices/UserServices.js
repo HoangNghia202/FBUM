@@ -5,33 +5,24 @@ export const handleLogin = async (userId, password) => {
   console.log("userId >>> ", userId, "password>>>", password);
 
   try {
-    const res = await axios.get(`${baseUrl}/users`);
+    const res = await axios.post(`${baseUrl}/api/login`, {
+      StaffID: userId,
+      Password: password,
+    });
     console.log("res >>> ", res.data);
-    const user = res.data.find((user) => user.userId == userId);
-    console.log("user >>> ", user);
-
-    if (user) {
-      if (user.userId == userId) {
-        if (user.password == password) {
-          return {
-            errCode: 0,
-            errMsg: "Login success",
-            data: user,
-          };
-        } else {
-          return {
-            errCode: 1,
-            errMsg: "Password is incorrect",
-            data: null,
-          };
-        }
-      }
+    if (res.data) {
+      return {
+        data: res.data,
+        errCode: 0,
+        message: "Login success",
+      };
+    } else {
+      return {
+        data: null,
+        errCode: 1,
+        message: "Login failed! ID or password is incorrect",
+      };
     }
-    return {
-      errCode: 1,
-      errMsg: "User ID is not exist",
-      data: null,
-    };
   } catch (error) {
     throw error;
   }

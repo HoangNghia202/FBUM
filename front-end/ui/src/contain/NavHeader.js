@@ -17,7 +17,9 @@ import { useState } from "react";
 import Avatar from "@mui/material/Avatar";
 import Stack from "@mui/material/Stack";
 
-function NavBar() {
+function NavBar(props) {
+  console.log("props>>>", props);
+
   const [isOpen, setIsOpen] = useState(false);
   const toggle = () => setIsOpen(!isOpen);
   return (
@@ -60,7 +62,7 @@ function NavBar() {
         </Collapse>
 
         <div className="d-flex text-white justify-content-center align-items-center">
-          <span className="px-2">Nghia</span>
+          <span className="px-2">{props.userInfo.StaffName}</span>
 
           <Avatar alt="Nghia Hoang" src=""></Avatar>
         </div>

@@ -36,13 +36,17 @@ export default function TransferList(props) {
   //   }
   // });
 
-  let fromProject = inprogressPrj.filter((item) => item.id == projectId)[0];
+  let fromProject = inprogressPrj.filter(
+    (item) => item.ProjectID == projectId
+  )[0];
   console.log("fromProject", fromProject);
 
-  let restProject = inprogressPrj.filter((item) => item.id != projectId);
+  let restProject = inprogressPrj.filter((item) => item.ProjectID != projectId);
 
   const [checked, setChecked] = React.useState([]);
-  const [left, setLeft] = React.useState(fromProject.staffs);
+  const [left, setLeft] = React.useState(
+    fromProject.Staffs == null ? [] : fromProject.Staffs
+  );
   const [right, setRight] = React.useState([]);
 
   const [projectLeft, setProjectLeft] = React.useState([...left]);
@@ -129,7 +133,7 @@ export default function TransferList(props) {
               </ListItemIcon>
               <ListItemText
                 id={labelId}
-                primary={`${value.name} (${value.position} ${value.level})`}
+                primary={`${value.StaffName} (${value.StaffPosition} ${value.StaffLevel})`}
               />
             </ListItem>
           );
@@ -147,7 +151,7 @@ export default function TransferList(props) {
       alignItems="center"
     >
       <Grid item>
-        <h6>From {fromProject.projectName}</h6>
+        <h6>From {fromProject.ProjectName}</h6>
         {customList(left)}
       </Grid>
       <Grid item>
@@ -220,8 +224,8 @@ export default function TransferList(props) {
           <SearchAutoComplete
             searchData={restProject}
             setProject={(prj) => {
-              setRight(prj.staffs);
-              setProjectRight(prj.staffs);
+              setRight(prj.Staffs == null ? [] : prj.Staffs);
+              setProjectRight(prj.Staffs);
             }}
           />
         </div>

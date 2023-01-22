@@ -23,24 +23,21 @@ function App() {
 
   const userLogin = useSelector((state) => state.userSlider);
   const projects = useSelector((state) => state.projectSlider);
+  const [allProjects, setAllProjects] = useState();
   console.log("userLogin: ", userLogin);
-  const [allProjects, setAllProjects] = useState({});
   useEffect(() => {
     dispatch(fetchProjects(1));
   }, []);
-
-  useEffect(() => {
-    setAllProjects(projects);
-  }, [projects]);
-
   console.log("projects in app: ", projects);
-  console.log("allProjects: ", allProjects);
 
   return (
     <div className="App">
       <div className="app-body">
         <Routes>
-          <Route path="/admin" element={<AdminPage />}>
+          <Route
+            path="/admin"
+            element={<AdminPage userInfo={userLogin.userInfo} />}
+          >
             <Route
               path="project"
               element={<Project projects={projects} />}
