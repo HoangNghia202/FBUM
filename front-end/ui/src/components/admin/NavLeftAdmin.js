@@ -21,7 +21,7 @@ function NavLeft(props) {
     <div className="col-3 nav-left pt-5">
       <Nav className="nav-contain">
         <NavItem className="nav-item">
-          <NavLink className="nav-link" end to="project">
+          <NavLink className="nav-link" to="project">
             <LibraryBooksIcon />
             Manage project
           </NavLink>

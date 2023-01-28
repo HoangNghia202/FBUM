@@ -21,7 +21,12 @@ import { Outlet } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { handleCreateProject } from "../../../services/adminServices/AdminServices";
-import { fetchProjects } from "../../../redux/ProjectSlider";
+import {
+  fetchProjects,
+  fetchProjectsInprogress,
+  fetchProjectsEnded,
+} from "../../../redux/ProjectSlider";
+import PaginationOutlined from "./Pagination";
 
 function Project(props) {
   const dispatch = useDispatch();
@@ -121,7 +126,7 @@ function Project(props) {
                   setProject={(data) => setProjectInprogress(data)}
                 />
               </div>
-              <div className="processing-proj row d-flex">
+              <div className="processing-proj row d-flex flex-row align-items-stretch">
                 {projectInprogress.map((item) => {
                   let percent = Math.floor(
                     ((Date.now() - Date.parse(item.TimeStart)) /
@@ -141,7 +146,12 @@ function Project(props) {
                       <div className="container">
                         <div className="card ">
                           <div className="card-body">
-                            <h5 className="card-title">{item.ProjectName}</h5>
+                            <h5
+                              className="card-title"
+                              style={{ height: "50px" }}
+                            >
+                              {item.ProjectName}
+                            </h5>
 
                             <Progress
                               striped
@@ -157,6 +167,14 @@ function Project(props) {
                     </div>
                   );
                 })}
+                <div className="d-flex justify-content-center my-5 col-md-11 ">
+                  <PaginationOutlined
+                    totalPage={props.projects.totalPageProjectInProgress}
+                    onChangePage={(pageNum) =>
+                      dispatch(fetchProjectsInprogress(pageNum))
+                    }
+                  />
+                </div>
               </div>
             </TabPanel>
             <TabPanel value="2">
@@ -176,7 +194,10 @@ function Project(props) {
                           <div className="container">
                             <div className="card card-end">
                               <div className="card-body">
-                                <h5 className="card-title">
+                                <h5
+                                  className="card-title"
+                                  style={{ height: "70px" }}
+                                >
                                   {item.ProjectName}
                                 </h5>
                                 <hr className="m-0"></hr>
@@ -186,6 +207,14 @@ function Project(props) {
                         </div>
                       );
                     })}
+                  <div className="d-flex justify-content-center my-5 col-md-11 ">
+                    <PaginationOutlined
+                      totalPage={props.projects.totalPageProjectEnded}
+                      onChangePage={(pageNum) =>
+                        dispatch(fetchProjectsInprogress(pageNum))
+                      }
+                    />
+                  </div>
                 </div>
               </div>
             </TabPanel>

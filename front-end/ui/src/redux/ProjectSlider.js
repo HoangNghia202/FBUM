@@ -5,6 +5,10 @@ const initialState = {
   projectInprogress: [],
   projectEnded: [],
   projectIncoming: [],
+  allProjectName: [],
+  totalPageProjectInProgress: 3,
+  totalPageProjectEnded: 2,
+  totalPageProjectIncoming: 0,
 };
 const baseUrl = process.env.REACT_APP_JSON_API;
 const productSliderSlice = createSlice({
@@ -12,24 +16,21 @@ const productSliderSlice = createSlice({
   initialState,
   reducers: {
     setProjectSlider(state, action) {
-      const { projectInprogress, projectEnded } = action.payload;
-      state.projectInprogress = projectInprogress;
-      state.projectEnded = projectEnded;
-    },
-    removeProject(state, action) {
-      const { projectId } = action.payload;
-      let newState = { ...state };
-      console.log("newState br for change >>> ", newState);
+      if (action.payload.projectInprogress) {
+        state.projectInprogress = action.payload.projectInprogress;
+      }
 
-      newState.projectInprogress = newState.projectInprogress.filter(
-        (project) => project.id !== projectId
-      );
-      newState.projectEnded = newState.projectEnded.filter(
-        (project) => project.id !== projectId
-      );
-      console.log("newState >>> ", newState);
+      if (action.payload.projectEnded) {
+        state.projectEnded = action.payload.projectEnded;
+      }
 
-      return newState;
+      if (action.payload.projectIncoming) {
+        state.projectIncoming = action.payload.projectIncoming;
+      }
+
+      if (action.payload.allProjectName) {
+        state.allProjectName = action.payload.allProjectName;
+      }
     },
   },
 });
@@ -49,35 +50,76 @@ export const fetchProjects = (pageNum) => {
         // `${baseUrl}/projectEnded`
       );
       console.log("res2 >>> ", res2);
-      const res = { projectInprogress: res1.data, projectEnded: res2.data };
+
+      const res3 = await axios.get(`${baseUrl}/api/project`);
+      console.log("res3 >>> ", res3);
+
+      const res = {
+        projectInprogress: res1.data,
+        projectEnded: res2.data,
+        allProjectName: res3.data,
+      };
       console.log("res >>> ", res);
       dispatch(setProjectSlider(res));
     } catch (error) {
       throw error;
     }
   };
-
-  //   let res1 = {};
-  //   let res2 = {};
-  //   let allRes = {};
-  //   fetch(`${baseUrl}/projectInProgress`)
-  //     .then((res) => res.json())
-  //     .then((data) => {
-  //       console.log("data >>> ", data);
-  //       res1 = data;
-  //     });
-  //   fetch(`${baseUrl}/api/projectEnded/page/${pageNum}`)
-  //     .then((res) => res.json())
-  //     .then((data) => {
-  //       console.log("data >>> ", data);
-  //       res2 = data;
-  //       allRes = { projectInprogress: res1, projectEnded: res2 };
-  //       console.log("allRes >>> ", allRes);
-  //       dispatch(setProjectSlider(allRes));
-  //     });
-  // } catch (error) {
-  //   throw error;
-  // }
 };
-export const { setProjectSlider, removeProject } = productSliderSlice.actions;
+
+export const fetchProjectsInprogress = (pageNum) => {
+  return async (dispatch, getState) => {
+    console.log("run in to thunk action creator");
+    console.log("state:", getState());
+    try {
+      const res = await axios.get(
+        `${baseUrl}/api/projectInProgress/page/${pageNum}`
+        // `${baseUrl}/projectInProgress`
+      );
+      console.log("res >>> ", res.data);
+      dispatch(setProjectSlider(res.data));
+    } catch (error) {
+      throw error;
+    }
+  };
+};
+
+export const fetchProjectsEnded = (pageNum) => {
+  return async (dispatch, getState) => {
+    console.log("run in to thunk action creator");
+    console.log("state:", getState());
+    try {
+      const res = await axios.get(
+        `${baseUrl}/api/projectEnded/page/${pageNum}`
+        // `${baseUrl}/projectEnded`
+      );
+      console.log("fetch project ended >>> ", res.data);
+
+      dispatch(setProjectSlider(res.data));
+    } catch (error) {
+      throw error;
+    }
+  };
+};
+
+export const fetchProjectsIncoming = (pageNum) => {
+  return async (dispatch, getState) => {
+    console.log("run in to thunk action creator");
+    console.log("state:", getState());
+    try {
+      const res1 = await axios.get(
+        `${baseUrl}/api/projectInProgress/page/${pageNum}`
+        // `${baseUrl}/projectInProgress`
+      );
+      console.log("res1 >>> ", res1);
+
+      const res = { projectInprogress: res1.data };
+      console.log("res >>> ", res);
+      dispatch(setProjectSlider(res));
+    } catch (error) {
+      throw error;
+    }
+  };
+};
+export const { setProjectSlider } = productSliderSlice.actions;
 export default productSliderSlice.reducer;

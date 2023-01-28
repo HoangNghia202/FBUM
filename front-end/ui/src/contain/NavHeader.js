@@ -23,7 +23,15 @@ function NavBar(props) {
   const [isOpen, setIsOpen] = useState(false);
   const toggle = () => setIsOpen(!isOpen);
   return (
-    <div className="navbar-header">
+    <div
+      className="navbar-header"
+      style={{
+        position: "fixed",
+        top: "0",
+        width: "100%",
+        zIndex: "1000",
+      }}
+    >
       <Navbar
         light
         expand="md"

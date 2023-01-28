@@ -1,10 +1,12 @@
 .nav-left {
   height: 100vh;
-  position: sticky;
+  position: fixed;
+  left: 0;
 }
 
 .nav-contain {
   margin: 0.5em 0;
+
   .nav-item {
     justify-items: center;
     a {

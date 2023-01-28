@@ -13,11 +13,12 @@ function AdminPage(props) {
     navigate("/admin/project");
   }, []);
   return (
-    <div className="row">
+    <div className="row mt-5">
       <div className="app-nav">
         <NavHeader userInfo={props.userInfo} />
       </div>
       <NavLeftAdmin />
+      <div className="col-3"></div>
       <Outlet />
     </div>
   );

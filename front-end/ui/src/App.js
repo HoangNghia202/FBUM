@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import HomePage from "./components/HomePage";
 import TransferList from "./components/admin/manageProject/TransferMember";
+import AddStaffsToProject from "./components/admin/manageProject/AddStaffsToProject";
 
 function App() {
   const navigate = useNavigate();
@@ -50,6 +51,12 @@ function App() {
               path="project/transfer/:projectId"
               element={<TransferList projects={projects} />}
             />
+
+            <Route
+              path="project/addStaffsToProject/:projectId"
+              element={<AddStaffsToProject projects={projects} />}
+            />
+
             <Route path="leader" element={<ManageLeader />} />
             <Route path="staff" element={<ManageStaff />} />
           </Route>

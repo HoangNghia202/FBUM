@@ -7,7 +7,12 @@ import Button from "@mui/material/Button";
 import { Divider } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { removeProject } from "../../../redux/ProjectSlider";
+import {
+  handleDeleteProject,
+  handleRemoveStaffOutOfProject,
+} from "../../../services/adminServices/AdminServices";
+import { fetchProjects } from "../../../redux/ProjectSlider";
+
 function ViewDetailProject(props) {
   const dispatch = useDispatch();
   console.log("props", props);
@@ -22,14 +27,32 @@ function ViewDetailProject(props) {
   console.log("mainProject", mainProject);
 
   const handleTransferMember = (projectId) => {
-    console.log("projectId need to transfer>>", projectId);
     navigate(`/admin/project/transfer/${projectId}`);
+    console.log("projectId need to transfer>>", projectId);
   };
 
-  const handleDeleteProject = (projectId) => {
-    console.log("projectId need to delete>>", projectId);
-    dispatch(removeProject(projectId));
-    navigate("/admin/project");
+  const handleClickDelete = async (projectId) => {
+    console.log("click delete");
+
+    const res = await handleDeleteProject(projectId);
+    console.log("res", res);
+    if (res.errCode === 0) {
+      navigate("/admin/project");
+      dispatch(fetchProjects(1));
+    } else {
+      console.log("error", res);
+      alert(res.message);
+    }
+  };
+
+  const removeStaffOutOfProject = async (staffId) => {
+    console.log("remove staff out of project", staffId);
+    let res = await handleRemoveStaffOutOfProject(staffId, projectId);
+    if (res.errCode === 0) {
+      dispatch(fetchProjects(1));
+    } else {
+      console.log("error", res);
+    }
   };
 
   return (
@@ -42,15 +65,30 @@ function ViewDetailProject(props) {
           className="col-md-4 mt-2 text-white"
           style={{ backgroundColor: "#A472FE", textAlign: "left" }}
         >
-          <h4>{mainProject.projectName}</h4>
+          <h4>{mainProject.ProjectName}</h4>
           <hr></hr>
-          <h5>Project Manager: {mainProject.projectManager}</h5>
-          <h5>Start Date: {mainProject.workStart}</h5>
-          <h5>End Date: {mainProject.workEnd}</h5>
+          <h5>Project Manager: </h5>
+          <h5>Start Date: {mainProject.TimeStart}</h5>
+          <h5>End Date: {mainProject.TimeEnd}</h5>
           <hr></hr>
           <div className="justify-content-around">
-            <Button variant="contained" color="success" className="my-1">
+            <Button
+              variant="contained"
+              color="success"
+              className="my-1"
+              onClick={() => {
+                navigate(`/admin/project/addStaffsToProject/${projectId}`);
+              }}
+            >
               Add Member
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              className="my-1"
+              onClick={() => handleClickDelete(projectId)}
+            >
+              Delete project
             </Button>
             <Button
               variant="contained"
@@ -60,19 +98,13 @@ function ViewDetailProject(props) {
             >
               Transfer Member
             </Button>
-
-            <Button
-              variant="contained"
-              color="error"
-              className="my-1"
-              onClick={() => handleDeleteProject(projectId)}
-            >
-              Delete project
-            </Button>
           </div>
         </div>
         <div className="col-md-8 mt-2 p-0">
-          <StaffOfProject staffs={mainProject.Staffs} />
+          <StaffOfProject
+            staffs={mainProject.Staffs}
+            removeStaffOutOfProject={removeStaffOutOfProject}
+          />
         </div>
       </div>
     </div>

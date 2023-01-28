@@ -3,16 +3,24 @@ import TextField from "@mui/material/TextField";
 import Stack from "@mui/material/Stack";
 import Autocomplete from "@mui/material/Autocomplete";
 import { useState } from "react";
+import axios from "axios";
+import { findProjectInprogressAndAvailableStaffs } from "../../../services/adminServices/AdminServices";
+
+const baseUrl = process.env.REACT_APP_JSON_API;
 export default function SearchAutoComplete(props) {
   const { searchData } = props;
   console.log("searchData", searchData);
-  const handleChange = (value) => {
+  const handleChange = async (value) => {
     console.log("value", value);
-    let searchResult = searchData.filter((item) =>
-      item.ProjectName.toLowerCase().includes(value.toLowerCase())
-    );
+    let searchResult = await findProjectInprogressAndAvailableStaffs(value);
     console.log("searchResult", searchResult);
-    props.setProject(searchResult);
+    if (searchResult.errCode == 0) {
+      searchResult.project.Staffs = searchResult.availableStaff;
+      console.log("searchResult.project", searchResult.project);
+
+      props.setProject(searchResult.project);
+    }
+    console.log("searchResult", searchResult);
   };
   return (
     <>

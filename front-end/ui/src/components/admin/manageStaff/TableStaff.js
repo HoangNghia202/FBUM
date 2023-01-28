@@ -28,6 +28,7 @@ function TableStaff(props) {
             <th scope="col">Name</th>
             <th scope="col">Position</th>
             <th scope="col">level</th>
+            <th scope="col">Action</th>
           </tr>
         </thead>
         <tbody>
@@ -38,6 +39,7 @@ function TableStaff(props) {
                 <td>{item.id}</td>
                 <td>{item.name}</td>
                 <td>{item.position}</td>
+                <td>{item.level}</td>
                 <td>{item.level}</td>
               </tr>
             );
