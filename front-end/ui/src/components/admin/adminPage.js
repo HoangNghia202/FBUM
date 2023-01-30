@@ -13,7 +13,7 @@ function AdminPage(props) {
     navigate("/admin/project");
   }, []);
   return (
-    <div className="row mt-5">
+    <div className="row" style={{ marginTop: "5%" }}>
       <div className="app-nav">
         <NavHeader userInfo={props.userInfo} />
       </div>

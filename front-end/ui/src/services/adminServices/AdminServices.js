@@ -71,7 +71,7 @@ export const handleDeleteProject = async (projectId) => {
 export const handleRemoveStaffOutOfProject = async (staffID, projectID) => {
   try {
     let res = await axios.delete(
-      `${baseUrl}/api/deleteStaffInproject/${projectID}/${staffID}`
+      `${baseUrl}/api/deleteStaffInProject/${projectID}/${staffID}`
     );
     console.log("res", res.data);
 
@@ -234,10 +234,15 @@ export const transferStaffBetweenProject = async (
   staffIDs
 ) => {
   try {
-    let res = await axios.post(
-      `${baseUrl}/api/transfer/${fromProject}/${toProject}`,
-      staffIDs
-    );
+    let res = await axios({
+      method: "post",
+      url: `${baseUrl}/api/transferStaffBetweenProject/${fromProject}/${toProject}`,
+      headers: {},
+      data: {
+        foo: staffIDs,
+      },
+    });
+
     console.log("res>>>", res.data);
     if (res.data == "Move staff successfully") {
       return {
@@ -253,4 +258,14 @@ export const transferStaffBetweenProject = async (
   } catch (error) {
     console.log("error transfer project>>>", error);
   }
+};
+
+export const handleAddStaffToProject = async (staffs, projectID) => {
+  try {
+    staffs.forEach((element) => {
+      axios.put(
+        `${baseUrl}/api/insertToProject/${projectID}/${element.StaffID}`
+      );
+    });
+  } catch (error) {}
 };

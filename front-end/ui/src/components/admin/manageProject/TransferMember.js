@@ -163,7 +163,7 @@ export default function TransferList(props) {
     handleClose();
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     let rightToLeft = not(projectRight, right);
     let leftToRight = not(projectLeft, left);
     console.log("rightToLeft", rightToLeft);
@@ -184,21 +184,32 @@ export default function TransferList(props) {
     }
 
     if (idStaffsToLeft != "") {
-      transferStaffBetweenProject(
+      let res = await transferStaffBetweenProject(
         fromProject.ProjectID,
         toProject.ProjectID,
         idStaffsToLeft
       );
+      console.log("res right to left>>>", res);
+      if (res.errCode === 0) {
+        alert("Transfer staff right to left project successfully");
+      } else {
+        alert("Transfer staff right to left project failed");
+      }
     }
     if (idStaffsToRight != "") {
-      transferStaffBetweenProject(
+      let res = await transferStaffBetweenProject(
         toProject.ProjectID,
         fromProject.ProjectID,
         idStaffsToRight
       );
+      console.log("res left to right>>>", res);
+      if (res.errCode === 0) {
+        alert("Transfer staff left to right project successfully");
+      } else {
+        alert("Transfer staff left to right project failed");
+      }
     }
 
-    alert("Transfer staff between project successfully");
     dispatch(fetchProjects(1));
     navigate("/admin/project");
   };

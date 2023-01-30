@@ -24,6 +24,20 @@ function ViewDetailProject(props) {
   const mainProject = [...projectEnded, ...projectInprogress].filter(
     (item) => item.ProjectID == projectId
   )[0];
+
+  const [type, setType] = useState("");
+  useEffect(() => {
+    if (Date.parse(mainProject.TimeEnd) > Date.now()) {
+      if (Date.parse(mainProject.TimeStart) > Date.now()) {
+        setType("incoming");
+      } else {
+        setType("inprogress");
+      }
+    } else {
+      setType("ended");
+    }
+  }, [mainProject]);
+
   console.log("mainProject", mainProject);
 
   const handleTransferMember = (projectId) => {
@@ -33,25 +47,32 @@ function ViewDetailProject(props) {
 
   const handleClickDelete = async (projectId) => {
     console.log("click delete");
-
-    const res = await handleDeleteProject(projectId);
-    console.log("res", res);
-    if (res.errCode === 0) {
-      navigate("/admin/project");
-      dispatch(fetchProjects(1));
-    } else {
-      console.log("error", res);
-      alert(res.message);
+    let confirm = window.confirm("Are you sure to delete this project?");
+    if (confirm) {
+      const res = await handleDeleteProject(projectId);
+      console.log("res", res);
+      if (res.errCode === 0) {
+        navigate("/admin/project");
+        dispatch(fetchProjects(1));
+      } else {
+        console.log("error", res);
+        alert(res.message);
+      }
     }
   };
 
   const removeStaffOutOfProject = async (staffId) => {
     console.log("remove staff out of project", staffId);
-    let res = await handleRemoveStaffOutOfProject(staffId, projectId);
-    if (res.errCode === 0) {
-      dispatch(fetchProjects(1));
-    } else {
-      console.log("error", res);
+    let confirm = window.confirm(
+      "Are you sure to remove this staff out of project?"
+    );
+    if (confirm) {
+      let res = await handleRemoveStaffOutOfProject(staffId, projectId);
+      if (res.errCode === 0) {
+        dispatch(fetchProjects(1));
+      } else {
+        console.log("error", res);
+      }
     }
   };
 
@@ -104,6 +125,7 @@ function ViewDetailProject(props) {
           <StaffOfProject
             staffs={mainProject.Staffs}
             removeStaffOutOfProject={removeStaffOutOfProject}
+            type={type}
           />
         </div>
       </div>

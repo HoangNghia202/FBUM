@@ -17,7 +17,14 @@ function ManageStaff(props) {
       <h1> manage staff</h1>
       <Box sx={{ width: "100%", typography: "body1" }}>
         <TabContext value={value}>
-          <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+          <Box
+            sx={{
+              borderBottom: 1,
+              borderColor: "divider",
+              position: "sticky",
+              top: "100px",
+            }}
+          >
             <TabList onChange={handleChange} aria-label="lab API tabs example">
               <Tab label="All Staff" value="1" />
               <Tab label="Free Staff" value="2" />

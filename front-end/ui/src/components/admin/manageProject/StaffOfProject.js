@@ -30,7 +30,9 @@ const StaffOfProject = (props) => {
               <th scope="col">Name</th>
               <th scope="col">Position</th>
               <th scope="col">Level</th>
-              <th scope="col">Action</th>
+              {(props.type === "inprogress" || props.type === "incoming") && (
+                <th scope="col">Action</th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -40,16 +42,21 @@ const StaffOfProject = (props) => {
                 <td className="text-left">{item.StaffName}</td>
                 <td className="text-left">{item.MainPosition}</td>
                 <td>{item.Level}</td>
-                <td>
-                  {" "}
-                  <Button
-                    color="primary"
-                    variant="outlined"
-                    onClick={() => props.removeStaffOutOfProject(item.StaffID)}
-                  >
-                    Remove
-                  </Button>{" "}
-                </td>
+
+                {(props.type === "inprogress" || props.type === "incoming") && (
+                  <td>
+                    {" "}
+                    <Button
+                      color="primary"
+                      variant="outlined"
+                      onClick={() =>
+                        props.removeStaffOutOfProject(item.StaffID)
+                      }
+                    >
+                      Remove
+                    </Button>{" "}
+                  </td>
+                )}
               </tr>
             ))}
             {data.length === 0 && (
