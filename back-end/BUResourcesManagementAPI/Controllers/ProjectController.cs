@@ -10,6 +10,7 @@ using System.Data.SqlClient;
 using System.Configuration;
 using Antlr.Runtime.Misc;
 using System.Collections;
+using System.Web.Management;
 
 namespace BUResourcesManagementAPI.Controllers
 {
@@ -102,7 +103,12 @@ namespace BUResourcesManagementAPI.Controllers
                 String query = @"SELECT Staff.StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition 
                             FROM Staff, Role, Position, Project, WorkOn
                             WHERE 
-                            Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND Staff.StaffID = WorkOn.StaffID AND Project.ProjectID = WorkOn.ProjectID AND Project.ProjectID = @ProjectID";
+                            Staff.StaffRole = Role.RoleID AND 
+                            Staff.MainPosition = Position.PositionID AND 
+                            Staff.StaffID = WorkOn.StaffID AND 
+                            Project.ProjectID = WorkOn.ProjectID AND 
+                            WorkOn.WorkEnd = Project.TimeEnd AND
+                            Project.ProjectID = @ProjectID";
 
                 using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
                 using (var command = new SqlCommand(query, connection))
@@ -149,9 +155,14 @@ namespace BUResourcesManagementAPI.Controllers
                                 SELECT a.StaffID
                                 FROM WorkOn AS a, (SELECT ProjectID, TimeStart, TimeEnd FROM Project WHERE ProjectID = @ProjectID) AS b
                                 WHERE 
+                                (
                                 (a.WorkStart >= b.TimeStart AND a.WorkStart < b.TimeEnd) OR
                                 (a.WorkEnd > b.TimeStart AND a.WorkEnd <= b.TimeEnd) OR
-                                (a.WorkStart <= b.TimeStart AND a.WorkEnd >= b.TimeEnd));";
+                                (a.WorkStart <= b.TimeStart AND a.WorkEnd >= b.TimeEnd) AND 
+                                a.ProjectID != @ProjectID
+                                ) OR 
+                                (a.WorkEnd = b.TimeEnd AND a.ProjectID = @ProjectID)
+                                );";
 
                 using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
                 using (var command = new SqlCommand(query, connection))
@@ -194,7 +205,11 @@ namespace BUResourcesManagementAPI.Controllers
                 List<Staff> listStaff = null;
 
                 String query = @"SELECT Staff.StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition FROM Staff, Role, Position, Project, WorkOn
-                                WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND Staff.StaffID = WorkOn.StaffID AND Project.ProjectID = WorkOn.ProjectID AND Project.ProjectID = @FromProjectID AND Staff.StaffID NOT IN (
+                                WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND Staff.StaffID = WorkOn.StaffID AND Project.ProjectID = WorkOn.ProjectID AND Project.ProjectID = @FromProjectID AND
+                                Staff.StaffID IN (
+                                SELECT StaffID FROM WorkOn WHERE ProjectID = @FromProjectID
+                                ) AND
+                                Staff.StaffID NOT IN (
                                 SELECT a.StaffID
                                 FROM WorkOn AS a, (SELECT ProjectID, TimeStart, TimeEnd FROM Project WHERE ProjectID = @ToProjectID) AS b
                                 WHERE 
@@ -244,7 +259,7 @@ namespace BUResourcesManagementAPI.Controllers
             {
                 List<Project> listProject = null;
 
-                String query = @"WITH NewTable AS (SELECT ROW_NUMBER() OVER(ORDER BY TimeStart) AS RowNumber, * FROM Project WHERE GETDATE() <= TimeEnd) 
+                String query = @"WITH NewTable AS (SELECT ROW_NUMBER() OVER(ORDER BY TimeStart) AS RowNumber, * FROM Project WHERE GETDATE() >= TimeStart AND GETDATE() <= TimeEnd) 
                                 SELECT ProjectID, ProjectName, CONVERT(VARCHAR(10), TimeStart) AS TimeStart, CONVERT(VARCHAR(10), TimeEnd) AS TimeEnd FROM NewTable WHERE RowNumber BETWEEN @Start AND @End;";
 
                 using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
@@ -272,6 +287,43 @@ namespace BUResourcesManagementAPI.Controllers
                 }
 
                 return listProject;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [HttpGet] // api/projectInProgressPage
+        [Route("api/projectInProgress")]
+        public int GetProjectInProgressPage()
+        {
+            try
+            {
+                int rows = 0;
+
+                String query = @"WITH NewTable AS (SELECT ROW_NUMBER() OVER(ORDER BY TimeStart) AS RowNumber, * FROM Project WHERE GETDATE() >= TimeStart AND GETDATE() <= TimeEnd) 
+                                SELECT COUNT(*) FROM NewTable;";
+
+                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    command.CommandType = CommandType.Text;
+                    var reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            rows = reader.GetInt32(0);
+                            if (rows % 10 == 0) return rows / 10;
+                            else return rows / 10 + 1;
+                        }
+                    }
+                    connection.Close();
+                }
+
+                return rows;
             }
             catch (Exception ex)
             {
@@ -315,6 +367,123 @@ namespace BUResourcesManagementAPI.Controllers
                 }
 
                 return listProject;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [HttpGet] // api/projectEndedPage
+        [Route("api/projectEndedPage")]
+        public int GetProjectEndedPage()
+        {
+            try
+            {
+                int rows = 0;
+
+                String query = @"WITH NewTable AS (SELECT ROW_NUMBER() OVER(ORDER BY TimeStart) AS RowNumber, * FROM Project WHERE GETDATE() > TimeEnd) 
+                                SELECT COUNT(*) FROM NewTable;";
+
+                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    command.CommandType = CommandType.Text;
+                    var reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            rows = reader.GetInt32(0);
+                            if (rows % 10 == 0) return rows / 10;
+                            else return rows / 10 + 1;
+                        }
+                    }
+                    connection.Close();
+                }
+
+                return rows;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [HttpGet] // api/projectInComing/page/{id}
+        [Route("api/projectInComing/page/{id}")]
+        public List<Project> GetProjectInComing(int id)
+        {
+            try
+            {
+                List<Project> listProject = null;
+
+                String query = @"WITH NewTable AS (SELECT ROW_NUMBER() OVER(ORDER BY TimeStart) AS RowNumber, * FROM Project WHERE GETDATE() < TimeStart) 
+                                SELECT ProjectID, ProjectName, CONVERT(VARCHAR(10), TimeStart) AS TimeStart, CONVERT(VARCHAR(10), TimeEnd) AS TimeEnd FROM NewTable WHERE RowNumber BETWEEN @Start AND @End;";
+
+                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    command.CommandType = CommandType.Text;
+                    command.Parameters.AddWithValue("@Start", 10 * id - 9);
+                    command.Parameters.AddWithValue("@End", 10 * id);
+                    var reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        listProject = new List<Project>();
+                        while (reader.Read())
+                        {
+                            int projectID = reader.GetInt32(0);
+                            String projectName = reader.GetString(1);
+                            String dateStart = reader.GetString(2);
+                            String dateEnd = reader.GetString(3);
+                            List<Staff> listStaff = GetStaff(projectID);
+                            listProject.Add(new Project(projectID, projectName, dateStart, dateEnd, listStaff));
+                        }
+                    }
+                    connection.Close();
+                }
+
+                return listProject;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [HttpGet] // api/projectInComingPage
+        [Route("api/projectInComingPage")]
+        public int GetProjectInComingPage()
+        {
+            try
+            {
+                int rows = 0;
+
+                String query = @"WITH NewTable AS (SELECT ROW_NUMBER() OVER(ORDER BY TimeStart) AS RowNumber, * FROM Project WHERE GETDATE() < TimeStart) 
+                                SELECT COUNT(*) FROM NewTable;";
+
+                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    command.CommandType = CommandType.Text;
+                    var reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            rows = reader.GetInt32(0);
+                            if (rows % 10 == 0) return rows / 10;
+                            else return rows / 10 + 1;
+                        }
+                    }
+                    connection.Close();
+                }
+
+                return rows;
             }
             catch (Exception ex)
             {
@@ -411,8 +580,8 @@ namespace BUResourcesManagementAPI.Controllers
             }
         }
 
-        [HttpPut] // api/insertToFroject/{projectID}/{staffID}
-        [Route("api/insertToFroject/{projectID}/{staffID}")]
+        [HttpPut] // api/insertToProject/{projectID}/{staffID}
+        [Route("api/insertToProject/{projectID}/{staffID}")]
         public String PutStaff(int projectID, int staffID)
         {
             try
@@ -428,7 +597,7 @@ namespace BUResourcesManagementAPI.Controllers
                     connection.Open();
                     command.Parameters.AddWithValue("@ProjectID", projectID);
                     command.Parameters.AddWithValue("@StaffID", staffID);
-                    command.Parameters.AddWithValue("@Position", staff.MainPosition);
+                    command.Parameters.AddWithValue("@Position", new PositionController().GetPositionIDToString(staff.MainPosition));
                     DateTime dateTime = DateTime.Now;
                     if (String.Compare(dateTime.ToString("yyyy-MM-dd"), project.TimeEnd, true) >= 0)
                     {
@@ -476,8 +645,8 @@ namespace BUResourcesManagementAPI.Controllers
             }
         }
 
-        [HttpDelete] // api/deleteStaffInproject/{projectID}/{staffID}
-        [Route("api/deleteStaffInproject/{projectID}/{staffID}")]
+        [HttpDelete] // api/deleteStaffInProject/{projectID}/{staffID}
+        [Route("api/deleteStaffInProject/{projectID}/{staffID}")]
         public String Delete(int projectID, int staffID)
         {
             try
