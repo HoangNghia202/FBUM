@@ -152,14 +152,15 @@ namespace BUResourcesManagementAPI.Controllers
 
                 String query = @"SELECT StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition FROM Staff, Role, Position
                                 WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND StaffID NOT IN (
-                                SELECT a.StaffID
-                                FROM WorkOn AS a, (SELECT ProjectID, TimeStart, TimeEnd FROM Project WHERE ProjectID = @ProjectID) AS b
+                                SELECT a.StaffID FROM 
+                                (SELECT WorkOn.ProjectID, StaffID, Position, WorkStart, WorkEnd, TimeStart, TimeEnd FROM WorkOn, Project WHERE WorkOn.ProjectID = Project.ProjectID) AS a, 
+                                (SELECT ProjectID, TimeStart, TimeEnd FROM Project WHERE ProjectID = @ProjectID) AS b
                                 WHERE 
                                 (
                                 (a.WorkStart >= b.TimeStart AND a.WorkStart < b.TimeEnd) OR
                                 (a.WorkEnd > b.TimeStart AND a.WorkEnd <= b.TimeEnd) OR
                                 (a.WorkStart <= b.TimeStart AND a.WorkEnd >= b.TimeEnd) AND 
-                                a.ProjectID != @ProjectID
+                                a.ProjectID != @ProjectID AND a.WorkEnd = a.TimeEnd 
                                 ) OR 
                                 (a.WorkEnd = b.TimeEnd AND a.ProjectID = @ProjectID)
                                 );";
@@ -207,16 +208,21 @@ namespace BUResourcesManagementAPI.Controllers
                 String query = @"SELECT Staff.StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition FROM Staff, Role, Position, Project, WorkOn
                                 WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND Staff.StaffID = WorkOn.StaffID AND Project.ProjectID = WorkOn.ProjectID AND Project.ProjectID = @FromProjectID AND
                                 Staff.StaffID IN (
-                                SELECT StaffID FROM WorkOn WHERE ProjectID = @FromProjectID
+                                SELECT StaffID FROM WorkOn, Project WHERE Project.ProjectID = @FromProjectID AND Project.ProjectID = WorkOn.ProjectID AND WorkOn.WorkEnd = Project.TimeEnd
                                 ) AND
                                 Staff.StaffID NOT IN (
-                                SELECT a.StaffID
-                                FROM WorkOn AS a, (SELECT ProjectID, TimeStart, TimeEnd FROM Project WHERE ProjectID = @ToProjectID) AS b
+                                SELECT a.StaffID FROM 
+                                (SELECT WorkOn.ProjectID, StaffID, Position, WorkStart, WorkEnd, TimeStart, TimeEnd FROM WorkOn, Project WHERE WorkOn.ProjectID = Project.ProjectID) AS a,
+                                (SELECT ProjectID, TimeStart, TimeEnd FROM Project WHERE ProjectID = @ToProjectID) AS b
                                 WHERE 
+                                (
                                 (a.WorkStart >= b.TimeStart AND a.WorkStart < b.TimeEnd) OR
                                 (a.WorkEnd > b.TimeStart AND a.WorkEnd <= b.TimeEnd) OR
-                                (a.WorkStart <= b.TimeStart AND a.WorkEnd >= b.TimeEnd) AND
-                                a.ProjectID != @FromProjectID);";
+                                (a.WorkStart <= b.TimeStart AND a.WorkEnd >= b.TimeEnd) AND 
+                                a.ProjectID != @FromProjectID AND a.ProjectID != @ToProjectID AND a.WorkEnd = a.TimeEnd 
+                                ) OR 
+                                (a.WorkEnd = b.TimeEnd AND a.ProjectID = @FromProjectID)
+                                );";
 
                 using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
                 using (var command = new SqlCommand(query, connection))
@@ -668,10 +674,10 @@ namespace BUResourcesManagementAPI.Controllers
                     {
                         command.Parameters.AddWithValue("@WorkEnd", dateTime.ToString("yyyy-MM-dd"));
                         command.Parameters.AddWithValue("@ProjectID", projectID);
-                        command.Parameters.AddWithValue("@ProjectID", staffID);
+                        command.Parameters.AddWithValue("@StaffID", staffID);
                     }
-                    if (command.ExecuteNonQuery() != 1) return "Delete project failed";
-                    else return "Delete project successfully";
+                    if (command.ExecuteNonQuery() != 1) return "Delete staff in project failed";
+                    else return "Delete staff in project successfully";
                 }
             }
             catch (Exception ex)
