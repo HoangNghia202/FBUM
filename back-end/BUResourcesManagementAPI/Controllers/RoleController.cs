@@ -15,10 +15,41 @@ namespace BUResourcesManagementAPI.Controllers
 {
     public class RoleController : ApiController
     {
-        // GET: api/Role
-        public IEnumerable<string> Get()
+        [HttpGet] // api/role
+        [Route("api/role")]
+        public List<Role> GetRole()
         {
-            return new string[] { "value1", "value2" };
+            try
+            {
+                List<Role> roles = null;
+
+                String query = @"SELECT * FROM Role";
+
+                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    command.CommandType = CommandType.Text;
+                    var reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        roles = new List<Role>();
+                        while (reader.Read())
+                        {
+                            int roleID = reader.GetInt32(0);
+                            String roleName = reader.GetString(1);
+                            roles.Add(new Role(roleID, roleName));
+                        }
+                    }
+                    connection.Close();
+                }
+
+                return roles;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         // GET: api/Role/5

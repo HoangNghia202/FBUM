@@ -7,15 +7,47 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using BUResourcesManagementAPI.Models;
 
 namespace BUResourcesManagementAPI.Controllers
 {
     public class PositionController : ApiController
     {
-        // GET: api/Position
-        public IEnumerable<string> Get()
+        [HttpGet] // api/position
+        [Route("api/position")]
+        public List<Position> GetPosition()
         {
-            return new string[] { "value1", "value2" };
+            try
+            {
+                List<Position> positions = null;
+
+                String query = @"SELECT * FROM Position";
+
+                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    command.CommandType = CommandType.Text;
+                    var reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        positions = new List<Position>();
+                        while (reader.Read())
+                        {
+                            int positionID = reader.GetInt32(0);
+                            String positionName = reader.GetString(1);
+                            positions.Add(new Position(positionID, positionName));
+                        }
+                    }
+                    connection.Close();
+                }
+
+                return positions;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         // GET: api/Position/5

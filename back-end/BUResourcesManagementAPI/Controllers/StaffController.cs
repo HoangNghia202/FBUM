@@ -23,8 +23,8 @@ namespace BUResourcesManagementAPI.Controllers
                 List<Staff> listStaff = null;
 
                 String query = @"SELECT StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition 
-                            FROM Staff, Role, Position
-                            WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID;";
+                                FROM Staff, Role, Position
+                                WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID;";
 
                 using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
                 using (var command = new SqlCommand(query, connection))
@@ -63,8 +63,8 @@ namespace BUResourcesManagementAPI.Controllers
             try
             {
                 String query = @"SELECT StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition 
-                            FROM Staff, Role, Position
-                            WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND StaffID = @StaffID";
+                                FROM Staff, Role, Position
+                                WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND StaffID = @StaffID";
 
                 using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
                 using (var command = new SqlCommand(query, connection))
@@ -90,80 +90,6 @@ namespace BUResourcesManagementAPI.Controllers
                 }
 
                 return null;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
-
-        [HttpGet] // api/role
-        [Route("api/role")]
-        public List<Role> GetRole()
-        {
-            try
-            {
-                List<Role> roles = null;
-
-                String query = @"SELECT * FROM Role";
-
-                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
-                using (var command = new SqlCommand(query, connection))
-                {
-                    connection.Open();
-                    command.CommandType = CommandType.Text;
-                    var reader = command.ExecuteReader();
-                    if (reader.HasRows)
-                    {
-                        roles = new List<Role>();
-                        while (reader.Read())
-                        {
-                            int roleID = reader.GetInt32(0);
-                            String roleName = reader.GetString(1);
-                            roles.Add(new Role(roleID, roleName));
-                        }
-                    }
-                    connection.Close();
-                }
-
-                return roles;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
-
-        [HttpGet] // api/position
-        [Route("api/position")]
-        public List<Position> GetPosition()
-        {
-            try
-            {
-                List<Position> positions = null;
-
-                String query = @"SELECT * FROM Position";
-
-                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
-                using (var command = new SqlCommand(query, connection))
-                {
-                    connection.Open();
-                    command.CommandType = CommandType.Text;
-                    var reader = command.ExecuteReader();
-                    if (reader.HasRows)
-                    {
-                        positions = new List<Position>();
-                        while (reader.Read())
-                        {
-                            int positionID = reader.GetInt32(0);
-                            String positionName = reader.GetString(1);
-                            positions.Add(new Position(positionID, positionName));
-                        }
-                    }
-                    connection.Close();
-                }
-
-                return positions;
             }
             catch (Exception ex)
             {
