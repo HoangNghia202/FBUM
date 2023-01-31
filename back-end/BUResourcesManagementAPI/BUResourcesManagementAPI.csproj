@@ -202,6 +202,7 @@
     <Compile Include="Models\Role.cs" />
     <Compile Include="Models\Project.cs" />
     <Compile Include="Models\Staff.cs" />
+    <Compile Include="Models\Values.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
