@@ -157,9 +157,9 @@ namespace BUResourcesManagementAPI.Controllers
                                 (SELECT ProjectID, TimeStart, TimeEnd FROM Project WHERE ProjectID = @ProjectID) AS b
                                 WHERE 
                                 (
-                                (a.WorkStart >= b.TimeStart AND a.WorkStart < b.TimeEnd) OR
+                                ((a.WorkStart >= b.TimeStart AND a.WorkStart < b.TimeEnd) OR
                                 (a.WorkEnd > b.TimeStart AND a.WorkEnd <= b.TimeEnd) OR
-                                (a.WorkStart <= b.TimeStart AND a.WorkEnd >= b.TimeEnd) AND 
+                                (a.WorkStart <= b.TimeStart AND a.WorkEnd >= b.TimeEnd)) AND 
                                 a.ProjectID != @ProjectID AND a.WorkEnd = a.TimeEnd 
                                 ) OR 
                                 (a.WorkEnd = b.TimeEnd AND a.ProjectID = @ProjectID)
@@ -216,9 +216,9 @@ namespace BUResourcesManagementAPI.Controllers
                                 (SELECT ProjectID, TimeStart, TimeEnd FROM Project WHERE ProjectID = @ToProjectID) AS b
                                 WHERE 
                                 (
-                                (a.WorkStart >= b.TimeStart AND a.WorkStart < b.TimeEnd) OR
+                                ((a.WorkStart >= b.TimeStart AND a.WorkStart < b.TimeEnd) OR
                                 (a.WorkEnd > b.TimeStart AND a.WorkEnd <= b.TimeEnd) OR
-                                (a.WorkStart <= b.TimeStart AND a.WorkEnd >= b.TimeEnd) AND 
+                                (a.WorkStart <= b.TimeStart AND a.WorkEnd >= b.TimeEnd)) AND 
                                 a.ProjectID != @FromProjectID AND a.ProjectID != @ToProjectID AND a.WorkEnd = a.TimeEnd 
                                 ) OR 
                                 (a.WorkEnd = b.TimeEnd AND a.ProjectID = @FromProjectID)
@@ -567,11 +567,11 @@ namespace BUResourcesManagementAPI.Controllers
 
         [HttpPost] // api/transfer/{fromId}/{toId}
         [Route("api/transfer/{fromId}/{toId}")]
-        public String MoveStaff(int fromID, int toID, [FromBody] String staffIDs)
+        public String MoveStaff(int fromID, int toID, [FromBody] Values staffIDs)
         {
             try
             {
-                String[] ids = staffIDs.Split(',');
+                String[] ids = staffIDs.Value.Split(',');
 
                 foreach (String id in ids)
                 {
