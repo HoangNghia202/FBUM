@@ -141,6 +141,153 @@ namespace BUResourcesManagementAPI.Controllers
             }
         }
 
+        [HttpGet] // api/staffManagerFree
+        [Route("api/staffManagerFree")]
+        public List<Staff> GetManagerFree()
+        {
+            try
+            {
+                List<Staff> listStaff = null;
+
+                String query = @"SELECT StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition 
+                                FROM Staff, Role, Position
+                                WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND StaffID IN (
+                                SELECT StaffID FROM Staff, Role, Position
+                                WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND RoleName = 'Project Manager' AND StaffID NOT IN (
+                                SELECT Staff.StaffID FROM Staff, WorkOn, Project 
+                                WHERE Staff.StaffID = WorkOn.StaffID AND 
+                                Project.ProjectID = WorkOn.ProjectID AND 
+                                WorkOn.WorkEnd = Project.TimeEnd AND 
+                                GETDATE() <= Project.TimeEnd AND 
+                                GETDATE() >= Project.TimeStart));";
+
+                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    command.CommandType = CommandType.Text;
+                    var reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        listStaff = new List<Staff>();
+                        while (reader.Read())
+                        {
+                            int staffID = reader.GetInt32(0);
+                            String staffName = reader.GetString(1);
+                            String password = reader.GetString(2);
+                            String staffRole = reader.GetString(3);
+                            int level = reader.GetInt32(4);
+                            String mainPosition = reader.GetString(5);
+                            listStaff.Add(new Staff(staffID, staffName, password, staffRole, level, mainPosition));
+                        }
+                    }
+                    connection.Close();
+                }
+
+                return listStaff;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [HttpGet] // api/staffFree
+        [Route("api/staffFree")]
+        public List<Staff> GetFreeStaff()
+        {
+            try
+            {
+                List<Staff> listStaff = null;
+
+                String query = @"SELECT StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition FROM Staff, Role, Position
+                                WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND StaffID NOT IN (
+                                SELECT Staff.StaffID FROM Staff, WorkOn, Project 
+                                WHERE Staff.StaffID = WorkOn.StaffID AND 
+                                Project.ProjectID = WorkOn.ProjectID AND 
+                                WorkOn.WorkEnd = Project.TimeEnd AND 
+                                GETDATE() <= Project.TimeEnd AND 
+                                GETDATE() >= Project.TimeStart);";
+
+                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    command.CommandType = CommandType.Text;
+                    var reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        listStaff = new List<Staff>();
+                        while (reader.Read())
+                        {
+                            int staffID = reader.GetInt32(0);
+                            String staffName = reader.GetString(1);
+                            String password = reader.GetString(2);
+                            String staffRole = reader.GetString(3);
+                            int level = reader.GetInt32(4);
+                            String mainPosition = reader.GetString(5);
+                            listStaff.Add(new Staff(staffID, staffName, password, staffRole, level, mainPosition));
+                        }
+                    }
+                    connection.Close();
+                }
+
+                return listStaff;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [HttpGet] // api/staffInProject
+        [Route("api/staffInProject")]
+        public List<Staff> GetInProjectStaff()
+        {
+            try
+            {
+                List<Staff> listStaff = null;
+
+                String query = @"SELECT StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition FROM Staff, Role, Position
+                                WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND StaffID IN (
+                                SELECT Staff.StaffID FROM Staff, WorkOn, Project 
+                                WHERE Staff.StaffID = WorkOn.StaffID AND 
+                                Project.ProjectID = WorkOn.ProjectID AND 
+                                WorkOn.WorkEnd = Project.TimeEnd AND 
+                                GETDATE() <= Project.TimeEnd AND 
+                                GETDATE() >= Project.TimeStart);";
+
+                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    command.CommandType = CommandType.Text;
+                    var reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        listStaff = new List<Staff>();
+                        while (reader.Read())
+                        {
+                            int staffID = reader.GetInt32(0);
+                            String staffName = reader.GetString(1);
+                            String password = reader.GetString(2);
+                            String staffRole = reader.GetString(3);
+                            int level = reader.GetInt32(4);
+                            String mainPosition = reader.GetString(5);
+                            listStaff.Add(new Staff(staffID, staffName, password, staffRole, level, mainPosition));
+                        }
+                    }
+                    connection.Close();
+                }
+
+                return listStaff;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         [HttpPost] // api/createNewStaff
         [Route("api/createNewStaff")]
         public String Post([FromBody] Staff staff)

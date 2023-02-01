@@ -28,18 +28,6 @@ namespace BUResourcesManagementAPI.Models
             TimeEnd = timeEnd;
         }
 
-        public Project(int projectID, string projectName, string timeStart, string timeEnd)
-        {
-            ProjectID = projectID;
-            ProjectName = projectName;
-            TimeStart = timeStart;
-            TimeEnd = timeEnd;
-        }
-
-        public Project(int projectID, string projectName, string timeStart, string timeEnd, List<Staff> staffs) : this(projectID, projectName, timeStart, timeEnd)
-        {
-            Staffs = staffs;
-        }
         public Project(int projectID, string projectName, string manager, string timeStart, string timeEnd)
         {
             ProjectID = projectID;
