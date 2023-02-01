@@ -667,16 +667,19 @@ namespace BUResourcesManagementAPI.Controllers
         {
             try
             {
-                String query = @"DELETE FROM Project WHERE ProjectID = @ProjectID;";
+                String query1 = @"DELETE FROM WorkOn WHERE ProjectID = @ProjectID;";
+                String query2 = @"DELETE FROM Project WHERE ProjectID = @ProjectID;";
 
-                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
-                using (var command = new SqlCommand(query, connection))
-                {
-                    connection.Open();
-                    command.Parameters.AddWithValue("@ProjectID", id);
-                    if (command.ExecuteNonQuery() != 1) return "Delete project failed";
-                    else return "Delete project successfully";
-                }
+                var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString);
+                var command1 = new SqlCommand(query1, connection);
+                var command2 = new SqlCommand(query2, connection);
+
+                connection.Open();
+                command1.Parameters.AddWithValue("@ProjectID", id);
+                command2.Parameters.AddWithValue("@ProjectID", id);
+                command1.ExecuteNonQuery();
+                if (command2.ExecuteNonQuery() != 1) return "Delete project failed";
+                else return "Delete project successfully";
             }
             catch (Exception ex)
             {

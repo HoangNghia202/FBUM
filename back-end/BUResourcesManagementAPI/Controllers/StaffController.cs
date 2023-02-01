@@ -141,59 +141,6 @@ namespace BUResourcesManagementAPI.Controllers
             }
         }
 
-        [HttpGet] // api/staffManagerFree
-        [Route("api/staffManagerFree")]
-        public List<Staff> GetManagerFree([FromBody] Values time)
-        {
-            try
-            {
-                String timeStart = time.Value.Split(',')[0].Trim();
-                String timeEnd = time.Value.Split(',')[1].Trim();
-                List<Staff> listStaff = null;
-
-                String query = @"SELECT StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition FROM Staff, Role, Position
-                                WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND RoleName = 'Project Manager' AND StaffID NOT IN (
-                                SELECT a.StaffID FROM 
-                                (SELECT WorkOn.ProjectID, StaffID, Position, WorkStart, WorkEnd, TimeStart, TimeEnd FROM WorkOn, Project WHERE WorkOn.ProjectID = Project.ProjectID) AS a
-                                WHERE 
-                                (
-                                ((a.WorkStart >= @TimeStart AND a.WorkStart < @TimeEnd) OR
-                                (a.WorkEnd > @TimeStart AND a.WorkEnd <= @TimeEnd) OR
-                                (a.WorkStart <= @TimeStart AND a.WorkEnd >= @TimeEnd)) AND a.WorkEnd = @TimeEnd));";
-
-                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
-                using (var command = new SqlCommand(query, connection))
-                {
-                    connection.Open();
-                    command.CommandType = CommandType.Text;
-                    command.Parameters.AddWithValue("@TimeStart", timeStart);
-                    command.Parameters.AddWithValue("@TimeEnd", timeEnd);
-                    var reader = command.ExecuteReader();
-                    if (reader.HasRows)
-                    {
-                        listStaff = new List<Staff>();
-                        while (reader.Read())
-                        {
-                            int staffID = reader.GetInt32(0);
-                            String staffName = reader.GetString(1);
-                            String password = reader.GetString(2);
-                            String staffRole = reader.GetString(3);
-                            int level = reader.GetInt32(4);
-                            String mainPosition = reader.GetString(5);
-                            listStaff.Add(new Staff(staffID, staffName, password, staffRole, level, mainPosition));
-                        }
-                    }
-                    connection.Close();
-                }
-
-                return listStaff;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
-
         [HttpGet] // api/staffFree
         [Route("api/staffFree")]
         public List<Staff> GetFreeStaff()
@@ -264,6 +211,59 @@ namespace BUResourcesManagementAPI.Controllers
                 {
                     connection.Open();
                     command.CommandType = CommandType.Text;
+                    var reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        listStaff = new List<Staff>();
+                        while (reader.Read())
+                        {
+                            int staffID = reader.GetInt32(0);
+                            String staffName = reader.GetString(1);
+                            String password = reader.GetString(2);
+                            String staffRole = reader.GetString(3);
+                            int level = reader.GetInt32(4);
+                            String mainPosition = reader.GetString(5);
+                            listStaff.Add(new Staff(staffID, staffName, password, staffRole, level, mainPosition));
+                        }
+                    }
+                    connection.Close();
+                }
+
+                return listStaff;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [HttpPost] // api/staffManagerFree
+        [Route("api/staffManagerFree")]
+        public List<Staff> GetManagerFree([FromBody] Values time)
+        {
+            try
+            {
+                String timeStart = time.Value.Split(',')[0].Trim();
+                String timeEnd = time.Value.Split(',')[1].Trim();
+                List<Staff> listStaff = null;
+
+                String query = @"SELECT StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition FROM Staff, Role, Position
+                                WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND RoleName = 'Project Manager' AND StaffID NOT IN (
+                                SELECT a.StaffID FROM 
+                                (SELECT WorkOn.ProjectID, StaffID, Position, WorkStart, WorkEnd, TimeStart, TimeEnd FROM WorkOn, Project WHERE WorkOn.ProjectID = Project.ProjectID) AS a
+                                WHERE 
+                                (
+                                ((a.WorkStart >= @TimeStart AND a.WorkStart < @TimeEnd) OR
+                                (a.WorkEnd > @TimeStart AND a.WorkEnd <= @TimeEnd) OR
+                                (a.WorkStart <= @TimeStart AND a.WorkEnd >= @TimeEnd)) AND a.WorkEnd = a.TimeEnd));";
+
+                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    command.CommandType = CommandType.Text;
+                    command.Parameters.AddWithValue("@TimeStart", timeStart);
+                    command.Parameters.AddWithValue("@TimeEnd", timeEnd);
                     var reader = command.ExecuteReader();
                     if (reader.HasRows)
                     {
@@ -406,16 +406,19 @@ namespace BUResourcesManagementAPI.Controllers
         {
             try
             {
-                String query = @"DELETE FROM Staff WHERE StaffID = @StaffID;";
+                String query1 = @"DELETE FROM WorkOn WHERE StaffID = @StaffID;";
+                String query2 = @"DELETE FROM Staff WHERE StaffID = @StaffID;";
 
-                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
-                using (var command = new SqlCommand(query, connection))
-                {
-                    connection.Open();
-                    command.Parameters.AddWithValue("@StaffID", id);
-                    if (command.ExecuteNonQuery() != 1) return "Delete staff failed";
-                    else return "Delete staff successfully";
-                }
+                var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString);
+                var command1 = new SqlCommand(query1, connection);
+                var command2 = new SqlCommand(query2, connection);
+
+                connection.Open();
+                command1.Parameters.AddWithValue("@StaffID", id);
+                command2.Parameters.AddWithValue("@StaffID", id);
+                command1.ExecuteNonQuery();
+                if (command2.ExecuteNonQuery() != 1) return "Delete staff failed";
+                else return "Delete staff successfully";
             }
             catch (Exception ex)
             {
