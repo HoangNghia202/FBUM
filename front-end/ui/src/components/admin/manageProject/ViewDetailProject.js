@@ -7,23 +7,27 @@ import Button from "@mui/material/Button";
 import { Divider } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import moment from "moment";
 import {
   handleDeleteProject,
   handleRemoveStaffOutOfProject,
 } from "../../../services/adminServices/AdminServices";
 import { fetchProjects } from "../../../redux/ProjectSlider";
+import { toast } from "react-toastify";
 
 function ViewDetailProject(props) {
   const dispatch = useDispatch();
   console.log("props", props);
-  const { projectEnded, projectInprogress } = props.projects;
+  const { projectEnded, projectInprogress, projectIncoming } = props.projects;
   let navigate = useNavigate();
   const { projectId } = useParams();
   console.log("projectId>>>", projectId);
 
-  const mainProject = [...projectEnded, ...projectInprogress].filter(
-    (item) => item.ProjectID == projectId
-  )[0];
+  const mainProject = [
+    ...projectEnded,
+    ...projectInprogress,
+    ...projectIncoming,
+  ].filter((item) => item.ProjectID == projectId)[0];
 
   const [type, setType] = useState("");
   useEffect(() => {
@@ -56,7 +60,7 @@ function ViewDetailProject(props) {
         dispatch(fetchProjects(1));
       } else {
         console.log("error", res);
-        alert(res.message);
+        toast.error(res.message);
       }
     }
   };
@@ -69,9 +73,11 @@ function ViewDetailProject(props) {
     if (confirm) {
       let res = await handleRemoveStaffOutOfProject(staffId, projectId);
       if (res.errCode === 0) {
+        toast.success("Remove staff out of project successfully!");
         dispatch(fetchProjects(1));
       } else {
         console.log("error", res);
+        toast.error("Remove staff out of project failed!");
       }
     }
   };
@@ -88,9 +94,12 @@ function ViewDetailProject(props) {
         >
           <h4>{mainProject.ProjectName}</h4>
           <hr></hr>
-          <h5>Project Manager: </h5>
-          <h5>Start Date: {mainProject.TimeStart}</h5>
-          <h5>End Date: {mainProject.TimeEnd}</h5>
+          <h5>Project Manager:{mainProject.Manager} </h5>
+          <h5>
+            Start Date: {moment(mainProject.TimeStart).format("MM/DD/YYYY")}
+          </h5>
+
+          <h5>End Date:{moment(mainProject.TimeEnd).format("MM/DD/YYYY")}</h5>
           <hr></hr>
           <div className="justify-content-around">
             <Button

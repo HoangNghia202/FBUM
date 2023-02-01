@@ -3,16 +3,20 @@ import TextField from "@mui/material/TextField";
 import Stack from "@mui/material/Stack";
 import Autocomplete from "@mui/material/Autocomplete";
 import { useState } from "react";
-export default function SearchAutoComplete(props) {
-  const { searchData, showResult } = props;
+
+const baseUrl = process.env.REACT_APP_JSON_API;
+export default function SearchAutoCompletePM(props) {
+  console.log("props", props);
+  const { searchData, setManager } = props;
   console.log("searchData", searchData);
-  const handleChange = (value) => {
+  const handleChange = async (value) => {
     console.log("value", value);
     let searchResult = searchData.filter((item) =>
       item.StaffName.toLowerCase().includes(value.toLowerCase())
-    );
+    )[0];
+
     console.log("searchResult", searchResult);
-    showResult(searchResult);
+    setManager(searchResult);
   };
   return (
     <>
@@ -21,6 +25,7 @@ export default function SearchAutoComplete(props) {
           <Autocomplete
             freeSolo
             disableClearable
+            sx={{ width: "100%" }}
             options={searchData.map((option) => option.StaffName)}
             onChange={(event, newValue) => {
               handleChange(newValue);
@@ -28,7 +33,7 @@ export default function SearchAutoComplete(props) {
             renderInput={(params) => (
               <TextField
                 {...params}
-                label="Search Name"
+                label="Search Project Manager"
                 InputProps={{
                   ...params.InputProps,
                   type: "search",

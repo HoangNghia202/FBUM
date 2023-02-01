@@ -19,7 +19,7 @@ import axios from "axios";
 import Modal from "react-bootstrap/Modal";
 import TextField from "@mui/material/TextField";
 import SearchAutoComplete from "./SearchAutoComplete";
-import { searchProject } from "../../../services/adminServices/AdminServices";
+import { searchProjectInProgress } from "../../../services/adminServices/AdminServices";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProjects } from "../../../redux/ProjectSlider";
 import {
@@ -29,6 +29,7 @@ import {
 } from "../../../services/adminServices/AdminServices";
 
 import { border } from "@mui/system";
+import { toast } from "react-toastify";
 
 const baseUrl = process.env.REACT_APP_JSON_API;
 
@@ -65,7 +66,7 @@ export default function TransferList(props) {
       console.log("search", e.target.value);
 
       handleShow();
-      let result = await searchProject(e.target.value);
+      let result = await searchProjectInProgress(e.target.value);
       setSearchResult(result);
     }
   };
@@ -179,34 +180,38 @@ export default function TransferList(props) {
     }
 
     if (idStaffsToLeft == "" && idStaffsToRight == "") {
-      alert("No change for transfer staff between project");
+      toast.warning("No change for transfer staff between project");
       return;
     }
 
     if (idStaffsToLeft != "") {
       let res = await transferStaffBetweenProject(
-        fromProject.ProjectID,
         toProject.ProjectID,
+        fromProject.ProjectID,
+
         idStaffsToLeft
       );
       console.log("res right to left>>>", res);
       if (res.errCode === 0) {
-        alert("Transfer staff right to left project successfully");
+        toast.success(
+          "Transfer staff right project to left project successfully"
+        );
       } else {
-        alert("Transfer staff right to left project failed");
+        toast.error("Transfer staff right project to left project failed");
       }
     }
     if (idStaffsToRight != "") {
       let res = await transferStaffBetweenProject(
-        toProject.ProjectID,
         fromProject.ProjectID,
+        toProject.ProjectID,
+
         idStaffsToRight
       );
       console.log("res left to right>>>", res);
       if (res.errCode === 0) {
-        alert("Transfer staff left to right project successfully");
+        toast.success("Transfer staff left to right project successfully");
       } else {
-        alert("Transfer staff left to right project failed");
+        toast.error("Transfer staff left project to right project failed");
       }
     }
 

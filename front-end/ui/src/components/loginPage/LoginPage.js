@@ -25,6 +25,7 @@ function LoginPage(props) {
         setErrLogin("");
         dispatch(setUserSlider(res.data));
         navigate("/");
+        toast.success("Login successfully!");
       } else {
         setErrLogin(res.message);
       }

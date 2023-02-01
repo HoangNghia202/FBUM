@@ -1,4 +1,5 @@
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const baseUrl = process.env.REACT_APP_JSON_API;
 
@@ -14,19 +15,19 @@ export const handleCreateProject = async (project) => {
     console.log("res>>>", res.data);
     switch (res.data) {
       case message.success:
-        alert(message.success);
+        toast.success(message.success);
         return {
           errCode: 0,
         };
 
       case message.failed:
-        alert(message.failed);
+        toast.error(message.failed);
         return {
           errCode: 1,
         };
 
       case message.invalid:
-        alert(message.invalid);
+        toast.error(message.invalid);
         return {
           errCode: 2,
         };
@@ -35,6 +36,7 @@ export const handleCreateProject = async (project) => {
         break;
     }
   } catch (error) {
+    toast.error("Create new project failed! Server error");
     console.log("error>>>", error);
   }
 };
@@ -49,13 +51,13 @@ export const handleDeleteProject = async (projectId) => {
     };
     switch (res.data) {
       case message.success:
-        alert(message.success);
+        toast.success(message.success);
         return {
           errCode: 0,
           message: message.success,
         };
       case message.failed:
-        alert(message.failed);
+        toast.error(message.failed);
         return {
           errCode: 1,
           message: message.failed,
@@ -76,19 +78,17 @@ export const handleRemoveStaffOutOfProject = async (staffID, projectID) => {
     console.log("res", res.data);
 
     const message = {
-      success: "Delete project successfully",
-      failed: "Delete project failed",
+      success: "Delete staff in project successfully",
+      failed: "Delete staff in project failed",
     };
     switch (res.data) {
       case message.success:
-        alert("Remove staff out of project successfully");
         return {
           errCode: 0,
           message: "Remove staff out of project successfully",
         };
 
       case message.failed:
-        alert("Remove staff out of project failed");
         return {
           errCode: 1,
           message: "Remove staff out of project failed",
@@ -164,7 +164,7 @@ export const findProjectInprogressAndAvailableStaffs = async (searchInput) => {
   }
 };
 
-export const searchProject = async (searchInput) => {
+export const searchProjectInProgress = async (searchInput) => {
   try {
     let res = await axios.get(`${baseUrl}/api/project/search/${searchInput}`);
     console.log("res>>>", res.data);
@@ -189,6 +189,76 @@ export const searchProject = async (searchInput) => {
         result.errCode = 1;
         result.message =
           "Don't have any project in progress named " + searchInput;
+        return result;
+      }
+    } else {
+      return {
+        errCode: 1,
+        projects: [],
+        message: "Project not found",
+      };
+    }
+  } catch (error) {
+    console.log("error search project>>>", error);
+  }
+};
+
+export const searchProjectEnded = async (searchInput) => {
+  try {
+    let res = await axios.get(`${baseUrl}/api/project/search/${searchInput}`);
+    console.log("res>>>", res.data);
+    if (res.data != null) {
+      let result = {
+        errCode: 0,
+        projects: [],
+        message: "",
+      };
+      res.data.forEach((element) => {
+        if (Date.parse(element.TimeEnd) < Date.now()) {
+          result.projects.push(element);
+        }
+      });
+      if (result.projects.length > 0) {
+        result.message = "Project found";
+        return result;
+      } else {
+        result.errCode = 1;
+        result.message = "Don't have any project ended named " + searchInput;
+        return result;
+      }
+    } else {
+      return {
+        errCode: 1,
+        projects: [],
+        message: "Project not found",
+      };
+    }
+  } catch (error) {
+    console.log("error search project>>>", error);
+  }
+};
+
+export const searchProjectInComing = async (searchInput) => {
+  try {
+    let res = await axios.get(`${baseUrl}/api/project/search/${searchInput}`);
+    console.log("res>>>", res.data);
+    if (res.data != null) {
+      let result = {
+        errCode: 0,
+        projects: [],
+        message: "",
+      };
+      res.data.forEach((element) => {
+        if (Date.parse(element.TimeStart) > Date.now()) {
+          result.projects.push(element);
+        }
+      });
+      if (result.projects.length > 0) {
+        result.message = "Project found";
+        return result;
+      } else {
+        result.errCode = 1;
+        result.message = "Don't have any project incoming named " + searchInput;
         return result;
       }
     } else {
@@ -234,15 +304,10 @@ export const transferStaffBetweenProject = async (
   staffIDs
 ) => {
   try {
-    let res = await axios({
-      method: "post",
-      url: `${baseUrl}/api/transferStaffBetweenProject/${fromProject}/${toProject}`,
-      headers: {},
-      data: {
-        foo: staffIDs,
-      },
-    });
-
+    let res = await axios.post(
+      `${baseUrl}/api/transfer/${fromProject}/${toProject}`,
+      { value: staffIDs }
+    );
     console.log("res>>>", res.data);
     if (res.data == "Move staff successfully") {
       return {
@@ -268,4 +333,31 @@ export const handleAddStaffToProject = async (staffs, projectID) => {
       );
     });
   } catch (error) {}
+};
+
+export const handleGetFreeProjectManager = async (time) => {
+  console.log("time in handleGetFreeProjectManager >>>", time);
+  let payload = {
+    value: time,
+  };
+  try {
+    console.log("payload>>>", payload);
+    let res = await axios.post(`${baseUrl}/api/staffManagerFree`, payload);
+    console.log("res>>>", res.data);
+    if (res.data != null) {
+      return {
+        errCode: 0,
+        PMs: res.data,
+        message: "Get free project manager successfully",
+      };
+    } else {
+      return {
+        errCode: 1,
+        PMs: [],
+        message: "Not have any free project manager",
+      };
+    }
+  } catch (error) {
+    console.log("Error get free project manager>>>", error);
+  }
 };

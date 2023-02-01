@@ -6,8 +6,8 @@ const initialState = {
   projectEnded: [],
   projectIncoming: [],
   allProjectName: [],
-  totalPageProjectInProgress: 3,
-  totalPageProjectEnded: 2,
+  totalPageProjectInProgress: 0,
+  totalPageProjectEnded: 0,
   totalPageProjectIncoming: 0,
 };
 const baseUrl = process.env.REACT_APP_JSON_API;
@@ -31,6 +31,20 @@ const productSliderSlice = createSlice({
       if (action.payload.allProjectName) {
         state.allProjectName = action.payload.allProjectName;
       }
+
+      if (action.payload.totalPageProjectInProgress) {
+        state.totalPageProjectInProgress =
+          action.payload.totalPageProjectInProgress;
+      }
+
+      if (action.payload.totalPageProjectEnded) {
+        state.totalPageProjectEnded = action.payload.totalPageProjectEnded;
+      }
+
+      if (action.payload.totalPageProjectIncoming) {
+        state.totalPageProjectIncoming =
+          action.payload.totalPageProjectIncoming;
+      }
     },
   },
 });
@@ -51,13 +65,28 @@ export const fetchProjects = (pageNum) => {
       );
       console.log("res2 >>> ", res2);
 
-      const res3 = await axios.get(`${baseUrl}/api/project`);
+      const res3 = await axios.get(
+        `${baseUrl}/api/projectInComing/page/${pageNum}`
+      );
       console.log("res3 >>> ", res3);
+      const res4 = await axios.get(`${baseUrl}/api/project`);
+      console.log("res4 >>> ", res4);
+
+      const res5 = await axios.get(`${baseUrl}/api/projectInProgress`);
+      console.log("res5 >>> ", res5);
+      const res6 = await axios.get(`${baseUrl}/api/projectEndedPage`);
+      console.log("res6 >>> ", res6);
+      const res7 = await axios.get(`${baseUrl}/api/projectInComingPage`);
+      console.log("res7 >>> ", res7);
 
       const res = {
         projectInprogress: res1.data,
         projectEnded: res2.data,
-        allProjectName: res3.data,
+        projectIncoming: res3.data,
+        allProjectName: res4.data,
+        totalPageProjectInProgress: res5.data,
+        totalPageProjectEnded: res6.data,
+        totalPageProjectIncoming: res7.data,
       };
       console.log("res >>> ", res);
       dispatch(setProjectSlider(res));
@@ -108,7 +137,7 @@ export const fetchProjectsIncoming = (pageNum) => {
     console.log("state:", getState());
     try {
       const res1 = await axios.get(
-        `${baseUrl}/api/projectInProgress/page/${pageNum}`
+        `${baseUrl}/api/projectInComing/page/${pageNum}`
         // `${baseUrl}/projectInProgress`
       );
       console.log("res1 >>> ", res1);

@@ -16,6 +16,7 @@ import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import CustomScrollbars from "../../../contain/CustomScrollBar";
 import { handleAddStaffToProject } from "../../../services/adminServices/AdminServices";
 import { fetchProjects } from "../../../redux/ProjectSlider";
+import { toast } from "react-toastify";
 
 function AddStaffsToProject() {
   const { projectId } = useParams();
@@ -98,7 +99,7 @@ function AddStaffsToProject() {
 
   const handleAddStaff = async () => {
     await handleAddStaffToProject(selectedStaffs, projectId);
-    alert("Add staffs successfully");
+    toast.success("Add staffs successfully");
     setSelectedStaffs([]);
     getStaffsAvailable();
     dispatch(fetchProjects(1));

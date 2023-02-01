@@ -23,25 +23,25 @@ function NavLeft(props) {
         <NavItem className="nav-item">
           <NavLink className="nav-link" to="project">
             <LibraryBooksIcon />
-            Manage project
+            Manage Project
           </NavLink>
         </NavItem>
       </Nav>
 
-      <Nav className="nav-contain">
+      {/* <Nav className="nav-contain">
         <NavItem className="nav-item">
           <NavLink className="nav-link" to="leader">
             <GroupIcon />
             Manage Leader
           </NavLink>
         </NavItem>
-      </Nav>
+      </Nav> */}
 
       <Nav className="nav-contain">
         <NavItem className="nav-item">
           <NavLink className="nav-link" to="staff">
             <Diversity3Icon />
-            Manage staff
+            Manage Staff
           </NavLink>
         </NavItem>
       </Nav>
