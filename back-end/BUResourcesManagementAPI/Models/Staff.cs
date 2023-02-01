@@ -20,9 +20,9 @@ namespace BUResourcesManagementAPI.Models
 
         public Staff() { }
 
-        public Staff(String staffName, String password)
+        public Staff(int staffID, String password)
         {
-            StaffName = staffName;
+            StaffID = staffID;
             Password = password;
         }
 

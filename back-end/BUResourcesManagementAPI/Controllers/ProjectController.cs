@@ -551,19 +551,46 @@ namespace BUResourcesManagementAPI.Controllers
             {
                 if (!project.CheckValidProject()) return "Project's information is invalid";
 
-                String query = @"INSERT INTO Project VALUES (@ProjectName, @Manager, @TimeStart, @TimeEnd);";
+                String query1 = @"INSERT INTO Project VALUES (@ProjectName, @Manager, @TimeStart, @TimeEnd);";
+                String query2 = @"SELECT TOP 1 ProjectID FROM Project ORDER BY ProjectID DESC;";
+                String query3 = @"INSERT INTO WorkOn VALUES (@ProjectID, @StaffID, @Position, @TimeStart, @TimeEnd);";
 
-                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
-                using (var command = new SqlCommand(query, connection))
+                var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString);
+
+                var command1 = new SqlCommand(query1, connection);
+                var command2 = new SqlCommand(query2, connection);
+                var command3 = new SqlCommand(query3, connection);
+
+                connection.Open();
+
+                command1.Parameters.AddWithValue("@ProjectName", project.ProjectName);
+                command1.Parameters.AddWithValue("@Manager", int.Parse(project.Manager));
+                command1.Parameters.AddWithValue("@TimeStart", project.TimeStart);
+                command1.Parameters.AddWithValue("@TimeEnd", project.TimeEnd);
+                if (command1.ExecuteNonQuery() != 1) return "Create new project failed";
+
+                var reader = command2.ExecuteReader();
+                int projectID = 0;
+                if (reader.HasRows)
                 {
-                    connection.Open();
-                    command.Parameters.AddWithValue("@ProjectName", project.ProjectName);
-                    command.Parameters.AddWithValue("@Manager", int.Parse(project.Manager));
-                    command.Parameters.AddWithValue("@TimeStart", project.TimeStart);
-                    command.Parameters.AddWithValue("@TimeEnd", project.TimeEnd);
-                    if (command.ExecuteNonQuery() != 1) return "Create new project failed";
-                    else return "Create new project successfully";
+                    while (reader.Read())
+                    {
+                        projectID = reader.GetInt32(0);
+                    }
                 }
+                reader.Close();
+
+                Staff manager = new StaffController().Get(int.Parse(project.Manager));
+                command3.Parameters.AddWithValue("@ProjectID", projectID);
+                command3.Parameters.AddWithValue("@StaffID", manager.StaffID);
+                command3.Parameters.AddWithValue("@Position", int.Parse(new PositionController().GetPositionIDToString(manager.MainPosition)));
+                command3.Parameters.AddWithValue("@TimeStart", project.TimeEnd);
+                command3.Parameters.AddWithValue("@TimeEnd", project.TimeEnd);
+                if (command3.ExecuteNonQuery() != 1) return "Create new project failed";
+
+                connection.Close();
+                return "Create new project successfully";
+
             }
             catch (Exception ex)
             {

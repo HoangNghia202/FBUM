@@ -143,29 +143,31 @@ namespace BUResourcesManagementAPI.Controllers
 
         [HttpGet] // api/staffManagerFree
         [Route("api/staffManagerFree")]
-        public List<Staff> GetManagerFree()
+        public List<Staff> GetManagerFree([FromBody] Values time)
         {
             try
             {
+                String timeStart = time.Value.Split(',')[0].Trim();
+                String timeEnd = time.Value.Split(',')[1].Trim();
                 List<Staff> listStaff = null;
 
-                String query = @"SELECT StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition 
-                                FROM Staff, Role, Position
-                                WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND StaffID IN (
-                                SELECT StaffID FROM Staff, Role, Position
+                String query = @"SELECT StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition FROM Staff, Role, Position
                                 WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND RoleName = 'Project Manager' AND StaffID NOT IN (
-                                SELECT Staff.StaffID FROM Staff, WorkOn, Project 
-                                WHERE Staff.StaffID = WorkOn.StaffID AND 
-                                Project.ProjectID = WorkOn.ProjectID AND 
-                                WorkOn.WorkEnd = Project.TimeEnd AND 
-                                GETDATE() <= Project.TimeEnd AND 
-                                GETDATE() >= Project.TimeStart));";
+                                SELECT a.StaffID FROM 
+                                (SELECT WorkOn.ProjectID, StaffID, Position, WorkStart, WorkEnd, TimeStart, TimeEnd FROM WorkOn, Project WHERE WorkOn.ProjectID = Project.ProjectID) AS a
+                                WHERE 
+                                (
+                                ((a.WorkStart >= @TimeStart AND a.WorkStart < @TimeEnd) OR
+                                (a.WorkEnd > @TimeStart AND a.WorkEnd <= @TimeEnd) OR
+                                (a.WorkStart <= @TimeStart AND a.WorkEnd >= @TimeEnd)) AND a.WorkEnd = @TimeEnd));";
 
                 using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
                 using (var command = new SqlCommand(query, connection))
                 {
                     connection.Open();
                     command.CommandType = CommandType.Text;
+                    command.Parameters.AddWithValue("@TimeStart", timeStart);
+                    command.Parameters.AddWithValue("@TimeEnd", timeEnd);
                     var reader = command.ExecuteReader();
                     if (reader.HasRows)
                     {
