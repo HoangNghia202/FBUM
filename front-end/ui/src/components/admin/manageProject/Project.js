@@ -30,6 +30,7 @@ import {
   fetchProjects,
   fetchProjectsInprogress,
   fetchProjectsEnded,
+  fetchProjectsIncoming,
 } from "../../../redux/ProjectSlider";
 import PaginationOutlined from "./Pagination";
 import SearchAutoCompletePM from "./SearchAutoCompletePM";
@@ -168,8 +169,6 @@ function Project(props) {
               sx={{
                 borderBottom: 1,
                 borderColor: "divider",
-                position: "sticky",
-                top: "100px",
               }}
             >
               <TabList
@@ -342,9 +341,9 @@ function Project(props) {
                 })}
                 <div className="d-flex justify-content-center my-5 col-md-11 ">
                   <PaginationOutlined
-                    totalPage={props.projects.totalPageProjectInProgress}
+                    totalPage={props.projects.totalPageProjectIncoming}
                     onChangePage={(pageNum) =>
-                      dispatch(fetchProjectsInprogress(pageNum))
+                      dispatch(fetchProjectsIncoming(pageNum))
                     }
                   />
                 </div>

@@ -56,12 +56,10 @@ export const fetchProjects = (pageNum) => {
     try {
       const res1 = await axios.get(
         `${baseUrl}/api/projectInProgress/page/${pageNum}`
-        // `${baseUrl}/projectInProgress`
       );
       console.log("res1 >>> ", res1);
       const res2 = await axios.get(
         `${baseUrl}/api/projectEnded/page/${pageNum}`
-        // `${baseUrl}/projectEnded`
       );
       console.log("res2 >>> ", res2);
 
@@ -73,11 +71,11 @@ export const fetchProjects = (pageNum) => {
       console.log("res4 >>> ", res4);
 
       const res5 = await axios.get(`${baseUrl}/api/projectInProgress`);
-      console.log("res5 >>> ", res5);
+      console.log("res5 >>> ", res5.data);
       const res6 = await axios.get(`${baseUrl}/api/projectEndedPage`);
-      console.log("res6 >>> ", res6);
+      console.log("res6 >>> ", res6.data);
       const res7 = await axios.get(`${baseUrl}/api/projectInComingPage`);
-      console.log("res7 >>> ", res7);
+      console.log("res7 >>> ", res7.data);
 
       const res = {
         projectInprogress: res1.data,
@@ -106,7 +104,8 @@ export const fetchProjectsInprogress = (pageNum) => {
         // `${baseUrl}/projectInProgress`
       );
       console.log("res >>> ", res.data);
-      dispatch(setProjectSlider(res.data));
+      let result = { projectInprogress: res.data };
+      dispatch(setProjectSlider(result));
     } catch (error) {
       throw error;
     }
@@ -123,8 +122,8 @@ export const fetchProjectsEnded = (pageNum) => {
         // `${baseUrl}/projectEnded`
       );
       console.log("fetch project ended >>> ", res.data);
-
-      dispatch(setProjectSlider(res.data));
+      let result = { projectEnded: res.data };
+      dispatch(setProjectSlider(result));
     } catch (error) {
       throw error;
     }
@@ -140,11 +139,11 @@ export const fetchProjectsIncoming = (pageNum) => {
         `${baseUrl}/api/projectInComing/page/${pageNum}`
         // `${baseUrl}/projectInProgress`
       );
-      console.log("res1 >>> ", res1);
+      console.log("res1 >>> ", res1.data);
 
-      const res = { projectInprogress: res1.data };
-      console.log("res >>> ", res);
-      dispatch(setProjectSlider(res));
+      const result = { projectIncoming: res1.data };
+      console.log("res >>> ", result);
+      dispatch(setProjectSlider(result));
     } catch (error) {
       throw error;
     }

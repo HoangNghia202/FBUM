@@ -66,7 +66,7 @@ function NavBar(props) {
         <Collapse isOpen={isOpen} navbar>
           <Nav className="mr-auto" navbar>
             <NavItem>
-              <NavLink className="nav-link" end to="/">
+              <NavLink className="nav-link" end to="/home">
                 Home
               </NavLink>
             </NavItem>

@@ -12,7 +12,14 @@ import Modal from "react-bootstrap/Modal";
 import TableStaff from "./TableStaff";
 import axios from "axios";
 import TextField from "@mui/material/TextField";
+import Alert from "@mui/material/Alert";
+import Button from "@mui/material/Button";
 
+import {
+  handleCreateNewStaff,
+  handleDeleteStaff,
+} from "../../../services/adminServices/AdminServices";
+import { toast } from "react-toastify";
 const baseUrl = process.env.REACT_APP_JSON_API;
 function ManageStaff(props) {
   const [value, setValue] = React.useState("1");
@@ -43,11 +50,30 @@ function ManageStaff(props) {
     allBA: [],
   });
 
-  const [show, setShow] = React.useState(false);
-  const handleClose = () => React.setShow(false);
-  const handleShow = () => {
-    setShow(true);
+  const [newStaff, setNewStaff] = React.useState({
+    StaffName: "",
+    Password: "",
+    ConfirmPassword: "",
+    StaffRole: "1",
+    MainPosition: "1",
+    Level: "1",
+  });
+
+  const [errValidate, setErrValidate] = React.useState({ errMessage: "" });
+
+  const handleConfirmPassword = () => {
+    if (newStaff.Password !== newStaff.ConfirmPassword) {
+      setErrValidate({
+        errMessage: "Password and confirm password are not match",
+      });
+    } else {
+      setErrValidate({ errMessage: "" });
+    }
   };
+
+  const [show, setShow] = React.useState(false);
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
 
   const getAllStaff = async () => {
     let res = await axios.get(`${baseUrl}/api/staff`);
@@ -140,6 +166,14 @@ function ManageStaff(props) {
     }
   };
 
+  const handleChangeInputModal = (e) => {
+    const { name, value } = e.target;
+    setNewStaff({
+      ...newStaff,
+      [name]: value,
+    });
+  };
+  console.log("newStaff>>>", newStaff);
   React.useEffect(() => {
     getAllStaff();
     getFreeStaffs();
@@ -183,7 +217,43 @@ function ManageStaff(props) {
     }
   };
 
-  const handleSubmitForm = () => {};
+  const createNewStaff = async () => {
+    console.log("run into createNewStaff");
+
+    delete newStaff.ConfirmPassword;
+    console.log("newStaff>>>", newStaff);
+    let res = await handleCreateNewStaff(newStaff);
+    console.log("res>>>", res);
+    if (res.errCode === 0) {
+      toast.success(res.message);
+      handleClose();
+      getAllStaff();
+      getFreeStaffs();
+      getInProjectStaffs();
+      setNewStaff({
+        StaffName: "",
+        Password: "",
+        ConfirmPassword: "",
+        StaffRole: "1",
+        MainPosition: "1",
+        Level: "1",
+      });
+    } else {
+      toast.error(res.message);
+    }
+  };
+
+  const deleteStaff = async (id) => {
+    let res = await handleDeleteStaff(id);
+    if (res.errCode === 0) {
+      toast.success(res.message);
+      getAllStaff();
+      getFreeStaffs();
+      getInProjectStaffs();
+    } else {
+      toast.error(res.message);
+    }
+  };
 
   return (
     <div className="manage-project col-9">
@@ -239,6 +309,7 @@ function ManageStaff(props) {
                 selectType={selectType.selectTypeFreeStaff}
                 changeSelectType={handleChangeSelectType}
                 itemType="freeStaff"
+                deleteStaff={(id) => deleteStaff(id)}
               />
             }
           </TabPanel>
@@ -249,6 +320,7 @@ function ManageStaff(props) {
                 selectType={selectType.selectTypeInProjectStaff}
                 changeSelectType={handleChangeSelectType}
                 itemType="inProjectStaff"
+                deleteStaff={(id) => deleteStaff(id)}
               />
             }
           </TabPanel>
@@ -260,28 +332,52 @@ function ManageStaff(props) {
           <Modal.Title>Create new staff</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <form onSubmit={(event) => handleSubmitForm(event)}>
+          <form>
             <div className="row">
-              <div className="col-6">
+              <div className="col-12">
                 <TextField
                   className=" my-2"
                   label="Staff Name"
                   variant="outlined"
                   size="small"
-                  name="projectName"
+                  name="StaffName"
                   fullWidth
+                  value={newStaff.StaffName}
+                  onChange={(event) => handleChangeInputModal(event)}
                 />
               </div>
-              <div className="col-6">
+              <div className="col-12">
                 <TextField
                   className=" my-2"
                   label="Password"
                   variant="outlined"
                   size="small"
-                  name="projectName"
+                  name="Password"
                   fullWidth
                   type={"password"}
+                  value={newStaff.Password}
+                  onChange={(event) => handleChangeInputModal(event)}
                 />
+              </div>
+
+              <div className="col-12">
+                <TextField
+                  className=" my-2"
+                  label="Confirm Password"
+                  variant="outlined"
+                  size="small"
+                  name="ConfirmPassword"
+                  fullWidth
+                  type={"password"}
+                  value={newStaff.ConfirmPassword}
+                  onChange={(event) => handleChangeInputModal(event)}
+                  onBlur={() => handleConfirmPassword()}
+                />
+              </div>
+              <div className="col-12 mt-1">
+                {errValidate && errValidate.errMessage && (
+                  <Alert severity="error"> {errValidate.errMessage} </Alert>
+                )}
               </div>
 
               <div className="row my-3 text-center">
@@ -290,10 +386,15 @@ function ManageStaff(props) {
                     {" "}
                     <b>Role</b>{" "}
                   </label>
-                  <select class="form-select">
-                    <option value="1">One</option>
-                    <option value="2">Two</option>
-                    <option value="3">Three</option>
+                  <select
+                    class="form-select"
+                    name="StaffRole"
+                    onChange={(event) => handleChangeInputModal(event)}
+                    value={newStaff.StaffRole}
+                  >
+                    <option value="1">Admin</option>
+                    <option value="2">Project Manager</option>
+                    <option value="3">Staff</option>
                   </select>
                 </div>
                 <div className="col-4">
@@ -301,10 +402,15 @@ function ManageStaff(props) {
                     {" "}
                     <b>Main Position</b>{" "}
                   </label>
-                  <select class="form-select">
-                    <option value="1">One</option>
-                    <option value="2">Two</option>
-                    <option value="3">Three</option>
+                  <select
+                    class="form-select"
+                    name="MainPosition"
+                    value={newStaff.MainPosition}
+                    onChange={(event) => handleChangeInputModal(event)}
+                  >
+                    <option value="1">Business Analysis</option>
+                    <option value="2">Software Developer</option>
+                    <option value="3">Software Tester</option>
                   </select>
                 </div>
                 <div className="col-4">
@@ -312,7 +418,12 @@ function ManageStaff(props) {
                     {" "}
                     <b>Level</b>{" "}
                   </label>
-                  <select class="form-select">
+                  <select
+                    class="form-select"
+                    name="Level"
+                    value={newStaff.Level}
+                    onChange={(event) => handleChangeInputModal(event)}
+                  >
                     <option value="1">One</option>
                     <option value="2">Two</option>
                     <option value="3">Three</option>
@@ -321,6 +432,17 @@ function ManageStaff(props) {
               </div>
             </div>
           </form>
+          <div>
+            <Button
+              variant="contained"
+              color="success"
+              className="mt-3"
+              disabled={errValidate.errMessage ? true : false}
+              onClick={() => createNewStaff()}
+            >
+              Create
+            </Button>
+          </div>
         </Modal.Body>
       </Modal>
     </div>

@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import SearchAutoComplete from "./SearchAutoComplete";
 function TableStaff(props) {
   console.log("props>>>>", props);
-  const { staffs, selectType, changeSelectType, itemType } = props;
+  const { staffs, selectType, changeSelectType, itemType, deleteStaff } = props;
   const [listStaffsToDisPlay, setListStaffsToDisPlay] = useState([]);
   const [staffsToDisPlay, setStaffsToDisPlay] = useState([]);
   const [searchData, setSearchData] = useState([]);
@@ -89,6 +89,7 @@ function TableStaff(props) {
             console.log("e.target.value", e.target.value);
             changeSelectType(itemType, e.target.value);
           }}
+          value={selectType}
         >
           <option checked value="1">
             Project Manager
@@ -116,6 +117,9 @@ function TableStaff(props) {
             <th scope="col">Name</th>
             <th scope="col">Position</th>
             <th scope="col">level</th>
+            {(itemType === "freeStaff" || itemType === "inProjectStaff") && (
+              <th scope="col">Action</th>
+            )}
             {/* <th scope="col">Action</th> */}
           </tr>
         </thead>
@@ -128,11 +132,45 @@ function TableStaff(props) {
                 <td>{item.StaffName}</td>
                 <td>{item.MainPosition}</td>
                 <td>{item.Level}</td>
-                {/* <td>
-                  <Button variant="outlined" color="error">
-                    Delete
-                  </Button>
-                </td> */}
+                {itemType === "freeStaff" && (
+                  <td>
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      size="small"
+                      style={{ marginRight: "5px" }}
+                      onClick={() => {
+                        let confirm = window.confirm(
+                          "Are you sure to delete this staff? "
+                        );
+                        if (confirm) {
+                          deleteStaff(item.StaffID);
+                        }
+                      }}
+                    >
+                      Delete
+                    </Button>
+                  </td>
+                )}
+
+                {itemType === "inProjectStaff" && (
+                  <td>
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      size="small"
+                      style={{ marginRight: "5px" }}
+                      onClick={() => {
+                        let confirm = window.confirm(
+                          "Are you sure to delete this staff? This action will also delete this staff from project he/she is working on."
+                        );
+                        deleteStaff(item.StaffID);
+                      }}
+                    >
+                      Delete
+                    </Button>
+                  </td>
+                )}
               </tr>
             );
           })}

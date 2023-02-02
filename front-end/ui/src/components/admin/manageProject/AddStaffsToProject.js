@@ -6,7 +6,7 @@ import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import Checkbox from "@mui/material/Checkbox";
 import { useDispatch } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { getStaffsAvailableForAdding } from "../../../services/adminServices/AdminServices";
 import { Button } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
@@ -27,8 +27,9 @@ function AddStaffsToProject() {
   const [testers, setTesters] = useState([]);
   const [selectedStaffs, setSelectedStaffs] = useState([]);
   const [value, setValue] = useState("1");
-
+  const [callUseEffect, setCallUseEffect] = useState(1);
   const dispatch = useDispatch();
+  let navigate = useNavigate();
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -39,14 +40,10 @@ function AddStaffsToProject() {
   };
 
   const getStaffsAvailable = async () => {
+    console.log("run into get available staff");
     let res = await getStaffsAvailableForAdding(projectId);
     setAvailableStaffs(res);
   };
-
-  useEffect(() => {
-    console.log("runinto get available staff");
-    getStaffsAvailable();
-  }, []);
 
   const separateStaffs = (staffs) => {
     let projectManagers = [];
@@ -74,6 +71,10 @@ function AddStaffsToProject() {
   };
 
   useEffect(() => {
+    getStaffsAvailable();
+  }, [callUseEffect]);
+
+  useEffect(() => {
     separateStaffs(availableStaffs);
   }, [availableStaffs]);
 
@@ -82,6 +83,7 @@ function AddStaffsToProject() {
   console.log("developers", developers);
   console.log("businessAnalysts", businessAnalysts);
   console.log("testers", testers);
+  console.log("selectedStaffs", selectedStaffs);
 
   const handleChoseStaff = (staff) => {
     setSelectedStaffs([...selectedStaffs, staff]);
@@ -98,10 +100,17 @@ function AddStaffsToProject() {
   };
 
   const handleAddStaff = async () => {
-    await handleAddStaffToProject(selectedStaffs, projectId);
-    toast.success("Add staffs successfully");
-    setSelectedStaffs([]);
-    getStaffsAvailable();
+    console.log("selectedStaffs in handle add", selectedStaffs);
+    let res = await handleAddStaffToProject(selectedStaffs, projectId);
+    console.log("res!", res);
+
+    if (res.errCode === 0) {
+      setCallUseEffect(callUseEffect + 1);
+      setSelectedStaffs([]);
+      toast.success("Add staffs successfully");
+    } else {
+      toast.error("Add staffs failed");
+    }
     dispatch(fetchProjects(1));
   };
   return (
@@ -329,7 +338,7 @@ function AddStaffsToProject() {
                 border: "1px solid #ccc",
               }}
             >
-              <h5>List Will Add</h5>
+              <h5>List Will Add To project {}</h5>
               {selectedStaffs.length > 0 &&
                 selectedStaffs.map((staff) => (
                   <Box

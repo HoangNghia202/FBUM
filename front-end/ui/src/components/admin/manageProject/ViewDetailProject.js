@@ -112,14 +112,17 @@ function ViewDetailProject(props) {
             >
               Add Member
             </Button>
-            <Button
-              variant="contained"
-              color="error"
-              className="my-1"
-              onClick={() => handleClickDelete(projectId)}
-            >
-              Delete project
-            </Button>
+            {Date.parse(mainProject.TimeEnd) > Date.now() &&
+              Date.parse(mainProject.TimeStart) > Date.now() && (
+                <Button
+                  variant="contained"
+                  color="error"
+                  className="my-1"
+                  onClick={() => handleClickDelete(projectId)}
+                >
+                  Delete project
+                </Button>
+              )}
             <Button
               variant="contained"
               color="warning"

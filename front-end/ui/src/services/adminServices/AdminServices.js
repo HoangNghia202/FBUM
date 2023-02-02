@@ -325,13 +325,24 @@ export const transferStaffBetweenProject = async (
   }
 };
 
-export const handleAddStaffToProject = async (staffs, projectID) => {
+export const handleAddStaffToProject = async (staffs, projectId) => {
   try {
-    staffs.forEach((element) => {
-      axios.put(
-        `${baseUrl}/api/insertToProject/${projectID}/${element.StaffID}`
-      );
-    });
+    if (staffs.length > 0) {
+      await staffs.forEach((element) => {
+        axios.put(
+          `${baseUrl}/api/insertToProject/${projectId}/${element.StaffID}`
+        );
+      });
+      return {
+        errCode: 0,
+        message: "Add staffs to project successfully",
+      };
+    } else {
+      return {
+        errCode: 1,
+        message: "Add staffs to project failed",
+      };
+    }
   } catch (error) {}
 };
 
@@ -359,5 +370,53 @@ export const handleGetFreeProjectManager = async (time) => {
     }
   } catch (error) {
     console.log("Error get free project manager>>>", error);
+  }
+};
+
+export const handleCreateNewStaff = async (staff) => {
+  try {
+    let res = await axios.post(`${baseUrl}/api/createNewStaff`, staff);
+    console.log("res>>> ", res.data);
+    if (res.data == "Create new staff successfully") {
+      return {
+        errCode: 0,
+        message: "Create staff successfully",
+      };
+    }
+    if (res.data == "Create new staff failed") {
+      return {
+        errCode: 1,
+        message: "Create staff failed",
+      };
+    }
+    if (res.data == "Staff's information is invalid") {
+      return {
+        errCode: 2,
+        message: "Staff's information is invalid",
+      };
+    }
+  } catch (error) {
+    console.log("error create staff>>>", error);
+  }
+};
+
+export const handleDeleteStaff = async (staffID) => {
+  try {
+    let res = await axios.delete(`${baseUrl}/api/deleteStaff/${staffID}`);
+    console.log("res>>> ", res.data);
+    if (res.data == "Delete staff successfully") {
+      return {
+        errCode: 0,
+        message: "Delete staff successfully",
+      };
+    }
+    if (res.data == "Delete staff failed") {
+      return {
+        errCode: 1,
+        message: "Delete staff failed",
+      };
+    }
+  } catch (error) {
+    console.log("error delete staff>>>", error);
   }
 };
