@@ -19,17 +19,28 @@ import HomePage from "./components/HomePage";
 import CustomScrollbars from "./contain/CustomScrollBar";
 import TransferList from "./components/admin/manageProject/TransferMember";
 import AddStaffsToProject from "./components/admin/manageProject/AddStaffsToProject";
-
+import {
+  fetchAllStaff,
+  fetchInProjectStaff,
+  fetchFreeStaff,
+} from "./redux/StaffSlider";
 function App() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const userLogin = useSelector((state) => state.userSlider);
   const projects = useSelector((state) => state.projectSlider);
-  const [allProjects, setAllProjects] = useState();
+  const staffs = useSelector((state) => state.staffSlider);
+
   console.log("userLogin: ", userLogin);
   useEffect(() => {
     dispatch(fetchProjects(1));
+    dispatch(fetchAllStaff());
+    dispatch(fetchInProjectStaff());
+    dispatch(fetchFreeStaff());
   }, []);
+
+  console.log("staffs in app: ", staffs);
+
   console.log("projects in app: ", projects);
 
   return (
@@ -60,7 +71,7 @@ function App() {
               />
 
               <Route path="leader" element={<ManageLeader />} />
-              <Route path="staff" element={<ManageStaff />} />
+              <Route path="staff" element={<ManageStaff staffs={staffs} />} />
             </Route>
             <Route path="/login" element={<LoginPage />}></Route>
 

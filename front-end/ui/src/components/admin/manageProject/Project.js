@@ -39,7 +39,7 @@ import { toast } from "react-toastify";
 function Project(props) {
   const dispatch = useDispatch();
   console.log("props >>>", props);
-  const projects = props.projects;
+  const { projects } = props;
 
   const [projectEnded, setProjectEnded] = useState([]);
   const [projectInprogress, setProjectInprogress] = useState([]);
@@ -56,14 +56,12 @@ function Project(props) {
   const [PMInNewProject, setPMInNewProject] = useState({});
 
   useEffect(() => {
-    if (projects) {
-      setProjectEnded(projects.projectEnded);
-      setProjectEndedToDisPlay(projects.projectEnded);
-      setProjectInprogress(projects.projectInprogress);
-      setProjectInprogressToDisPlay(projects.projectInprogress);
-      setProjectIncoming(projects.projectIncoming);
-      setProjectIncomingToDisPlay(projects.projectIncoming);
-    }
+    setProjectEnded(projects.projectEnded);
+    setProjectEndedToDisPlay(projects.projectEnded);
+    setProjectInprogress(projects.projectInprogress);
+    setProjectInprogressToDisPlay(projects.projectInprogress);
+    setProjectIncoming(projects.projectIncoming);
+    setProjectIncomingToDisPlay(projects.projectIncoming);
   }, [projects]);
 
   console.log("projectEnded", projectEnded);
@@ -476,7 +474,7 @@ function Project(props) {
                 }}
               />
             </div>
-            <div>
+            <div className="my-2">
               <Button
                 variant="warning"
                 onClick={() => getFreeProjectManager()}
@@ -487,13 +485,15 @@ function Project(props) {
             </div>
 
             <div className="d-flex justify-content-start">
-              <SearchAutoCompletePM
-                searchData={FreeProjectManager}
-                setManager={async (result) => {
-                  console.log("result", result);
-                  setPMInNewProject(result);
-                }}
-              />
+              {FreeProjectManager.length > 0 && (
+                <SearchAutoCompletePM
+                  searchData={FreeProjectManager}
+                  setManager={async (result) => {
+                    console.log("result", result);
+                    setPMInNewProject(result);
+                  }}
+                />
+              )}
             </div>
             <div className="d-flex">
               <Button

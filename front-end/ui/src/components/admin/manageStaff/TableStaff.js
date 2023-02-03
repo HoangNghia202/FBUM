@@ -12,15 +12,27 @@ import Alert from "@mui/material/Alert";
 
 import { handleUpdateStaff } from "../../../services/adminServices/AdminServices";
 import { toast } from "react-toastify";
+import { useDispatch } from "react-redux";
+
+import {
+  fetchAllStaff,
+  fetchInProjectStaff,
+  fetchFreeStaff,
+} from "../../../redux/StaffSlider";
 
 function TableStaff(props) {
-  console.log("props>>>>", props);
+  console.log("props in table staff>>>>", props);
+  console.log(
+    "props in table staff > allPM>>>>",
+    props.staffs.allPM.find((item) => item.StaffID === 5)
+  );
+
+  const dispatch = useDispatch();
   const { staffs, selectType, changeSelectType, itemType, deleteStaff } = props;
   const [listStaffsToDisPlay, setListStaffsToDisPlay] = useState([]);
   const [staffsToDisPlay, setStaffsToDisPlay] = useState([]);
   const [searchData, setSearchData] = useState([]);
   const [searchResult, setSearchResult] = useState([]);
-
   const [showUpdate, setShowUpdate] = useState(false);
   const handleCloseUpdate = () => setShowUpdate(false);
   const handleShowUpdate = () => setShowUpdate(true);
@@ -39,7 +51,7 @@ function TableStaff(props) {
       setListStaffsToDisPlay(staffs.allBA);
       setStaffsToDisPlay(staffs.allBA);
     }
-  }, [selectType]);
+  }, [selectType, staffs]);
   console.log("staffsToDisPlay", staffsToDisPlay);
 
   useEffect(() => {
@@ -111,9 +123,11 @@ function TableStaff(props) {
     console.log("updateStaff", updateStaff);
     let res = await handleUpdateStaff(updateStaff);
     if (res.errCode === 0) {
-      await props.fetchStaff();
-      handleCloseUpdate();
       toast.success(res.message);
+      dispatch(fetchAllStaff());
+      dispatch(fetchFreeStaff());
+      dispatch(fetchInProjectStaff());
+      handleCloseUpdate();
     } else {
       toast.error(res.message);
     }
