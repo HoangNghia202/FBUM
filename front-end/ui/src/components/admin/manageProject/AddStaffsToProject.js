@@ -105,13 +105,13 @@ function AddStaffsToProject() {
     console.log("res!", res);
 
     if (res.errCode === 0) {
+      dispatch(fetchProjects(1));
       setCallUseEffect(callUseEffect + 1);
       setSelectedStaffs([]);
-      toast.success("Add staffs successfully");
+      toast.success(res.message);
     } else {
-      toast.error("Add staffs failed");
+      toast.error(res.message);
     }
-    dispatch(fetchProjects(1));
   };
   return (
     <>

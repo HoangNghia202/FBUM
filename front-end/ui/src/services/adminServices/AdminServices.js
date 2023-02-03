@@ -340,7 +340,7 @@ export const handleAddStaffToProject = async (staffs, projectId) => {
     } else {
       return {
         errCode: 1,
-        message: "Add staffs to project failed",
+        message: "Add staffs to project failed, empty list to add",
       };
     }
   } catch (error) {}

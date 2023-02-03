@@ -35,6 +35,7 @@ import {
 import PaginationOutlined from "./Pagination";
 import SearchAutoCompletePM from "./SearchAutoCompletePM";
 import { toast } from "react-toastify";
+import DynamicSearchProject from "./DynamicSearchProject";
 
 function Project(props) {
   const dispatch = useDispatch();
@@ -204,12 +205,16 @@ function Project(props) {
               )}
 
               <div>
-                <SearchAutoComplete
+                {/* <SearchAutoComplete
                   searchData={props.projects.projectInprogress}
                   setProject={(data) => setProjectInprogressToDisPlay(data)}
                   typeProject="projectInprogress"
                   searchType="project"
-                />
+                /> */}
+                <DynamicSearchProject
+                  setProject={(data) => setProjectInprogressToDisPlay(data)}
+                  typeProject="projectInprogress"
+                ></DynamicSearchProject>
               </div>
               <div className="processing-proj row d-flex flex-row align-items-stretch">
                 {projectInprogressToDisPlay.map((item) => {
@@ -289,12 +294,10 @@ function Project(props) {
               )}
 
               <div>
-                <SearchAutoComplete
-                  searchData={props.projects.projectIncoming}
+                <DynamicSearchProject
                   setProject={(data) => setProjectIncomingToDisPlay(data)}
                   typeProject="projectIncoming"
-                  searchType="project"
-                />
+                ></DynamicSearchProject>
               </div>
               <div className="incoming-proj row d-flex flex-row align-items-stretch">
                 {projectIncomingToDisPlay.map((item) => {
@@ -373,12 +376,10 @@ function Project(props) {
                 </div>
               )}
 
-              <SearchAutoComplete
-                searchData={projectEnded}
+              <DynamicSearchProject
                 setProject={(data) => setProjectEndedToDisPlay(data)}
-                Project="projectEnded"
-                searchType="project"
-              />
+                typeProject="projectEnded"
+              ></DynamicSearchProject>
               <div className="ended-proj row">
                 <div className="processing-proj row d-flex">
                   {projectEndedToDisPlay.length === 0 && (

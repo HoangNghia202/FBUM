@@ -42,6 +42,15 @@ function App() {
   console.log("staffs in app: ", staffs);
 
   console.log("projects in app: ", projects);
+  console.log(
+    "projects in app >> inprogress >> project 3: ",
+    projects.projectInprogress.find((item) => item.ProjectID === 3)
+  );
+
+  console.log(
+    "projects in app >> incoming >> project 9: ",
+    projects.projectIncoming.find((item) => item.ProjectID === 9)
+  );
 
   return (
     <div className="App">

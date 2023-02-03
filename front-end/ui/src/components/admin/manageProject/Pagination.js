@@ -16,6 +16,7 @@ export default function PaginationOutlined(props) {
     <Stack spacing={2}>
       <Pagination
         count={totalPage}
+        page={page}
         variant="outlined"
         color="secondary"
         onChange={(event, values) => {
