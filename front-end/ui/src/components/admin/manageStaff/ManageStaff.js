@@ -23,6 +23,7 @@ import { toast } from "react-toastify";
 const baseUrl = process.env.REACT_APP_JSON_API;
 function ManageStaff(props) {
   const [value, setValue] = React.useState("1");
+  const [callUseEffect, setCallUseEffect] = React.useState(1);
   const [selectType, setSelectType] = React.useState({
     selectTypeAllStaff: "1",
     selectTypeFreeStaff: "1",
@@ -71,9 +72,9 @@ function ManageStaff(props) {
     }
   };
 
-  const [show, setShow] = React.useState(false);
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
+  const [showCreate, setShowCreate] = React.useState(false);
+  const handleCloseCreate = () => setShowCreate(false);
+  const handleShowCreate = () => setShowCreate(true);
 
   const getAllStaff = async () => {
     let res = await axios.get(`${baseUrl}/api/staff`);
@@ -96,6 +97,8 @@ function ManageStaff(props) {
           staff.StaffRole == "Staff" &&
           staff.MainPosition == "Business Analysis"
       );
+      console.log("setAllStaff");
+
       setAllStaff({
         allPM: allPM,
         allDev: allDev,
@@ -127,6 +130,8 @@ function ManageStaff(props) {
           staff.StaffRole == "Staff" &&
           staff.MainPosition == "Business Analysis"
       );
+      console.log("setFreeStaff");
+
       setFreeStaff({
         allPM: freePM,
         allDev: freeDev,
@@ -157,6 +162,7 @@ function ManageStaff(props) {
           staff.StaffRole == "Staff" &&
           staff.MainPosition == "Business Analysis"
       );
+      console.log("setInProjectStaff");
       setInProjectStaff({
         allPM: inProjectPM,
         allDev: inProjectDev,
@@ -166,6 +172,16 @@ function ManageStaff(props) {
     }
   };
 
+  const fetchStaff = async () => {
+    await getAllStaff();
+    await getFreeStaffs();
+    await getInProjectStaffs();
+  };
+
+  React.useEffect(() => {
+    fetchStaff();
+  }, []);
+
   const handleChangeInputModal = (e) => {
     const { name, value } = e.target;
     setNewStaff({
@@ -174,11 +190,6 @@ function ManageStaff(props) {
     });
   };
   console.log("newStaff>>>", newStaff);
-  React.useEffect(() => {
-    getAllStaff();
-    getFreeStaffs();
-    getInProjectStaffs();
-  }, []);
 
   console.log("allStaff", allStaff);
   console.log("freeStaff", freeStaff);
@@ -226,10 +237,8 @@ function ManageStaff(props) {
     console.log("res>>>", res);
     if (res.errCode === 0) {
       toast.success(res.message);
-      handleClose();
-      getAllStaff();
-      getFreeStaffs();
-      getInProjectStaffs();
+      handleCloseCreate();
+      await fetchStaff();
       setNewStaff({
         StaffName: "",
         Password: "",
@@ -247,9 +256,7 @@ function ManageStaff(props) {
     let res = await handleDeleteStaff(id);
     if (res.errCode === 0) {
       toast.success(res.message);
-      getAllStaff();
-      getFreeStaffs();
-      getInProjectStaffs();
+      await fetchStaff();
     } else {
       toast.error(res.message);
     }
@@ -269,7 +276,7 @@ function ManageStaff(props) {
               size="small"
               color="secondary"
               aria-label="add"
-              onClick={() => handleShow()}
+              onClick={() => handleShowCreate()}
             >
               <AddIcon />
             </Fab>
@@ -299,6 +306,7 @@ function ManageStaff(props) {
                 selectType={selectType.selectTypeAllStaff}
                 changeSelectType={handleChangeSelectType}
                 itemType="allStaff"
+                fetchStaff={fetchStaff}
               />
             }
           </TabPanel>
@@ -327,7 +335,7 @@ function ManageStaff(props) {
         </TabContext>
       </Box>
 
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={showCreate} onHide={handleCloseCreate}>
         <Modal.Header closeButton>
           <Modal.Title>Create new staff</Modal.Title>
         </Modal.Header>

@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { handleLogin } from "../../services/userServices/UserServices";
 import { setUserSlider } from "../../redux/UserSlider";
 import { useDispatch } from "react-redux";
+import { useCookies } from "react-cookie";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 function LoginPage(props) {
@@ -15,6 +16,12 @@ function LoginPage(props) {
     password: "",
   });
   const [errLogin, setErrLogin] = useState("");
+  const [cookies, setCookie, removeCookie] = useCookies([
+    "userId",
+    "password",
+    "userName",
+    "role",
+  ]);
   const loginUser = async (event) => {
     event.preventDefault();
     console.log("run into login user");
@@ -23,8 +30,14 @@ function LoginPage(props) {
       console.log("res in login page >>> ", res);
       if (res.errCode === 0) {
         setErrLogin("");
+        setCookie("userId", user.userId, { path: "/" });
+        setCookie("password", user.password, { path: "/" });
+        setCookie("userName", res.data.StaffName, { path: "/" });
+        setCookie("role", res.data.StaffRole, { path: "/" });
         dispatch(setUserSlider(res.data));
-        navigate("/");
+        if (res.data.StaffRole === "Admin") {
+          navigate("/admin/project");
+        }
         toast.success("Login successfully!");
       } else {
         setErrLogin(res.message);
@@ -36,6 +49,16 @@ function LoginPage(props) {
     console.log("handle change");
     setUser({ ...user, [event.target.name]: event.target.value });
   };
+
+  const checkCookiesUser = async () => {
+    if (cookies.userId && cookies.password) {
+      navigate("/");
+    }
+  };
+
+  useEffect(() => {
+    checkCookiesUser();
+  }, []);
 
   return (
     <div className="wrapper">

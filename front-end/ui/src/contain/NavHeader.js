@@ -6,7 +6,6 @@ import {
   NavbarBrand,
   Nav,
   NavItem,
-  // NavLink,
   UncontrolledDropdown,
   DropdownToggle,
   DropdownMenu,
@@ -17,6 +16,7 @@ import { useState } from "react";
 import Avatar from "@mui/material/Avatar";
 import Stack from "@mui/material/Stack";
 import Box from "@mui/material/Box";
+import { useCookies } from "react-cookie";
 
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
@@ -28,10 +28,14 @@ import Tooltip from "@mui/material/Tooltip";
 import PersonAdd from "@mui/icons-material/PersonAdd";
 import Settings from "@mui/icons-material/Settings";
 import Logout from "@mui/icons-material/Logout";
+import { useNavigate } from "react-router-dom";
 
 function NavBar(props) {
+  const navigate = useNavigate();
   console.log("props>>>", props);
-
+  const [cookies, setCookie, removeCookie] = useCookies([
+    "userName, role, userId, password",
+  ]);
   const [isOpen, setIsOpen] = useState(false);
   const toggle = () => setIsOpen(!isOpen);
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -42,6 +46,16 @@ function NavBar(props) {
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  const handleLogout = () => {
+    removeCookie("userName");
+    removeCookie("role");
+    removeCookie("userId");
+    removeCookie("password");
+    handleClose();
+    navigate("/");
+  };
+
   return (
     <div
       className="navbar-header"
@@ -141,7 +155,7 @@ function NavBar(props) {
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       >
         <MenuItem onClick={handleClose}>
-          <Avatar /> {props.userInfo.StaffName}
+          <Avatar /> {cookies.userName}
         </MenuItem>
 
         <Divider />
@@ -157,7 +171,7 @@ function NavBar(props) {
           </ListItemIcon>
           Settings
         </MenuItem>
-        <MenuItem onClick={handleClose}>
+        <MenuItem onClick={() => handleLogout()}>
           <ListItemIcon>
             <Logout fontSize="small" />
           </ListItemIcon>

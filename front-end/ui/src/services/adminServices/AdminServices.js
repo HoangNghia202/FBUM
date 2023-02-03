@@ -420,3 +420,24 @@ export const handleDeleteStaff = async (staffID) => {
     console.log("error delete staff>>>", error);
   }
 };
+
+export const handleUpdateStaff = async (staff) => {
+  try {
+    let res = await axios.put(`${baseUrl}/api/updateStaff`, staff);
+    console.log("res>>>", res.data);
+    if (res.data == "Update staff successfully") {
+      return {
+        errCode: 0,
+        message: "Update staff successfully",
+      };
+    }
+    if (res.data == "Update staff failed") {
+      return {
+        errCode: 1,
+        message: "Update staff failed",
+      };
+    }
+  } catch (error) {
+    console.log("error update staff>>>", error);
+  }
+};
