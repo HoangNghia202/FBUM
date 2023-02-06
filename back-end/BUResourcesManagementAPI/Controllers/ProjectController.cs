@@ -20,6 +20,7 @@ namespace BUResourcesManagementAPI.Controllers
         [HttpGet] // api/project
         public List<Project> Get()
         {
+            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
             try
             {
                 List<Project> listProject = null;
@@ -59,6 +60,7 @@ namespace BUResourcesManagementAPI.Controllers
         [HttpGet] // api/project/{id}
         public Project Get(int id)
         {
+            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
             try
             {
                 String query = @"SELECT * FROM Project WHERE ProjectID = @ProjectID";
@@ -97,6 +99,7 @@ namespace BUResourcesManagementAPI.Controllers
         [Route("api/staffInProject/{id}")]
         public List<Staff> GetStaff(int id)
         {
+            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
             try
             {
                 List<Staff> listStaff = null;
@@ -147,6 +150,7 @@ namespace BUResourcesManagementAPI.Controllers
         [Route("api/project/staff_available/{id}")]
         public List<Staff> GetStaffAvailable(int id)
         {
+            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
             try
             {
                 List<Staff> listStaff = null;
@@ -202,6 +206,7 @@ namespace BUResourcesManagementAPI.Controllers
         [Route("api/project/staff_available/{fromID}/{toID}")]
         public List<Staff> GetStaffAvailable(int fromID, int toID)
         {
+            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
             try
             {
                 List<Staff> listStaff = null;
@@ -262,6 +267,7 @@ namespace BUResourcesManagementAPI.Controllers
         [Route("api/projectInProgress/page/{id}")]
         public List<Project> GetProjectInProgress(int id)
         {
+            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
             try
             {
                 List<Project> listProject = null;
@@ -306,6 +312,7 @@ namespace BUResourcesManagementAPI.Controllers
         [Route("api/projectInProgress")]
         public int GetProjectInProgressPage()
         {
+            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return 0;
             try
             {
                 int rows = 0;
@@ -343,6 +350,7 @@ namespace BUResourcesManagementAPI.Controllers
         [Route("api/projectEnded/page/{id}")]
         public List<Project> GetProjectEnded(int id)
         {
+            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
             try
             {
                 List<Project> listProject = null;
@@ -387,6 +395,7 @@ namespace BUResourcesManagementAPI.Controllers
         [Route("api/projectEndedPage")]
         public int GetProjectEndedPage()
         {
+            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return 0;
             try
             {
                 int rows = 0;
@@ -424,6 +433,7 @@ namespace BUResourcesManagementAPI.Controllers
         [Route("api/projectInComing/page/{id}")]
         public List<Project> GetProjectInComing(int id)
         {
+            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
             try
             {
                 List<Project> listProject = null;
@@ -468,6 +478,7 @@ namespace BUResourcesManagementAPI.Controllers
         [Route("api/projectInComingPage")]
         public int GetProjectInComingPage()
         {
+            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return 0;
             try
             {
                 int rows = 0;
@@ -505,6 +516,7 @@ namespace BUResourcesManagementAPI.Controllers
         [Route("api/project/search/{keyword}")]
         public List<Project> Search(String keyword)
         {
+            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
             try
             {
                 List<Project> listProject = null;
@@ -547,6 +559,7 @@ namespace BUResourcesManagementAPI.Controllers
         [Route("api/createProject")]
         public String Post(Project project)
         {
+            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return "Can't access this resource";
             try
             {
                 if (!project.CheckValidProject()) return "Project's information is invalid";
@@ -602,6 +615,7 @@ namespace BUResourcesManagementAPI.Controllers
         [Route("api/transfer/{fromId}/{toId}")]
         public String MoveStaff(int fromID, int toID, [FromBody] Values staffIDs)
         {
+            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return "Can't access this resource";
             try
             {
                 String[] ids = staffIDs.Value.Split(',');
@@ -623,6 +637,7 @@ namespace BUResourcesManagementAPI.Controllers
         [Route("api/insertToProject/{projectID}/{staffID}")]
         public String PutStaff(int projectID, int staffID)
         {
+            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return "Can't access this resource";
             try
             {
                 Project project = Get(projectID);
@@ -665,6 +680,7 @@ namespace BUResourcesManagementAPI.Controllers
         [Route("api/deleteProject/{id}")]
         public String Delete(int id)
         {
+            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return "Can't access this resource";
             try
             {
                 String query1 = @"DELETE FROM WorkOn WHERE ProjectID = @ProjectID;";
@@ -691,6 +707,7 @@ namespace BUResourcesManagementAPI.Controllers
         [Route("api/deleteStaffInProject/{projectID}/{staffID}")]
         public String Delete(int projectID, int staffID)
         {
+            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return "Can't access this resource";
             try
             {
                 Project project = Get(projectID);

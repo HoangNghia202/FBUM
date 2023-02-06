@@ -17,7 +17,8 @@ namespace BUResourcesManagementAPI.Models
         public String StaffRole { get; set; }
         public int Level { get; set; }
         public String MainPosition { get; set; }
-
+        public String JWTToken { get; set; }
+        
         public Staff() { }
 
         public Staff(int staffID, String password)
@@ -43,6 +44,16 @@ namespace BUResourcesManagementAPI.Models
             StaffRole = staffRole;
             Level = level;
             MainPosition = mainPosition;
+        }
+
+        public Staff(int staffID, String staffName, String staffRole, int level, String mainPosition, String jwtToken)
+        {
+            StaffID = staffID;
+            StaffName = staffName;
+            StaffRole = staffRole;
+            Level = level;
+            MainPosition = mainPosition;
+            JWTToken = jwtToken;
         }
 
         public bool CheckValidStaff()

@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Security.Claims;
 
 namespace BUResourcesManagementAPI.TokenAuthentication
 {
-    internal interface ITokenManager
+    public interface ITokenManager
     {
+        bool Authenticate(int staffID, string password);
+        string NewToken(int staffID);
+        bool VerifyToken(string token);
     }
 }

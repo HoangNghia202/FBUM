@@ -10,12 +10,14 @@ using System.Web.Http;
 using BUResourcesManagementAPI.Models;
 using System.Web.ModelBinding;
 using Antlr.Runtime.Misc;
+using BUResourcesManagementAPI.TokenAuthentication;
 
 namespace BUResourcesManagementAPI.Controllers
 {
     public class StaffController : ApiController
     {
         [HttpGet] // api/staff
+        [Route("api/staff")]
         public List<Staff> Get()
         {
             try
@@ -97,17 +99,19 @@ namespace BUResourcesManagementAPI.Controllers
             }
         }
 
-        [HttpGet] // api/staff/search/{keyword}
-        [Route("api/staff/search/{keyword}")]
-        public List<Staff> Search(String keyword)
+        [HttpGet] // api/staff/search/{keyword}/{page}
+        [Route("api/staff/search/{keyword}/{page}")]
+        public List<Staff> Search(String keyword, int page)
         {
+            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
             try
             {
                 List<Staff> listStaff = null;
 
-                String query = @"SELECT StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition 
-                                FROM Staff, Role, Position
-                                WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND StaffName LIKE @Keyword";
+                String query = @"WITH NewTable AS (SELECT ROW_NUMBER() OVER(ORDER BY StaffName) AS RowNumber, StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition 
+                                FROM Staff, Role, Position 
+                                WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND StaffName LIKE @Keyword) 
+                                SELECT * FROM NewTable WHERE RowNumber BETWEEN @Start AND @End;";
 
                 using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
                 using (var command = new SqlCommand(query, connection))
@@ -115,18 +119,20 @@ namespace BUResourcesManagementAPI.Controllers
                     connection.Open();
                     command.CommandType = CommandType.Text;
                     command.Parameters.AddWithValue("@Keyword", "%" + keyword + "%");
+                    command.Parameters.AddWithValue("@Start", (page - 1) * 10 + 1);
+                    command.Parameters.AddWithValue("@End", page * 10);
                     var reader = command.ExecuteReader();
                     if (reader.HasRows)
                     {
                         listStaff = new List<Staff>();
                         while (reader.Read())
                         {
-                            int staffID = reader.GetInt32(0);
-                            String staffName = reader.GetString(1);
-                            String password = reader.GetString(2);
-                            String staffRole = reader.GetString(3);
-                            int level = reader.GetInt32(4);
-                            String mainPosition = reader.GetString(5);
+                            int staffID = reader.GetInt32(1);
+                            String staffName = reader.GetString(2);
+                            String password = reader.GetString(3);
+                            String staffRole = reader.GetString(4);
+                            int level = reader.GetInt32(5);
+                            String mainPosition = reader.GetString(6);
                             listStaff.Add(new Staff(staffID, staffName, password, staffRole, level, mainPosition));
                         }
                     }
@@ -141,10 +147,53 @@ namespace BUResourcesManagementAPI.Controllers
             }
         }
 
+        [HttpGet] // api/staff/search/{keyword}
+        [Route("api/staff/search/{keyword}")]
+        public int SearchPage(String keyword)
+        {
+            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return 0;
+            try
+            {
+                int rows = 0;
+
+                String query = @"WITH NewTable AS (SELECT ROW_NUMBER() OVER(ORDER BY StaffName) AS RowNumber, StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition 
+                                FROM Staff, Role, Position 
+                                WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND StaffName LIKE @Keyword) 
+                                SELECT COUNT(*) FROM NewTable;";
+
+                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    command.CommandType = CommandType.Text;
+                    command.Parameters.AddWithValue("@Keyword", "%" + keyword + "%");
+                    var reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            rows = reader.GetInt32(0);
+                            if (rows % 10 == 0) return rows / 10;
+                            else return rows / 10 + 1;
+
+                        }
+                    }
+                    connection.Close();
+                }
+
+                return rows;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         [HttpGet] // api/staffFree
         [Route("api/staffFree")]
         public List<Staff> GetFreeStaff()
         {
+            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
             try
             {
                 List<Staff> listStaff = null;
@@ -189,40 +238,44 @@ namespace BUResourcesManagementAPI.Controllers
             }
         }
 
-        [HttpGet] // api/staffInProject
-        [Route("api/staffInProject")]
-        public List<Staff> GetInProjectStaff()
+        [HttpGet] // api/allStaffInProject/{id}
+        [Route("api/allStaffInProject/{id}")]
+        public List<Staff> GetInProjectStaff(int id)
         {
+            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
             try
             {
                 List<Staff> listStaff = null;
 
-                String query = @"SELECT StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition FROM Staff, Role, Position
+                String query = @"WITH NewTable AS (SELECT ROW_NUMBER() OVER(ORDER BY StaffName) AS RowNumber, StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition FROM Staff, Role, Position
                                 WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND StaffID IN (
                                 SELECT Staff.StaffID FROM Staff, WorkOn, Project 
                                 WHERE Staff.StaffID = WorkOn.StaffID AND 
                                 Project.ProjectID = WorkOn.ProjectID AND 
                                 WorkOn.WorkEnd = Project.TimeEnd AND 
                                 GETDATE() <= Project.TimeEnd AND 
-                                GETDATE() >= Project.TimeStart);";
+                                GETDATE() >= Project.TimeStart))
+								SELECT * FROM NewTable WHERE RowNumber BETWEEN @Start AND @End;";
 
                 using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
                 using (var command = new SqlCommand(query, connection))
                 {
                     connection.Open();
                     command.CommandType = CommandType.Text;
+                    command.Parameters.AddWithValue("@Start", id * 10 - 9);
+                    command.Parameters.AddWithValue("@End", id * 10);
                     var reader = command.ExecuteReader();
                     if (reader.HasRows)
                     {
                         listStaff = new List<Staff>();
                         while (reader.Read())
                         {
-                            int staffID = reader.GetInt32(0);
-                            String staffName = reader.GetString(1);
-                            String password = reader.GetString(2);
-                            String staffRole = reader.GetString(3);
-                            int level = reader.GetInt32(4);
-                            String mainPosition = reader.GetString(5);
+                            int staffID = reader.GetInt32(1);
+                            String staffName = reader.GetString(2);
+                            String password = reader.GetString(3);
+                            String staffRole = reader.GetString(4);
+                            int level = reader.GetInt32(5);
+                            String mainPosition = reader.GetString(6);
                             listStaff.Add(new Staff(staffID, staffName, password, staffRole, level, mainPosition));
                         }
                     }
@@ -237,10 +290,56 @@ namespace BUResourcesManagementAPI.Controllers
             }
         }
 
+        [HttpGet] // api/allStaffInProject
+        [Route("api/allStaffInProject")]
+        public int GetInProjectStaffPage()
+        {
+            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return 0;
+            try
+            {
+                int rows = 0;
+
+                String query = @"WITH NewTable AS (SELECT ROW_NUMBER() OVER(ORDER BY StaffName) AS RowNumber, StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition FROM Staff, Role, Position
+                                WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND StaffID IN (
+                                SELECT Staff.StaffID FROM Staff, WorkOn, Project 
+                                WHERE Staff.StaffID = WorkOn.StaffID AND 
+                                Project.ProjectID = WorkOn.ProjectID AND 
+                                WorkOn.WorkEnd = Project.TimeEnd AND 
+                                GETDATE() <= Project.TimeEnd AND 
+                                GETDATE() >= Project.TimeStart))
+								SELECT COUNT(*) FROM NewTable;";
+
+                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    command.CommandType = CommandType.Text;
+                    var reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            rows = reader.GetInt32(0);
+                            if (rows % 10 == 0) return rows / 10;
+                            else return rows / 10 + 1;
+                        }
+                    }
+                    connection.Close();
+                }
+
+                return rows;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         [HttpPost] // api/staffManagerFree
         [Route("api/staffManagerFree")]
         public List<Staff> GetManagerFree([FromBody] Values time)
         {
+            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
             try
             {
                 String timeStart = time.Value.Split(',')[0].Trim();
@@ -294,6 +393,7 @@ namespace BUResourcesManagementAPI.Controllers
         [Route("api/createNewStaff")]
         public String Post([FromBody] Staff staff)
         {
+            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return "Can't not access this resource";
             try
             {
                 if (!staff.CheckValidStaff()) return "Staff's information is invalid";
@@ -368,6 +468,7 @@ namespace BUResourcesManagementAPI.Controllers
         [Route("api/updateStaff")]
         public String Put([FromBody] Staff staff)
         {
+            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return "Can't not access this resource";
             try
             {
                 if (!staff.CheckValidStaff()) return "Staff's information is invalid";
@@ -404,6 +505,7 @@ namespace BUResourcesManagementAPI.Controllers
         [Route("api/deleteStaff/{id}")]
         public String Delete(int id)
         {
+            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return "Can't not access this resource";
             try
             {
                 String query1 = @"DELETE FROM WorkOn WHERE StaffID = @StaffID;";
