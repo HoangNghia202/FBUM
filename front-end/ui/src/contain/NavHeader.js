@@ -29,9 +29,14 @@ import PersonAdd from "@mui/icons-material/PersonAdd";
 import Settings from "@mui/icons-material/Settings";
 import Logout from "@mui/icons-material/Logout";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { logout } from "../redux/Auth";
 
 function NavBar(props) {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const userInfo = useSelector((state) => state.auth.authReducer.userInfo);
   console.log("props>>>", props);
   const [cookies, setCookie, removeCookie] = useCookies([
     "userName, role, userId, password",
@@ -53,6 +58,7 @@ function NavBar(props) {
     removeCookie("userId");
     removeCookie("password");
     handleClose();
+    dispatch(logout());
     navigate("/");
   };
 
@@ -114,7 +120,7 @@ function NavBar(props) {
               aria-haspopup="true"
               aria-expanded={open ? "true" : undefined}
             >
-              <Avatar alt={props.userInfo.StaffName} src=""></Avatar>
+              <Avatar alt={userInfo.StaffName} src=""></Avatar>
             </IconButton>
           </Tooltip>
         </div>
@@ -155,7 +161,7 @@ function NavBar(props) {
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       >
         <MenuItem onClick={handleClose}>
-          <Avatar /> {cookies.userName}
+          <Avatar /> {userInfo.StaffName}
         </MenuItem>
 
         <Divider />

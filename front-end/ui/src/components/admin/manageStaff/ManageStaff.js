@@ -40,27 +40,6 @@ function ManageStaff(props) {
     selectTypeInProjectStaff: "1",
   });
 
-  // const [allStaff, setAllStaff] = React.useState({
-  //   allPM: [],
-  //   allDev: [],
-  //   allTester: [],
-  //   allBA: [],
-  // });
-
-  // const [freeStaff, setFreeStaff] = React.useState({
-  //   allPM: [],
-  //   allDev: [],
-  //   allTester: [],
-  //   allBA: [],
-  // });
-
-  // const [inProjectStaff, setInProjectStaff] = React.useState({
-  //   allPM: [],
-  //   allDev: [],
-  //   allTester: [],
-  //   allBA: [],
-  // });
-
   const [newStaff, setNewStaff] = React.useState({
     StaffName: "",
     Password: "",
@@ -86,112 +65,6 @@ function ManageStaff(props) {
   const handleCloseCreate = () => setShowCreate(false);
   const handleShowCreate = () => setShowCreate(true);
 
-  // const getAllStaff = async () => {
-  //   let res = await axios.get(`${baseUrl}/api/staff`);
-  //   console.log("res>>>", res.data);
-  //   if (res.data) {
-  //     let allPM = res.data.filter(
-  //       (staff) => staff.StaffRole == "Project Manager"
-  //     );
-  //     let allDev = res.data.filter(
-  //       (staff) =>
-  //         staff.StaffRole == "Staff" &&
-  //         staff.MainPosition == "Software Developer"
-  //     );
-  //     let allTester = res.data.filter(
-  //       (staff) =>
-  //         staff.StaffRole == "Staff" && staff.MainPosition == "Software Tester"
-  //     );
-  //     let allBA = res.data.filter(
-  //       (staff) =>
-  //         staff.StaffRole == "Staff" &&
-  //         staff.MainPosition == "Business Analysis"
-  //     );
-  //     console.log("setAllStaff");
-
-  //     setAllStaff({
-  //       allPM: allPM,
-  //       allDev: allDev,
-  //       allTester: allTester,
-  //       allBA: allBA,
-  //     });
-  //   }
-  // };
-
-  // const getFreeStaffs = async () => {
-  //   let res = await axios.get(`${baseUrl}/api/staffFree`);
-  //   console.log("res>>>", res.data);
-  //   if (res.data) {
-  //     let freePM = res.data.filter(
-  //       (staff) =>
-  //         staff.StaffRole == "Project Manager" && staff.ProjectId == null
-  //     );
-  //     let freeDev = res.data.filter(
-  //       (staff) =>
-  //         staff.StaffRole == "Staff" &&
-  //         staff.MainPosition == "Software Developer"
-  //     );
-  //     let freeTester = res.data.filter(
-  //       (staff) =>
-  //         staff.StaffRole == "Staff" && staff.MainPosition == "Software Tester"
-  //     );
-  //     let freeBA = res.data.filter(
-  //       (staff) =>
-  //         staff.StaffRole == "Staff" &&
-  //         staff.MainPosition == "Business Analysis"
-  //     );
-  //     console.log("setFreeStaff");
-
-  //     setFreeStaff({
-  //       allPM: freePM,
-  //       allDev: freeDev,
-  //       allTester: freeTester,
-  //       allBA: freeBA,
-  //     });
-  //   }
-  // };
-
-  // const getInProjectStaffs = async () => {
-  //   let res = await axios.get(`${baseUrl}/api/staffInProject`);
-  //   console.log("res>>>", res.data);
-  //   if (res.data) {
-  //     let inProjectPM = res.data.filter(
-  //       (staff) => staff.StaffRole == "Project Manager"
-  //     );
-  //     let inProjectDev = res.data.filter(
-  //       (staff) =>
-  //         staff.StaffRole == "Staff" &&
-  //         staff.MainPosition == "Software Developer"
-  //     );
-  //     let inProjectTester = res.data.filter(
-  //       (staff) =>
-  //         staff.StaffRole == "Staff" && staff.MainPosition == "Software Tester"
-  //     );
-  //     let inProjectBA = res.data.filter(
-  //       (staff) =>
-  //         staff.StaffRole == "Staff" &&
-  //         staff.MainPosition == "Business Analysis"
-  //     );
-  //     console.log("setInProjectStaff");
-  //     setInProjectStaff({
-  //       allPM: inProjectPM,
-  //       allDev: inProjectDev,
-  //       allTester: inProjectTester,
-  //       allBA: inProjectBA,
-  //     });
-  //   }
-  // };
-
-  // const fetchStaff = async () => {
-  //   await getAllStaff();
-  //   await getFreeStaffs();
-  //   await getInProjectStaffs();
-  // };
-
-  // React.useEffect(() => {
-  //   fetchStaff();
-  // }, []);
-
   const handleChangeInputModal = (e) => {
     const { name, value } = e.target;
     setNewStaff({
@@ -200,9 +73,6 @@ function ManageStaff(props) {
     });
   };
   console.log("newStaff>>>", newStaff);
-
-  // console.log("allStaff", allStaff);
-  // console.log("freeStaff", freeStaff);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);

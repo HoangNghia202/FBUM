@@ -22,10 +22,10 @@ import {
 
 function TableStaff(props) {
   console.log("props in table staff>>>>", props);
-  console.log(
-    "props in table staff > allPM>>>>",
-    props.staffs.allPM.find((item) => item.StaffID === 5)
-  );
+  // console.log(
+  //   "props in table staff > allPM>>>>",
+  //   props.staffs.allPM.find((item) => item.StaffID === 5)
+  // );
 
   const dispatch = useDispatch();
   const { staffs, selectType, changeSelectType, itemType, deleteStaff } = props;

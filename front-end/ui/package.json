@@ -20,6 +20,7 @@
     "axios": "^1.2.2",
     "bootstrap": "^5.2.3",
     "dotenv": "^16.0.3",
+    "jsonwebtoken": "^9.0.0",
     "moment": "^2.29.4",
     "react": "^18.2.0",
     "react-bootstrap": "^2.7.0",
@@ -32,6 +33,7 @@
     "react-scripts": "5.0.1",
     "react-toastify": "^9.1.1",
     "reactstrap": "^9.1.5",
+    "redux-persist": "^6.0.0",
     "sass": "^1.57.1",
     "styled-components": "^5.3.6",
     "web-vitals": "^2.1.4"

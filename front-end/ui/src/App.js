@@ -24,6 +24,8 @@ import {
   fetchInProjectStaff,
   fetchFreeStaff,
 } from "./redux/StaffSlider";
+import PMPage from "./components/project mananger/PMPage";
+import NowProject from "./components/project mananger/now project/Nowproject";
 function App() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -81,6 +83,10 @@ function App() {
 
               <Route path="leader" element={<ManageLeader />} />
               <Route path="staff" element={<ManageStaff staffs={staffs} />} />
+            </Route>
+
+            <Route path="/PM" element={<PMPage />}>
+              <Route path="nowProject" element={<NowProject />} />
             </Route>
             <Route path="/login" element={<LoginPage />}></Route>
 
