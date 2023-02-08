@@ -276,3 +276,14 @@ D:\Visual Studio 2022\FBUM\back-end\BUResourcesManagementAPI\bin\Microsoft.Exten
 D:\Visual Studio 2022\FBUM\back-end\BUResourcesManagementAPI\bin\Microsoft.Extensions.ObjectPool.xml
 D:\Visual Studio 2022\FBUM\back-end\BUResourcesManagementAPI\bin\Microsoft.Extensions.Options.xml
 D:\Visual Studio 2022\FBUM\back-end\BUResourcesManagementAPI\bin\System.Diagnostics.DiagnosticSource.xml
+D:\Visual Studio 2022\FBUM\back-end\BUResourcesManagementAPI\bin\ClosedXML.dll
+D:\Visual Studio 2022\FBUM\back-end\BUResourcesManagementAPI\bin\DocumentFormat.OpenXml.dll
+D:\Visual Studio 2022\FBUM\back-end\BUResourcesManagementAPI\bin\EPPlus.Core.dll
+D:\Visual Studio 2022\FBUM\back-end\BUResourcesManagementAPI\bin\EPPlus.Interfaces.dll
+D:\Visual Studio 2022\FBUM\back-end\BUResourcesManagementAPI\bin\EPPlus.System.Drawing.dll
+D:\Visual Studio 2022\FBUM\back-end\BUResourcesManagementAPI\bin\Microsoft.IO.RecyclableMemoryStream.dll
+D:\Visual Studio 2022\FBUM\back-end\BUResourcesManagementAPI\bin\ClosedXML.xml
+D:\Visual Studio 2022\FBUM\back-end\BUResourcesManagementAPI\bin\EPPlus.Core.xml
+D:\Visual Studio 2022\FBUM\back-end\BUResourcesManagementAPI\bin\Microsoft.IO.RecyclableMemoryStream.xml
+D:\Visual Studio 2022\FBUM\back-end\BUResourcesManagementAPI\bin\System.Memory.Data.dll
+D:\Visual Studio 2022\FBUM\back-end\BUResourcesManagementAPI\bin\System.Memory.Data.xml

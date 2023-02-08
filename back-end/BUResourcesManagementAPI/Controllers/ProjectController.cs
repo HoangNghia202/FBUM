@@ -11,12 +11,14 @@ using System.Configuration;
 using Antlr.Runtime.Misc;
 using System.Collections;
 using System.Web.Management;
+using DocumentFormat.OpenXml.Office2010.Excel;
+using ClosedXML.Excel;
+using System.IO;
 
 namespace BUResourcesManagementAPI.Controllers
 {
     public class ProjectController : ApiController
     {
-
         [HttpGet] // api/project
         public List<Project> Get()
         {
@@ -309,7 +311,7 @@ namespace BUResourcesManagementAPI.Controllers
         }
 
         [HttpGet] // api/projectInProgressPage
-        [Route("api/projectInProgress")]
+        [Route("api/projectInProgressPage")]
         public int GetProjectInProgressPage()
         {
             if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return 0;
@@ -548,6 +550,327 @@ namespace BUResourcesManagementAPI.Controllers
                 }
 
                 return listProject;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [HttpGet] // api/Export/Project/{id}/{path}
+        [Route("api/Export/Project/{id}/{path}")]
+        public String ExportExcel(int id, String path)
+        {
+            try
+            {
+                ProjectController projectController = new ProjectController();
+                Project project = projectController.Get(id);
+                List<Staff> staffs = projectController.GetStaff(id);
+
+                DataTable projectTable = new DataTable();
+                projectTable.TableName = "Project Information";
+
+                projectTable.Columns.Add("Project ID", typeof(int));
+                projectTable.Columns.Add("Project Name", typeof(String));
+                projectTable.Columns.Add("Manager", typeof(String));
+                projectTable.Columns.Add("Start Date", typeof(String));
+                projectTable.Columns.Add("End Date", typeof(String));
+                projectTable.Columns.Add("Export Date", typeof(String));
+
+                projectTable.Rows.Add(project.ProjectID, project.ProjectName, project.Manager, project.TimeStart, project.TimeEnd, String.Format("{0:yyyy-MM-dd hh:mm:ss}", DateTimeOffset.Now));
+
+                DataTable staffTable = new DataTable();
+                staffTable.TableName = "Staff In Project";
+
+                staffTable.Columns.Add("Staff ID", typeof(int));
+                staffTable.Columns.Add("Staff Name", typeof(String));
+
+                foreach (Staff staff in staffs) staffTable.Rows.Add(staff.StaffID, staff.StaffName);
+
+                if (!Directory.Exists(path)) path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Downloads";
+                String fileName = path + "\\Project" + project.ProjectID + ".xlsx";
+                using (XLWorkbook wb = new XLWorkbook())
+                {
+                    wb.Worksheets.Add(projectTable);
+                    wb.Worksheets.Add(staffTable);
+                    wb.SaveAs(fileName);
+                }
+                return "Project was exported at " + path;
+            }
+            catch (Exception ex)
+            {
+                return ex.ToString();
+            }
+        }
+
+        [HttpPost] // api/project/multiOptionSearch
+        [Route("api/project/multiOptionSearch")]
+        public IEnumerable<Project> MultiOptionSearch([FromBody] SearchProject searchProject)
+        {
+            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
+
+            try
+            {
+                var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString);
+                connection.Open();
+
+                List<Project> listProject = new List<Project>();
+                if (true)
+                {
+                    String query = @"SELECT * FROM Project ORDER BY TimeStart";
+                    var command = new SqlCommand(query, connection);
+                    command.CommandType = CommandType.Text;
+                    var reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            int projectID = reader.GetInt32(0);
+                            String projectName = reader.GetString(1);
+                            String manager = new StaffController().Get(reader.GetInt32(2)).StaffName;
+                            String dateStart = reader.GetDateTime(3).ToString("yyyy-MM-dd HH:mm:ss");
+                            String dateEnd = reader.GetDateTime(4).ToString("yyyy-MM-dd HH:mm:ss");
+                            List<Staff> listStaff = GetStaff(projectID);
+                            listProject.Add(new Project(projectID, projectName, manager, dateStart, dateEnd, listStaff));
+
+                        }
+                    }
+                    reader.Close();
+                }
+
+                //ProjectName Option
+                List<Project> listProject1 = new List<Project>();
+                if (!searchProject.ProjectName.Equals(""))
+                {
+                    String query = @"SELECT * FROM Project WHERE ProjectName LIKE @ProjectName";
+                    var command = new SqlCommand(query, connection);
+                    command.CommandType = CommandType.Text;
+                    command.Parameters.AddWithValue("@ProjectName", "%" + searchProject.ProjectName + "%");
+                    var reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            int projectID = reader.GetInt32(0);
+                            String projectName = reader.GetString(1);
+                            String manager = new StaffController().Get(reader.GetInt32(2)).StaffName;
+                            String dateStart = reader.GetDateTime(3).ToString("yyyy-MM-dd HH:mm:ss");
+                            String dateEnd = reader.GetDateTime(4).ToString("yyyy-MM-dd HH:mm:ss");
+                            List<Staff> listStaff = GetStaff(projectID);
+                            listProject1.Add(new Project(projectID, projectName, manager, dateStart, dateEnd, listStaff));
+                        }
+                    }
+                    reader.Close();
+                }
+                else
+                {
+                    listProject1 = listProject;
+                }
+
+                //ProjectManager Option
+                List<Project> listProject2 = new List<Project>();
+                if (!(searchProject.ProjectManager == 0))
+                {
+                    String query = @"SELECT * FROM Project WHERE Manager = @Manager";
+                    var command = new SqlCommand(query, connection);
+                    command.CommandType = CommandType.Text;
+                    command.Parameters.AddWithValue("@Manager", searchProject.ProjectManager);
+                    var reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            int projectID = reader.GetInt32(0);
+                            String projectName = reader.GetString(1);
+                            String manager = new StaffController().Get(reader.GetInt32(2)).StaffName;
+                            String dateStart = reader.GetDateTime(3).ToString("yyyy-MM-dd HH:mm:ss");
+                            String dateEnd = reader.GetDateTime(4).ToString("yyyy-MM-dd HH:mm:ss");
+                            List<Staff> listStaff = GetStaff(projectID);
+                            listProject2.Add(new Project(projectID, projectName, manager, dateStart, dateEnd, listStaff));
+                        }
+                    }
+                    reader.Close();
+                }
+                else
+                {
+                    listProject2 = listProject;
+                }
+
+                //BusinessAnalysis Option
+                List<Project> listProject3 = new List<Project>();
+                if (!(searchProject.BusinessAnalysis.Length == 0))
+                {
+                    for (int i = 0; i < searchProject.BusinessAnalysis.Length; i++)
+                    {
+                        String query = @"SELECT Project.ProjectID, ProjectName, Manager, TimeStart, TimeEnd FROM Project, WorkOn 
+                                        WHERE Project.ProjectID = WorkOn.ProjectID AND WorkOn.StaffID = @StaffID";
+                        var command = new SqlCommand(query, connection);
+                        command.CommandType = CommandType.Text;
+                        command.Parameters.AddWithValue("@StaffID", searchProject.BusinessAnalysis[i]);
+                        var reader = command.ExecuteReader();
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                int projectID = reader.GetInt32(0);
+                                String projectName = reader.GetString(1);
+                                String manager = new StaffController().Get(reader.GetInt32(2)).StaffName;
+                                String dateStart = reader.GetDateTime(3).ToString("yyyy-MM-dd HH:mm:ss");
+                                String dateEnd = reader.GetDateTime(4).ToString("yyyy-MM-dd HH:mm:ss");
+                                List<Staff> listStaff = GetStaff(projectID);
+                                listProject3.Add(new Project(projectID, projectName, manager, dateStart, dateEnd, listStaff));
+
+                            }
+                        }
+                        reader.Close();
+                    }
+                }
+                else
+                {
+                    listProject3 = listProject;
+                }
+
+                //SoftwareDeveloper Option
+                List<Project> listProject4 = new List<Project>();
+                if (!(searchProject.SoftwareDeveloper.Length == 0))
+                {
+                    for (int i = 0; i < searchProject.SoftwareDeveloper.Length; i++)
+                    {
+                        String query = @"SELECT Project.ProjectID, ProjectName, Manager, TimeStart, TimeEnd FROM Project, WorkOn 
+                                        WHERE Project.ProjectID = WorkOn.ProjectID AND WorkOn.StaffID = @StaffID";
+                        var command = new SqlCommand(query, connection);
+                        command.CommandType = CommandType.Text;
+                        command.Parameters.AddWithValue("@StaffID", searchProject.SoftwareDeveloper[i]);
+                        var reader = command.ExecuteReader();
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                int projectID = reader.GetInt32(0);
+                                String projectName = reader.GetString(1);
+                                String manager = new StaffController().Get(reader.GetInt32(2)).StaffName;
+                                String dateStart = reader.GetDateTime(3).ToString("yyyy-MM-dd HH:mm:ss");
+                                String dateEnd = reader.GetDateTime(4).ToString("yyyy-MM-dd HH:mm:ss");
+                                List<Staff> listStaff = GetStaff(projectID);
+                                listProject4.Add(new Project(projectID, projectName, manager, dateStart, dateEnd, listStaff));
+
+                            }
+                        }
+                        reader.Close();
+                    }
+                }
+                else
+                {
+                    listProject4 = listProject;
+                }
+
+                //SoftwareTester Option
+                List<Project> listProject5 = new List<Project>();
+                if (!(searchProject.SoftwareTester.Length == 0))
+                {
+                    for (int i = 0; i < searchProject.SoftwareTester.Length; i++)
+                    {
+                        String query = @"SELECT Project.ProjectID, ProjectName, Manager, TimeStart, TimeEnd FROM Project, WorkOn 
+                                        WHERE Project.ProjectID = WorkOn.ProjectID AND WorkOn.StaffID = @StaffID";
+                        var command = new SqlCommand(query, connection);
+                        command.CommandType = CommandType.Text;
+                        command.Parameters.AddWithValue("@StaffID", searchProject.SoftwareTester[i]);
+                        var reader = command.ExecuteReader();
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                int projectID = reader.GetInt32(0);
+                                String projectName = reader.GetString(1);
+                                String manager = new StaffController().Get(reader.GetInt32(2)).StaffName;
+                                String dateStart = reader.GetDateTime(3).ToString("yyyy-MM-dd HH:mm:ss");
+                                String dateEnd = reader.GetDateTime(4).ToString("yyyy-MM-dd HH:mm:ss");
+                                List<Staff> listStaff = GetStaff(projectID);
+                                listProject5.Add(new Project(projectID, projectName, manager, dateStart, dateEnd, listStaff));
+
+                            }
+                        }
+                        reader.Close();
+                    }
+                }
+                else
+                {
+                    listProject5 = listProject;
+                }
+
+                //TimeStart Option
+                List<Project> listProject6 = new List<Project>();
+                if (!searchProject.TimeStart.Equals(""))
+                {
+                    String query = @"SELECT * FROM Project WHERE TimeStart >= @TimeStart";
+                    var command = new SqlCommand(query, connection);
+                    command.CommandType = CommandType.Text;
+                    command.Parameters.AddWithValue("@TimeStart", searchProject.TimeStart);
+                    var reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            int projectID = reader.GetInt32(0);
+                            String projectName = reader.GetString(1);
+                            String manager = new StaffController().Get(reader.GetInt32(2)).StaffName;
+                            String dateStart = reader.GetDateTime(3).ToString("yyyy-MM-dd HH:mm:ss");
+                            String dateEnd = reader.GetDateTime(4).ToString("yyyy-MM-dd HH:mm:ss");
+                            List<Staff> listStaff = GetStaff(projectID);
+                            listProject6.Add(new Project(projectID, projectName, manager, dateStart, dateEnd, listStaff));
+
+                        }
+                    }
+                    reader.Close();
+                }
+                else
+                {
+                    listProject6 = listProject;
+                }
+
+                //TimeEnd Option
+                List<Project> listProject7 = new List<Project>();
+                if (!searchProject.TimeEnd.Equals(""))
+                {
+                    String query = @"SELECT * FROM Project WHERE TimeEnd <= @TimeEnd";
+                    var command = new SqlCommand(query, connection);
+                    command.CommandType = CommandType.Text;
+                    command.Parameters.AddWithValue("@TimeEnd", searchProject.TimeEnd);
+                    var reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            int projectID = reader.GetInt32(0);
+                            String projectName = reader.GetString(1);
+                            String manager = new StaffController().Get(reader.GetInt32(2)).StaffName;
+                            String dateStart = reader.GetDateTime(3).ToString("yyyy-MM-dd HH:mm:ss");
+                            String dateEnd = reader.GetDateTime(4).ToString("yyyy-MM-dd HH:mm:ss");
+                            List<Staff> listStaff = GetStaff(projectID);
+                            listProject7.Add(new Project(projectID, projectName, manager, dateStart, dateEnd, listStaff));
+
+                        }
+                    }
+                    reader.Close();
+                }
+                else
+                {
+                    listProject7 = listProject;
+                }
+
+                connection.Close();
+                //LINQ
+                var result = from list in listProject
+                             where
+                             listProject1.Any(list1 => list1.ProjectID == list.ProjectID) &&
+                             listProject2.Any(list2 => list2.ProjectID == list.ProjectID) &&
+                             listProject3.Any(list3 => list3.ProjectID == list.ProjectID) &&
+                             listProject4.Any(list4 => list4.ProjectID == list.ProjectID) &&
+                             listProject5.Any(list5 => list5.ProjectID == list.ProjectID) &&
+                             listProject6.Any(list6 => list6.ProjectID == list.ProjectID) &&
+                             listProject7.Any(list7 => list7.ProjectID == list.ProjectID)
+                             select list;
+                return result;
             }
             catch (Exception ex)
             {
