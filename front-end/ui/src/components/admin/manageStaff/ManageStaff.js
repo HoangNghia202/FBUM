@@ -16,6 +16,8 @@ import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import { useDispatch } from "react-redux";
 
+import { Cookies, useCookies } from "react-cookie";
+
 import {
   fetchAllStaff,
   fetchInProjectStaff,
@@ -28,6 +30,8 @@ import {
 import { toast } from "react-toastify";
 const baseUrl = process.env.REACT_APP_JSON_API;
 function ManageStaff(props) {
+  const [cookies, setCookie, removeCookie] = useCookies(["token"]);
+  const token = cookies.token;
   const { staffs } = props;
   const dispatch = useDispatch();
   console.log("prop in manage staff: ", staffs);
@@ -113,7 +117,7 @@ function ManageStaff(props) {
 
     delete newStaff.ConfirmPassword;
     console.log("newStaff>>>", newStaff);
-    let res = await handleCreateNewStaff(newStaff);
+    let res = await handleCreateNewStaff(newStaff, token);
     console.log("res>>>", res);
     if (res.errCode === 0) {
       toast.success(res.message);
@@ -126,9 +130,9 @@ function ManageStaff(props) {
         MainPosition: "1",
         Level: "1",
       });
-      dispatch(fetchAllStaff());
-      dispatch(fetchFreeStaff());
-      dispatch(fetchInProjectStaff());
+      dispatch(fetchAllStaff(token));
+      dispatch(fetchFreeStaff(token));
+      dispatch(fetchInProjectStaff(token));
     } else {
       toast.error(res.message);
     }
@@ -138,9 +142,9 @@ function ManageStaff(props) {
     let res = await handleDeleteStaff(id);
     if (res.errCode === 0) {
       toast.success(res.message);
-      dispatch(fetchAllStaff());
-      dispatch(fetchFreeStaff());
-      dispatch(fetchInProjectStaff());
+      dispatch(fetchAllStaff(token));
+      dispatch(fetchFreeStaff(token));
+      dispatch(fetchInProjectStaff(token));
     } else {
       toast.error(res.message);
     }

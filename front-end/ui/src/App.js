@@ -33,13 +33,13 @@ function App() {
   const projects = useSelector((state) => state.projectSlider);
   const staffs = useSelector((state) => state.staffSlider);
 
-  console.log("userLogin: ", userLogin);
-  useEffect(() => {
-    dispatch(fetchProjects(1));
-    dispatch(fetchAllStaff());
-    dispatch(fetchInProjectStaff());
-    dispatch(fetchFreeStaff());
-  }, []);
+  // console.log("userLogin: ", userLogin);
+  // useEffect(() => {
+  //   dispatch(fetchProjects(1));
+  //   dispatch(fetchAllStaff());
+  //   dispatch(fetchInProjectStaff());
+  //   dispatch(fetchFreeStaff());
+  // }, []);
 
   console.log("staffs in app: ", staffs);
 

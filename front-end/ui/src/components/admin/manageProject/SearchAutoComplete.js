@@ -9,9 +9,12 @@ import {
   searchProjectInComing,
 } from "../../../services/adminServices/AdminServices";
 import { toast } from "react-toastify";
+import { useCookies } from "react-cookie";
 
 const baseUrl = process.env.REACT_APP_JSON_API;
 export default function SearchAutoComplete(props) {
+  const [cookies, setCookie, removeCookie] = useCookies(["token"]);
+  const token = cookies.token;
   console.log("props", props);
 
   const { searchData, setProject, typeProject, searchType, setManager } = props;
@@ -22,14 +25,14 @@ export default function SearchAutoComplete(props) {
     let searchResult = [];
     if (searchType === "project") {
       if (typeProject === "projectInprogress") {
-        searchResult = await searchProjectInProgress(newValue);
+        searchResult = await searchProjectInProgress(newValue, token);
       }
       if (typeProject === "projectEnded") {
-        searchResult = await searchProjectEnded(newValue);
+        searchResult = await searchProjectEnded(newValue, token);
       }
 
       if (typeProject === "projectIncoming") {
-        searchResult = await searchProjectInComing(newValue);
+        searchResult = await searchProjectInComing(newValue, token);
       }
       console.log("searchResult", searchResult);
       if (searchResult.errCode == 0) {

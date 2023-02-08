@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useCookies } from "react-cookie";
 import { ToastContainer, toast } from "react-toastify";
 import { startLogin, loginSuccess, loginFailed } from "../../redux/Auth";
+import localStorage from "redux-persist/es/storage";
 import "react-toastify/dist/ReactToastify.css";
 function LoginPage(props) {
   const isUserLogin = useSelector(
@@ -25,12 +26,7 @@ function LoginPage(props) {
     password: "",
   });
   const [errLogin, setErrLogin] = useState("");
-  // const [cookies, setCookie, removeCookie] = useCookies([
-  //   "userId",
-  //   "password",
-  //   "userName",
-  //   "role",
-  // ]);
+  const [cookies, setCookie, removeCookie] = useCookies(["token"]);
 
   const checkIsLogin = () => {
     if (isUserLogin) {
@@ -58,15 +54,15 @@ function LoginPage(props) {
       console.log("res in login page >>> ", res);
       if (res.errCode === 0) {
         setErrLogin("");
-        // setCookie("userId", user.userId, { path: "/" });
-        // setCookie("password", user.password, { path: "/" });
-        // setCookie("userName", res.data.StaffName, { path: "/" });
-        // setCookie("role", res.data.StaffRole, { path: "/" });
         dispatch(setUserSlider(res.data));
         if (res.data.StaffRole === "Admin") {
           navigate("/admin/project");
         }
         toast.success("Login successfully!");
+        localStorage.setItem("token", res.data.JWTToken);
+        setCookie("token", res.data.JWTToken, { path: "/" });
+        console.log("cookies >>> ", cookies.token);
+
         dispatch(loginSuccess(res.data));
       } else {
         setErrLogin(res.message);

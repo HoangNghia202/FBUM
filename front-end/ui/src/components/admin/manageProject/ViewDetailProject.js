@@ -14,9 +14,12 @@ import {
 } from "../../../services/adminServices/AdminServices";
 import { fetchProjects } from "../../../redux/ProjectSlider";
 import { toast } from "react-toastify";
+import { useCookies } from "react-cookie";
 
 function ViewDetailProject(props) {
   const dispatch = useDispatch();
+  const [cookies, setCookie, removeCookie] = useCookies(["token"]);
+  const token = cookies.token;
   console.log("props", props);
   const { projectEnded, projectInprogress, projectIncoming } = props.projects;
   let navigate = useNavigate();
@@ -53,11 +56,11 @@ function ViewDetailProject(props) {
     console.log("click delete");
     let confirm = window.confirm("Are you sure to delete this project?");
     if (confirm) {
-      const res = await handleDeleteProject(projectId);
+      const res = await handleDeleteProject(projectId, token);
       console.log("res", res);
       if (res.errCode === 0) {
         navigate("/admin/project");
-        dispatch(fetchProjects(1));
+        dispatch(fetchProjects(1, token));
       } else {
         console.log("error", res);
         toast.error(res.message);
@@ -71,10 +74,10 @@ function ViewDetailProject(props) {
       "Are you sure to remove this staff out of project?"
     );
     if (confirm) {
-      let res = await handleRemoveStaffOutOfProject(staffId, projectId);
+      let res = await handleRemoveStaffOutOfProject(staffId, projectId, token);
       if (res.errCode === 0) {
         toast.success("Remove staff out of project successfully!");
-        dispatch(fetchProjects(1));
+        dispatch(fetchProjects(1, token));
       } else {
         console.log("error", res);
         toast.error("Remove staff out of project failed!");

@@ -3,10 +3,12 @@ import { toast } from "react-toastify";
 
 const baseUrl = process.env.REACT_APP_JSON_API;
 
-export const handleCreateProject = async (project) => {
+export const handleCreateProject = async (project, token) => {
   console.log("project", project);
   try {
-    let res = await axios.post(`${baseUrl}/api/createProject`, project);
+    let res = await axios.post(`${baseUrl}/api/createProject`, project, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     const message = {
       success: "Create new project successfully",
       failed: "Create new project failed",
@@ -40,10 +42,12 @@ export const handleCreateProject = async (project) => {
     console.log("error>>>", error);
   }
 };
-export const handleDeleteProject = async (projectId) => {
+export const handleDeleteProject = async (projectId, token) => {
   console.log("project if will delete>>", projectId);
   try {
-    let res = await axios.delete(`${baseUrl}/api/deleteProject/${projectId}`);
+    let res = await axios.delete(`${baseUrl}/api/deleteProject/${projectId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     console.log("res>>>", res.data);
     const message = {
       success: "Delete project successfully",
@@ -70,10 +74,15 @@ export const handleDeleteProject = async (projectId) => {
   }
 };
 
-export const handleRemoveStaffOutOfProject = async (staffID, projectID) => {
+export const handleRemoveStaffOutOfProject = async (
+  staffID,
+  projectID,
+  token
+) => {
   try {
     let res = await axios.delete(
-      `${baseUrl}/api/deleteStaffInProject/${projectID}/${staffID}`
+      `${baseUrl}/api/deleteStaffInProject/${projectID}/${staffID}`,
+      { headers: { Authorization: `Bearer ${token}` } }
     );
     console.log("res", res.data);
 
@@ -100,10 +109,11 @@ export const handleRemoveStaffOutOfProject = async (staffID, projectID) => {
   } catch (error) {}
 };
 
-export const getStaffsAvailableForAdding = async (projectId) => {
+export const getStaffsAvailableForAdding = async (projectId, token) => {
   try {
     let res = await axios.get(
-      `${baseUrl}/api/project/staff_available/${projectId}`
+      `${baseUrl}/api/project/staff_available/${projectId}`,
+      { headers: { Authorization: `Bearer ${token}` } }
     );
     console.log("res", res.data);
     return res.data;
@@ -112,16 +122,21 @@ export const getStaffsAvailableForAdding = async (projectId) => {
   }
 };
 
-export const findProjectInprogressAndAvailableStaffs = async (searchInput) => {
+export const findProjectInprogressAndAvailableStaffs = async (
+  searchInput,
+  token
+) => {
   try {
     const project = await axios.get(
-      `${baseUrl}/api/project/search/${searchInput}`
+      `${baseUrl}/api/project/search/${searchInput}`,
+      { headers: { Authorization: `Bearer ${token}` } }
     );
     console.log("project>>>", project.data);
     if (project.data != null) {
       if (Date.parse(project.data.TimeEnd) > Date.now()) {
         let staffAvailable = await axios.get(
-          `${baseUrl}api/project/staff_available/${project.data.id}`
+          `${baseUrl}api/project/staff_available/${project.data.id}`,
+          { headers: { Authorization: `Bearer ${token}` } }
         );
         console.log("res>>>", staffAvailable.data);
         if (staffAvailable.data != null || staffAvailable.data != undefined) {
@@ -164,9 +179,11 @@ export const findProjectInprogressAndAvailableStaffs = async (searchInput) => {
   }
 };
 
-export const searchProjectInProgress = async (searchInput) => {
+export const searchProjectInProgress = async (searchInput, token) => {
   try {
-    let res = await axios.get(`${baseUrl}/api/project/search/${searchInput}`);
+    let res = await axios.get(`${baseUrl}/api/project/search/${searchInput}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     console.log("res>>>", res.data);
     if (res.data != null) {
       let result = {
@@ -203,9 +220,11 @@ export const searchProjectInProgress = async (searchInput) => {
   }
 };
 
-export const searchProjectEnded = async (searchInput) => {
+export const searchProjectEnded = async (searchInput, token) => {
   try {
-    let res = await axios.get(`${baseUrl}/api/project/search/${searchInput}`);
+    let res = await axios.get(`${baseUrl}/api/project/search/${searchInput}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     console.log("res>>>", res.data);
     if (res.data != null) {
       let result = {
@@ -238,9 +257,11 @@ export const searchProjectEnded = async (searchInput) => {
   }
 };
 
-export const searchProjectInComing = async (searchInput) => {
+export const searchProjectInComing = async (searchInput, token) => {
   try {
-    let res = await axios.get(`${baseUrl}/api/project/search/${searchInput}`);
+    let res = await axios.get(`${baseUrl}/api/project/search/${searchInput}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     console.log("res>>>", res.data);
     if (res.data != null) {
       let result = {
@@ -275,11 +296,13 @@ export const searchProjectInComing = async (searchInput) => {
 
 export const getStaffAvailableBetweenTwoProject = async (
   fromProject,
-  toProject
+  toProject,
+  token
 ) => {
   try {
     let res = await axios.get(
-      `${baseUrl}/api/project/staff_available/${fromProject}/${toProject}`
+      `${baseUrl}/api/project/staff_available/${fromProject}/${toProject}`,
+      { headers: { Authorization: `Bearer ${token}` } }
     );
     console.log(`available from ${fromProject} to ${toProject}`, res.data);
     if (res.data != null) {
@@ -301,12 +324,14 @@ export const getStaffAvailableBetweenTwoProject = async (
 export const transferStaffBetweenProject = async (
   fromProject,
   toProject,
-  staffIDs
+  staffIDs,
+  token
 ) => {
   try {
     let res = await axios.post(
       `${baseUrl}/api/transfer/${fromProject}/${toProject}`,
-      { value: staffIDs }
+      { value: staffIDs },
+      { headers: { Authorization: `Bearer ${token}` } }
     );
     console.log("res>>>", res.data);
     if (res.data == "Move staff successfully") {
@@ -325,12 +350,13 @@ export const transferStaffBetweenProject = async (
   }
 };
 
-export const handleAddStaffToProject = async (staffs, projectId) => {
+export const handleAddStaffToProject = async (staffs, projectId, token) => {
   try {
     if (staffs.length > 0) {
       await staffs.forEach((element) => {
         axios.put(
-          `${baseUrl}/api/insertToProject/${projectId}/${element.StaffID}`
+          `${baseUrl}/api/insertToProject/${projectId}/${element.StaffID}`,
+          { headers: { Authorization: `Bearer ${token}` } }
         );
       });
       return {
@@ -346,14 +372,16 @@ export const handleAddStaffToProject = async (staffs, projectId) => {
   } catch (error) {}
 };
 
-export const handleGetFreeProjectManager = async (time) => {
+export const handleGetFreeProjectManager = async (time, token) => {
   console.log("time in handleGetFreeProjectManager >>>", time);
   let payload = {
     value: time,
   };
   try {
     console.log("payload>>>", payload);
-    let res = await axios.post(`${baseUrl}/api/staffManagerFree`, payload);
+    let res = await axios.post(`${baseUrl}/api/staffManagerFree`, payload, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     console.log("res>>>", res.data);
     if (res.data != null) {
       return {
@@ -373,9 +401,11 @@ export const handleGetFreeProjectManager = async (time) => {
   }
 };
 
-export const handleCreateNewStaff = async (staff) => {
+export const handleCreateNewStaff = async (staff, token) => {
   try {
-    let res = await axios.post(`${baseUrl}/api/createNewStaff`, staff);
+    let res = await axios.post(`${baseUrl}/api/createNewStaff`, staff, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     console.log("res>>> ", res.data);
     if (res.data == "Create new staff successfully") {
       return {
@@ -400,9 +430,11 @@ export const handleCreateNewStaff = async (staff) => {
   }
 };
 
-export const handleDeleteStaff = async (staffID) => {
+export const handleDeleteStaff = async (staffID, token) => {
   try {
-    let res = await axios.delete(`${baseUrl}/api/deleteStaff/${staffID}`);
+    let res = await axios.delete(`${baseUrl}/api/deleteStaff/${staffID}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     console.log("res>>> ", res.data);
     if (res.data == "Delete staff successfully") {
       return {
@@ -421,9 +453,11 @@ export const handleDeleteStaff = async (staffID) => {
   }
 };
 
-export const handleUpdateStaff = async (staff) => {
+export const handleUpdateStaff = async (staff, token) => {
   try {
-    let res = await axios.put(`${baseUrl}/api/updateStaff`, staff);
+    let res = await axios.put(`${baseUrl}/api/updateStaff`, staff, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     console.log("res>>>", res.data);
     if (res.data == "Update staff successfully") {
       return {

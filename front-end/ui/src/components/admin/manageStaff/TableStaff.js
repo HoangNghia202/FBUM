@@ -19,9 +19,12 @@ import {
   fetchInProjectStaff,
   fetchFreeStaff,
 } from "../../../redux/StaffSlider";
+import { useCookies } from "react-cookie";
 
 function TableStaff(props) {
   console.log("props in table staff>>>>", props);
+  const [cookies, setCookie, removeCookie] = useCookies(["token"]);
+  const token = cookies.token;
   // console.log(
   //   "props in table staff > allPM>>>>",
   //   props.staffs.allPM.find((item) => item.StaffID === 5)
@@ -124,10 +127,10 @@ function TableStaff(props) {
     let res = await handleUpdateStaff(updateStaff);
     if (res.errCode === 0) {
       toast.success(res.message);
-      dispatch(fetchAllStaff());
-      dispatch(fetchFreeStaff());
-      dispatch(fetchInProjectStaff());
-      handleCloseUpdate();
+      dispatch(fetchAllStaff(token));
+      dispatch(fetchFreeStaff(token));
+      dispatch(fetchInProjectStaff(token));
+      handleCloseUpdate(token);
     } else {
       toast.error(res.message);
     }

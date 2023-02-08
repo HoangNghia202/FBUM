@@ -17,8 +17,11 @@ import CustomScrollbars from "../../../contain/CustomScrollBar";
 import { handleAddStaffToProject } from "../../../services/adminServices/AdminServices";
 import { fetchProjects } from "../../../redux/ProjectSlider";
 import { toast } from "react-toastify";
+import { useCookies } from "react-cookie";
 
 function AddStaffsToProject() {
+  const [cookies, setCookie, removeCookie] = useCookies(["token"]);
+  const token = cookies.token;
   const { projectId } = useParams();
   const [availableStaffs, setAvailableStaffs] = useState([]);
   const [projectManagers, setProjectManagers] = useState([]);
@@ -29,7 +32,6 @@ function AddStaffsToProject() {
   const [value, setValue] = useState("1");
   const [callUseEffect, setCallUseEffect] = useState(1);
   const dispatch = useDispatch();
-  let navigate = useNavigate();
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -41,7 +43,7 @@ function AddStaffsToProject() {
 
   const getStaffsAvailable = async () => {
     console.log("run into get available staff");
-    let res = await getStaffsAvailableForAdding(projectId);
+    let res = await getStaffsAvailableForAdding(projectId, token);
     setAvailableStaffs(res);
   };
 
@@ -101,11 +103,11 @@ function AddStaffsToProject() {
 
   const handleAddStaff = async () => {
     console.log("selectedStaffs in handle add", selectedStaffs);
-    let res = await handleAddStaffToProject(selectedStaffs, projectId);
+    let res = await handleAddStaffToProject(selectedStaffs, projectId, token);
     console.log("res!", res);
 
     if (res.errCode === 0) {
-      dispatch(fetchProjects(1));
+      dispatch(fetchProjects(1, token));
       setCallUseEffect(callUseEffect + 1);
       setSelectedStaffs([]);
       toast.success(res.message);

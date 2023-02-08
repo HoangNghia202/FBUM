@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
-const baseUrl = process.env.REACT_APP_JSON_API;
 
+const baseUrl = process.env.REACT_APP_JSON_API;
 const initialState = {
   allStaff: {},
   freeStaffs: {},
@@ -25,10 +25,14 @@ const StaffSlice = createSlice({
   },
 });
 
-export const fetchAllStaff = () => {
+export const fetchAllStaff = (token) => {
   return async (dispatch) => {
-    console.log("run in to thunk action creator for fetchAllStaff");
-    const res = await axios.get(`${baseUrl}/api/staff`);
+    console.log("run in to thunk action creator for fetchAllStaff", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const res = await axios.get(`${baseUrl}/api/staff`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     console.log("res>>>", res.data);
     if (res.data) {
       let allPM = res.data.filter(
@@ -61,10 +65,12 @@ export const fetchAllStaff = () => {
   };
 };
 
-export const fetchFreeStaff = () => {
+export const fetchFreeStaff = (token) => {
   return async (dispatch) => {
     console.log("run in to thunk action creator for fetchFreeStaff");
-    const res = await axios.get(`${baseUrl}/api/staffFree`);
+    const res = await axios.get(`${baseUrl}/api/staffFree`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     console.log("res>>>", res.data);
     if (res.data) {
       let allPM = res.data.filter(
@@ -97,11 +103,13 @@ export const fetchFreeStaff = () => {
   };
 };
 
-export const fetchInProjectStaff = () => {
+export const fetchInProjectStaff = (token) => {
   return async (dispatch) => {
     console.log("run in to thunk action creator for fetchInProcessStaff");
-    const res = await axios.get(`${baseUrl}/api/staffInProject`);
-    console.log("res>>>", res.data);
+    const res = await axios.get(`${baseUrl}/api/staffInProject`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    console.log("res inprogress staff>>>", res.data);
     if (res.data) {
       let allPM = res.data.filter(
         (staff) => staff.StaffRole == "Project Manager"

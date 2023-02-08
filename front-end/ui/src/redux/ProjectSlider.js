@@ -1,6 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
-// import acxios
+import { useSelector } from "react-redux";
+
 import axios from "axios";
+
 const initialState = {
   projectInprogress: [],
   projectEnded: [],
@@ -10,6 +12,7 @@ const initialState = {
   totalPageProjectEnded: 0,
   totalPageProjectIncoming: 0,
 };
+
 const baseUrl = process.env.REACT_APP_JSON_API;
 const productSliderSlice = createSlice({
   name: "projectSlider",
@@ -49,32 +52,45 @@ const productSliderSlice = createSlice({
   },
 });
 
-export const fetchProjects = (pageNum) => {
+export const fetchProjects = (pageNum, token) => {
+  console.log("token in fecch project >>> ", token);
+
   return async (dispatch, getState) => {
     console.log("run in to thunk action creator");
     console.log("state:", getState());
     try {
       const res1 = await axios.get(
-        `${baseUrl}/api/projectInProgress/page/${pageNum}`
+        `${baseUrl}/api/projectInProgress/page/${pageNum}`,
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       console.log("res1 >>> ", res1);
       const res2 = await axios.get(
-        `${baseUrl}/api/projectEnded/page/${pageNum}`
+        `${baseUrl}/api/projectEnded/page/${pageNum}`,
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       console.log("res2 >>> ", res2);
 
       const res3 = await axios.get(
-        `${baseUrl}/api/projectInComing/page/${pageNum}`
+        `${baseUrl}/api/projectInComing/page/${pageNum}`,
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       console.log("res3 >>> ", res3);
-      const res4 = await axios.get(`${baseUrl}/api/project`);
+      const res4 = await axios.get(`${baseUrl}/api/project`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       console.log("res4 >>> ", res4);
 
-      const res5 = await axios.get(`${baseUrl}/api/projectInProgress`);
+      const res5 = await axios.get(`${baseUrl}/api/projectInProgress`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       console.log("res5 >>> ", res5.data);
-      const res6 = await axios.get(`${baseUrl}/api/projectEndedPage`);
+      const res6 = await axios.get(`${baseUrl}/api/projectEndedPage`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       console.log("res6 >>> ", res6.data);
-      const res7 = await axios.get(`${baseUrl}/api/projectInComingPage`);
+      const res7 = await axios.get(`${baseUrl}/api/projectInComingPage`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       console.log("res7 >>> ", res7.data);
 
       const res = {
@@ -94,13 +110,14 @@ export const fetchProjects = (pageNum) => {
   };
 };
 
-export const fetchProjectsInprogress = (pageNum) => {
+export const fetchProjectsInprogress = (pageNum, token) => {
   return async (dispatch, getState) => {
     console.log("run in to thunk action creator");
     console.log("state:", getState());
     try {
       const res = await axios.get(
-        `${baseUrl}/api/projectInProgress/page/${pageNum}`
+        `${baseUrl}/api/projectInProgress/page/${pageNum}`,
+        { headers: { Authorization: `Bearer ${token}` } }
         // `${baseUrl}/projectInProgress`
       );
       console.log("res >>> ", res.data);
@@ -112,13 +129,14 @@ export const fetchProjectsInprogress = (pageNum) => {
   };
 };
 
-export const fetchProjectsEnded = (pageNum) => {
+export const fetchProjectsEnded = (pageNum, token) => {
   return async (dispatch, getState) => {
     console.log("run in to thunk action creator");
     console.log("state:", getState());
     try {
       const res = await axios.get(
-        `${baseUrl}/api/projectEnded/page/${pageNum}`
+        `${baseUrl}/api/projectEnded/page/${pageNum}`,
+        { headers: { Authorization: `Bearer ${token}` } }
         // `${baseUrl}/projectEnded`
       );
       console.log("fetch project ended >>> ", res.data);
@@ -130,13 +148,14 @@ export const fetchProjectsEnded = (pageNum) => {
   };
 };
 
-export const fetchProjectsIncoming = (pageNum) => {
+export const fetchProjectsIncoming = (pageNum, token) => {
   return async (dispatch, getState) => {
     console.log("run in to thunk action creator");
     console.log("state:", getState());
     try {
       const res1 = await axios.get(
-        `${baseUrl}/api/projectInComing/page/${pageNum}`
+        `${baseUrl}/api/projectInComing/page/${pageNum}`,
+        { headers: { Authorization: `Bearer ${token}` } }
         // `${baseUrl}/projectInProgress`
       );
       console.log("res1 >>> ", res1.data);

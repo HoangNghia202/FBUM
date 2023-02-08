@@ -2,13 +2,17 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import { useState, useRef } from "react";
 import { toast } from "react-toastify";
+import { Button } from "@mui/material";
 import {
   searchProjectEnded,
   searchProjectInComing,
   searchProjectInProgress,
 } from "../../../services/adminServices/AdminServices";
+import { useCookies } from "react-cookie";
 
 function DynamicSearchProject(props) {
+  const [cookies, setCookie, removeCookie] = useCookies(["token"]);
+  const token = cookies.token;
   const { setProject, typeProject } = props;
   const [searchItem, setSearchItem] = useState("");
   const typingTimeoutRef = useRef(null);
@@ -17,14 +21,14 @@ function DynamicSearchProject(props) {
     let searchResult = [];
     if (typeProject) {
       if (typeProject === "projectInprogress") {
-        searchResult = await searchProjectInProgress(content);
+        searchResult = await searchProjectInProgress(content, token);
       }
       if (typeProject === "projectEnded") {
-        searchResult = await searchProjectEnded(content);
+        searchResult = await searchProjectEnded(content, token);
       }
 
       if (typeProject === "projectIncoming") {
-        searchResult = await searchProjectInComing(content);
+        searchResult = await searchProjectInComing(content, token);
       }
       console.log("searchResult", searchResult);
       if (searchResult.errCode == 0) {
@@ -54,6 +58,11 @@ function DynamicSearchProject(props) {
     }, 500);
   };
 
+  const handleClickClear = () => {
+    setSearchItem("");
+    props.resetScreen();
+  };
+
   return (
     <>
       <div>
@@ -64,8 +73,17 @@ function DynamicSearchProject(props) {
             type="search"
             variant="outlined"
             size="small"
+            value={searchItem}
             onChange={handleSearchChange}
           />
+          <Button
+            variant="contained"
+            color="warning"
+            className="mx-2"
+            onClick={() => handleClickClear()}
+          >
+            Clear
+          </Button>
         </Box>
       </div>
     </>

@@ -27,7 +27,7 @@ import {
   getStaffAvailableBetweenTwoProject,
   transferStaffBetweenProject,
 } from "../../../services/adminServices/AdminServices";
-
+import { useCookies } from "react-cookie";
 import { border } from "@mui/system";
 import { toast } from "react-toastify";
 
@@ -53,6 +53,8 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 export default function TransferList(props) {
+  const [cookies, setCookie, removeCookie] = useCookies(["token"]);
+  const token = cookies.token;
   const dispatch = useDispatch();
   const navigate = useNavigate();
   //modal
@@ -66,7 +68,7 @@ export default function TransferList(props) {
       console.log("search", e.target.value);
 
       handleShow();
-      let result = await searchProjectInProgress(e.target.value);
+      let result = await searchProjectInProgress(e.target.value, token);
       setSearchResult(result);
     }
   };
@@ -146,7 +148,8 @@ export default function TransferList(props) {
   const chooseProjectRight = async (project) => {
     let staffsAvailableLeft = await getStaffAvailableBetweenTwoProject(
       fromProject.ProjectID,
-      project.ProjectID
+      project.ProjectID,
+      token
     );
     console.log("staffsAvailableLeft", staffsAvailableLeft.staffs);
     setLeft(staffsAvailableLeft.staffs);
@@ -154,7 +157,8 @@ export default function TransferList(props) {
 
     let staffsAvailableRight = await getStaffAvailableBetweenTwoProject(
       project.ProjectID,
-      fromProject.ProjectID
+      fromProject.ProjectID,
+      token
     );
     console.log("staffsAvailableRight", staffsAvailableRight.staffs);
     setRight(staffsAvailableRight.staffs);
@@ -188,8 +192,8 @@ export default function TransferList(props) {
       let res = await transferStaffBetweenProject(
         toProject.ProjectID,
         fromProject.ProjectID,
-
-        idStaffsToLeft
+        idStaffsToLeft,
+        token
       );
       console.log("res right to left>>>", res);
       if (res.errCode === 0) {
@@ -204,8 +208,8 @@ export default function TransferList(props) {
       let res = await transferStaffBetweenProject(
         fromProject.ProjectID,
         toProject.ProjectID,
-
-        idStaffsToRight
+        idStaffsToRight,
+        token
       );
       console.log("res left to right>>>", res);
       if (res.errCode === 0) {
@@ -215,7 +219,7 @@ export default function TransferList(props) {
       }
     }
 
-    dispatch(fetchProjects(1));
+    dispatch(fetchProjects(1, token));
     navigate("/admin/project");
   };
 

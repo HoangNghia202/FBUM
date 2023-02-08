@@ -13,9 +13,9 @@ import "@fontsource/public-sans";
 import SearchAutoComplete from "./SearchAutoComplete";
 import GridOnRoundedIcon from "@mui/icons-material/GridOnRounded";
 import { useState } from "react";
-import Button from "react-bootstrap/Button";
+
 import Modal from "react-bootstrap/Modal";
-import { AlertTitle } from "@mui/material";
+import { AlertTitle, Button } from "@mui/material";
 import moment from "moment/moment";
 import { dataProject } from "../dataAdmin";
 import { Alert, Progress } from "reactstrap";
@@ -36,10 +36,14 @@ import PaginationOutlined from "./Pagination";
 import SearchAutoCompletePM from "./SearchAutoCompletePM";
 import { toast } from "react-toastify";
 import DynamicSearchProject from "./DynamicSearchProject";
+import { useCookies } from "react-cookie";
+import SearchDialog from "./searchProject/SearchDialog";
 
 function Project(props) {
   const dispatch = useDispatch();
   console.log("props >>>", props);
+  const [cookies, setCookie, removeCookie] = useCookies(["token"]);
+  const token = cookies.token;
   const { projects } = props;
 
   const [projectEnded, setProjectEnded] = useState([]);
@@ -55,6 +59,14 @@ function Project(props) {
   const [endDayNewProject, setEndDayNewProject] = useState("");
   const [FreeProjectManager, setFreeProjectManager] = useState([]);
   const [PMInNewProject, setPMInNewProject] = useState({});
+
+  const [openSearchDialog, setOpenSearchDialog] = useState(false);
+  const handleOpenSearchDialog = () => {
+    setOpenSearchDialog(true);
+  };
+  const handleCloseSearchDialog = () => {
+    setOpenSearchDialog(false);
+  };
 
   useEffect(() => {
     setProjectEnded(projects.projectEnded);
@@ -95,7 +107,7 @@ function Project(props) {
       const res = await handleCreateProject(values);
       console.log("res>>>", res);
       if (res.errCode === 0) {
-        dispatch(fetchProjects(1));
+        dispatch(fetchProjects(1, token));
         console.log(
           "create project successfully, and go to fecth project again"
         );
@@ -125,7 +137,7 @@ function Project(props) {
     let time = startDay + " , " + endDay;
     console.log("time", time);
 
-    let res = await handleGetFreeProjectManager(time);
+    let res = await handleGetFreeProjectManager(time, token);
     console.log("res", res);
     if (res.errCode === 0) {
       console.log("Get free project manager successfully");
@@ -141,387 +153,462 @@ function Project(props) {
   console.log("endDayNewProject", endDayNewProject);
 
   return (
-    <div className="manage-project col-9 ">
-      <div className="sticky-btn">
-        <Box sx={{ "& > :not(style)": { m: 1 } }}>
-          <Tooltip
-            title="Add new project"
-            color="secondary"
-            placement="left"
-            variant={"soft"}
-          >
-            <Fab
-              size="small"
+    <>
+      <div className="manage-project col-9 ">
+        <SearchDialog
+          open={openSearchDialog}
+          handleClose={handleCloseSearchDialog}
+          handleOpen={handleCloseSearchDialog}
+        />
+        <div className="sticky-btn">
+          <Box sx={{ "& > :not(style)": { m: 1 } }}>
+            <Tooltip
+              title="Add new project"
               color="secondary"
-              aria-label="add"
-              onClick={() => handleShow()}
+              placement="left"
+              variant={"soft"}
             >
-              <AddIcon />
-            </Fab>
-          </Tooltip>
-        </Box>
-      </div>
-      <div className="container row">
-        <Box sx={{ width: "100%", typography: "body1" }}>
-          <TabContext value={value}>
-            <Box
-              sx={{
-                borderBottom: 1,
-                borderColor: "divider",
-              }}
-            >
-              <TabList
-                onChange={handleChange}
-                aria-label="lab API tabs example"
+              <Fab
+                size="small"
+                color="secondary"
+                aria-label="add"
+                onClick={() => handleShow()}
               >
-                <Tab label="Project in progressing" value="1" />
-                <Tab label="Project incoming" value="3" />
-                <Tab label="Project ended" value="2" />
-              </TabList>
-            </Box>
-            <TabPanel value="1">
-              {projectInprogressToDisPlay.length < projectInprogress.length && (
-                <div className="sticky-btn-viewAll">
-                  <Box sx={{ "& > :not(style)": { m: 1 } }}>
-                    <Tooltip
-                      title="View All"
-                      color="info"
-                      placement="left"
-                      variant={"soft"}
-                    >
-                      <Fab
-                        size="small"
-                        color="secondary"
-                        aria-label="add"
+                <AddIcon />
+              </Fab>
+            </Tooltip>
+          </Box>
+        </div>
+        <div className="container row">
+          <Box sx={{ width: "100%", typography: "body1" }}>
+            <TabContext value={value}>
+              <Box
+                sx={{
+                  borderBottom: 1,
+                  borderColor: "divider",
+                }}
+              >
+                <TabList
+                  onChange={handleChange}
+                  aria-label="lab API tabs example"
+                >
+                  <Tab label="Project in progressing" value="1" />
+                  <Tab label="Project incoming" value="3" />
+                  <Tab label="Project ended" value="2" />
+                </TabList>
+              </Box>
+              <TabPanel value="1">
+                <Button variant="outlined" onClick={handleOpenSearchDialog}>
+                  Open dialog
+                </Button>
+                {projectInprogressToDisPlay.length <
+                  projectInprogress.length && (
+                  <div className="sticky-btn-viewAll">
+                    <Box sx={{ "& > :not(style)": { m: 1 } }}>
+                      <Tooltip
+                        title="View All"
+                        color="info"
+                        placement="left"
+                        variant={"soft"}
+                      >
+                        <Fab size="small" color="secondary" aria-label="add">
+                          <GridOnRoundedIcon
+                            onClick={() => {
+                              setProjectInprogressToDisPlay(projectInprogress);
+                            }}
+                          />
+                        </Fab>
+                      </Tooltip>
+                    </Box>
+                  </div>
+                )}
+
+                <div className="d-flex justify-content-end align-items-center">
+                  <DynamicSearchProject
+                    setProject={(data) => setProjectInprogressToDisPlay(data)}
+                    typeProject="projectInprogress"
+                    resetScreen={() => {
+                      setProjectInprogressToDisPlay(projectInprogress);
+                    }}
+                  ></DynamicSearchProject>
+                  {/* <Button color="danger" style={{ height: "40px" }}>
+                  Clear
+                </Button> */}
+                </div>
+                <div className="processing-proj row d-flex flex-row align-items-stretch">
+                  {projectInprogressToDisPlay.map((item) => {
+                    let percent = Math.floor(
+                      ((Date.now() - Date.parse(item.TimeStart)) /
+                        (Date.parse(item.TimeEnd) -
+                          Date.parse(item.TimeStart))) *
+                        100
+                    );
+
+                    console.log("percent", percent);
+
+                    return (
+                      <div
+                        className="col-2 col-md-4 row"
                         onClick={() => {
-                          setProjectInprogressToDisPlay(projectInprogress);
+                          ViewDetailProject(item.ProjectID);
                         }}
                       >
-                        <GridOnRoundedIcon />
-                      </Fab>
-                    </Tooltip>
-                  </Box>
-                </div>
-              )}
-
-              <div>
-                {/* <SearchAutoComplete
-                  searchData={props.projects.projectInprogress}
-                  setProject={(data) => setProjectInprogressToDisPlay(data)}
-                  typeProject="projectInprogress"
-                  searchType="project"
-                /> */}
-                <DynamicSearchProject
-                  setProject={(data) => setProjectInprogressToDisPlay(data)}
-                  typeProject="projectInprogress"
-                ></DynamicSearchProject>
-              </div>
-              <div className="processing-proj row d-flex flex-row align-items-stretch">
-                {projectInprogressToDisPlay.map((item) => {
-                  let percent = Math.floor(
-                    ((Date.now() - Date.parse(item.TimeStart)) /
-                      (Date.parse(item.TimeEnd) - Date.parse(item.TimeStart))) *
-                      100
-                  );
-
-                  console.log("percent", percent);
-
-                  return (
-                    <div
-                      className="col-2 col-md-3 row"
-                      onClick={() => {
-                        ViewDetailProject(item.ProjectID);
-                      }}
-                    >
-                      <div className="container">
-                        <div className="card ">
-                          <div className="card-body">
-                            <h5
-                              className="card-title"
-                              style={{ height: "50px" }}
-                            >
-                              {item.ProjectName}
-                            </h5>
-
-                            <Progress
-                              striped
-                              animated
-                              color="warning"
-                              value={percent > 0 ? percent : 0}
-                            >
-                              {percent}%
-                            </Progress>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-                <div className="d-flex justify-content-center my-5 col-md-11 ">
-                  <PaginationOutlined
-                    totalPage={props.projects.totalPageProjectInProgress}
-                    onChangePage={(pageNum) =>
-                      dispatch(fetchProjectsInprogress(pageNum))
-                    }
-                  />
-                </div>
-              </div>
-            </TabPanel>
-
-            <TabPanel value="3">
-              {projectIncomingToDisPlay.length < projectIncoming.length && (
-                <div className="sticky-btn-viewAll">
-                  <Box sx={{ "& > :not(style)": { m: 1 } }}>
-                    <Tooltip
-                      title="View All"
-                      color="info"
-                      placement="left"
-                      variant={"soft"}
-                    >
-                      <Fab
-                        size="small"
-                        color="secondary"
-                        aria-label="add"
-                        onClick={() => {
-                          setProjectIncomingToDisPlay(projectIncoming);
-                        }}
-                      >
-                        <GridOnRoundedIcon />
-                      </Fab>
-                    </Tooltip>
-                  </Box>
-                </div>
-              )}
-
-              <div>
-                <DynamicSearchProject
-                  setProject={(data) => setProjectIncomingToDisPlay(data)}
-                  typeProject="projectIncoming"
-                ></DynamicSearchProject>
-              </div>
-              <div className="incoming-proj row d-flex flex-row align-items-stretch">
-                {projectIncomingToDisPlay.map((item) => {
-                  let percent = Math.floor(
-                    ((Date.now() - Date.parse(item.TimeStart)) /
-                      (Date.parse(item.TimeEnd) - Date.parse(item.TimeStart))) *
-                      100
-                  );
-
-                  console.log("percent", percent);
-
-                  return (
-                    <div
-                      className="col-2 col-md-3 row"
-                      onClick={() => {
-                        ViewDetailProject(item.ProjectID);
-                      }}
-                    >
-                      <div className="container">
-                        <div className="card card-incoming">
-                          <div className="card-body">
-                            <h5
-                              className="card-title"
-                              style={{ height: "50px" }}
-                            >
-                              {item.ProjectName}
-                            </h5>
-
-                            <Progress
-                              striped
-                              animated
-                              color="warning"
-                              value={percent > 0 ? percent : 0}
-                            >
-                              {percent}%
-                            </Progress>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-                <div className="d-flex justify-content-center my-5 col-md-11 ">
-                  <PaginationOutlined
-                    totalPage={props.projects.totalPageProjectIncoming}
-                    onChangePage={(pageNum) =>
-                      dispatch(fetchProjectsIncoming(pageNum))
-                    }
-                  />
-                </div>
-              </div>
-            </TabPanel>
-
-            <TabPanel value="2">
-              {projectIncomingToDisPlay.length < projectIncoming.length && (
-                <div className="sticky-btn-viewAll">
-                  <Box sx={{ "& > :not(style)": { m: 1 } }}>
-                    <Tooltip
-                      title="View All"
-                      color="info"
-                      placement="left"
-                      variant={"soft"}
-                    >
-                      <Fab
-                        size="small"
-                        color="secondary"
-                        aria-label="add"
-                        onClick={() => {
-                          setProjectEndedToDisPlay(projectEnded);
-                        }}
-                      >
-                        <GridOnRoundedIcon />
-                      </Fab>
-                    </Tooltip>
-                  </Box>
-                </div>
-              )}
-
-              <DynamicSearchProject
-                setProject={(data) => setProjectEndedToDisPlay(data)}
-                typeProject="projectEnded"
-              ></DynamicSearchProject>
-              <div className="ended-proj row">
-                <div className="processing-proj row d-flex">
-                  {projectEndedToDisPlay.length === 0 && (
-                    <Alert severity="info" className="w-100">
-                      <AlertTitle>Info</AlertTitle>
-                      <strong>There is no project ended!</strong>
-                    </Alert>
-                  )}
-                  {projectEndedToDisPlay.length > 0 &&
-                    projectEndedToDisPlay.map((item, index) => {
-                      return (
-                        <div
-                          key={index}
-                          className="col-2 col-md-3 row"
-                          onClick={() => {
-                            ViewDetailProject(item.ProjectID);
-                          }}
-                        >
-                          <div className="container">
-                            <div className="card card-end">
-                              <div className="card-body">
-                                <h5
-                                  className="card-title"
-                                  style={{ height: "70px" }}
-                                >
-                                  {item.ProjectName}
-                                </h5>
-                                <hr className="m-0"></hr>
+                        <div className="container">
+                          <div className="card ">
+                            <div className="card-body">
+                              <h5
+                                className="card-title"
+                                style={{ height: "50px" }}
+                              >
+                                {item.ProjectName}
+                              </h5>
+                              <div className="row px-2 cart-content">
+                                <div className="text-black row">
+                                  <div className="col-6">
+                                    {" "}
+                                    <b>Project ID</b>{" "}
+                                  </div>
+                                  <div className="col-6 text-end">
+                                    {item.ProjectID}
+                                  </div>
+                                  <div className="col-6">
+                                    {" "}
+                                    <b>PM</b>{" "}
+                                  </div>
+                                  <div
+                                    className="col-6 text-end card-text text-truncate"
+                                    style={{ maxWidth: "500px" }}
+                                  >
+                                    {item.Manager}
+                                  </div>
+                                  <div className="col-6">
+                                    {" "}
+                                    <b>Team size</b>{" "}
+                                  </div>
+                                  <div className="col-6 text-end">
+                                    {item.Staffs.length}
+                                  </div>
+                                </div>
                               </div>
+
+                              <Progress
+                                striped
+                                animated
+                                color="warning"
+                                value={percent > 0 ? percent : 0}
+                                className="my-3 mx-2"
+                              >
+                                {percent}%
+                              </Progress>
                             </div>
                           </div>
                         </div>
-                      );
-                    })}
+                      </div>
+                    );
+                  })}
                   <div className="d-flex justify-content-center my-5 col-md-11 ">
                     <PaginationOutlined
-                      totalPage={props.projects.totalPageProjectEnded}
+                      totalPage={props.projects.totalPageProjectInProgress}
                       onChangePage={(pageNum) =>
-                        dispatch(fetchProjectsInprogress(pageNum))
+                        dispatch(fetchProjectsInprogress(pageNum, token))
                       }
                     />
                   </div>
                 </div>
-              </div>
-            </TabPanel>
-          </TabContext>
-        </Box>
-      </div>
+              </TabPanel>
 
-      {/* modal input create new project */}
-      <Modal show={show} onHide={handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Create new project</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <form onSubmit={(event) => handleSubmitForm(event)}>
-            <div className="row"></div>
-            <TextField
-              className=" my-2"
-              label="Project name"
-              variant="outlined"
-              size="small"
-              name="projectName"
-              fullWidth
-            />
+              <TabPanel value="3">
+                {projectIncomingToDisPlay.length < projectIncoming.length && (
+                  <div className="sticky-btn-viewAll">
+                    <Box sx={{ "& > :not(style)": { m: 1 } }}>
+                      <Tooltip
+                        title="View All"
+                        color="info"
+                        placement="left"
+                        variant={"soft"}
+                      >
+                        <Fab
+                          size="small"
+                          color="secondary"
+                          aria-label="add"
+                          onClick={() => {
+                            setProjectIncomingToDisPlay(projectIncoming);
+                          }}
+                        >
+                          <GridOnRoundedIcon />
+                        </Fab>
+                      </Tooltip>
+                    </Box>
+                  </div>
+                )}
 
-            <div className="d-flex justify-content-between">
+                <div>
+                  <DynamicSearchProject
+                    setProject={(data) => setProjectIncomingToDisPlay(data)}
+                    typeProject="projectIncoming"
+                    resetScreen={() => {
+                      setProjectIncomingToDisPlay(projectIncoming);
+                    }}
+                  ></DynamicSearchProject>
+                </div>
+                <div className="incoming-proj row d-flex flex-row align-items-stretch">
+                  {projectIncomingToDisPlay.map((item) => {
+                    let percent = Math.floor(
+                      ((Date.now() - Date.parse(item.TimeStart)) /
+                        (Date.parse(item.TimeEnd) -
+                          Date.parse(item.TimeStart))) *
+                        100
+                    );
+
+                    console.log("percent", percent);
+
+                    return (
+                      <div
+                        className="col-2 col-md-4 row"
+                        onClick={() => {
+                          ViewDetailProject(item.ProjectID);
+                        }}
+                      >
+                        <div className="container">
+                          <div className="card ">
+                            <div className="card-body">
+                              <h5
+                                className="card-incoming"
+                                style={{ height: "50px" }}
+                              >
+                                {item.ProjectName}
+                              </h5>
+
+                              <div className="row px-2 cart-content">
+                                <div className="text-black row">
+                                  <div className="col-6">
+                                    {" "}
+                                    <b>Project ID</b>{" "}
+                                  </div>
+                                  <div className="col-6 text-end">
+                                    {item.ProjectID}
+                                  </div>
+                                  <div className="col-6">
+                                    {" "}
+                                    <b>PM</b>{" "}
+                                  </div>
+                                  <div
+                                    className="col-6 text-end card-text text-truncate"
+                                    style={{ maxWidth: "500px" }}
+                                  >
+                                    {item.Manager}
+                                  </div>
+                                  <div className="col-6">
+                                    {" "}
+                                    <b>Team size</b>{" "}
+                                  </div>
+                                  <div className="col-6 text-end">
+                                    {item.Staffs.length}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* <Progress
+                              striped
+                              animated
+                              color="warning"
+                              value={percent > 0 ? percent : 0}
+                              className="my-3 mx-2"
+                            >
+                              {percent}%
+                            </Progress> */}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <div className="d-flex justify-content-center my-5 col-md-11 ">
+                    <PaginationOutlined
+                      totalPage={props.projects.totalPageProjectIncoming}
+                      onChangePage={(pageNum) =>
+                        dispatch(fetchProjectsIncoming(pageNum, token))
+                      }
+                    />
+                  </div>
+                </div>
+              </TabPanel>
+
+              <TabPanel value="2">
+                {projectIncomingToDisPlay.length < projectIncoming.length && (
+                  <div className="sticky-btn-viewAll">
+                    <Box sx={{ "& > :not(style)": { m: 1 } }}>
+                      <Tooltip
+                        title="View All"
+                        color="info"
+                        placement="left"
+                        variant={"soft"}
+                      >
+                        <Fab
+                          size="small"
+                          color="secondary"
+                          aria-label="add"
+                          onClick={() => {
+                            setProjectEndedToDisPlay(projectEnded);
+                          }}
+                        >
+                          <GridOnRoundedIcon />
+                        </Fab>
+                      </Tooltip>
+                    </Box>
+                  </div>
+                )}
+
+                <DynamicSearchProject
+                  setProject={(data) => setProjectEndedToDisPlay(data)}
+                  typeProject="projectEnded"
+                  resetScreen={() => {
+                    setProjectEndedToDisPlay(projectEnded);
+                  }}
+                ></DynamicSearchProject>
+                <div className="ended-proj row">
+                  <div className="processing-proj row d-flex">
+                    {projectEndedToDisPlay.length === 0 && (
+                      <Alert severity="error" className="w-100">
+                        <AlertTitle>Info</AlertTitle>
+                        <strong>There is no project ended!</strong>
+                      </Alert>
+                    )}
+                    {projectEndedToDisPlay.length > 0 &&
+                      projectEndedToDisPlay.map((item, index) => {
+                        return (
+                          <div
+                            key={index}
+                            className="col-2 col-md-3 row"
+                            onClick={() => {
+                              ViewDetailProject(item.ProjectID);
+                            }}
+                          >
+                            <div className="container">
+                              <div className="card card-end">
+                                <div className="card-body">
+                                  <h5
+                                    className="card-title"
+                                    style={{ height: "70px" }}
+                                  >
+                                    {item.ProjectName}
+                                  </h5>
+                                  <hr className="m-0"></hr>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    <div className="d-flex justify-content-center my-5 col-md-11 ">
+                      <PaginationOutlined
+                        totalPage={props.projects.totalPageProjectEnded}
+                        onChangePage={(pageNum) =>
+                          dispatch(fetchProjectsInprogress(pageNum, token))
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+              </TabPanel>
+            </TabContext>
+          </Box>
+        </div>
+
+        {/* modal input create new project */}
+        <Modal show={show} onHide={handleClose}>
+          <Modal.Header closeButton>
+            <Modal.Title>Create new project</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <form onSubmit={(event) => handleSubmitForm(event)}>
+              <div className="row"></div>
               <TextField
-                className="my-2"
-                label="Start day"
-                variant="filled"
+                className=" my-2"
+                label="Project name"
+                variant="outlined"
                 size="small"
-                name="startDay"
-                type={"date"}
-                defaultValue={new Date().toISOString().slice(0, 10)}
-                onChange={(event) => {
-                  console.log("event", event.target.value);
-                  setStartDayNewProject(event.target.value);
-                }}
+                name="projectName"
+                fullWidth
               />
 
-              <TextField
-                className="my-2"
-                label="End day"
-                variant="filled"
-                size="small"
-                name="endDay"
-                type={"date"}
-                defaultValue={new Date().toISOString().slice(0, 10)}
-                onChange={(event) => {
-                  console.log("event", event.target.value);
-                  setEndDayNewProject(event.target.value);
-                }}
-              />
-            </div>
-            <div className="my-2">
-              <Button
-                variant="warning"
-                onClick={() => getFreeProjectManager()}
-                className="mr-2"
-              >
-                Find ProjectManager
-              </Button>
-            </div>
-
-            <div className="d-flex justify-content-start">
-              {FreeProjectManager.length > 0 && (
-                <SearchAutoCompletePM
-                  searchData={FreeProjectManager}
-                  setManager={async (result) => {
-                    console.log("result", result);
-                    setPMInNewProject(result);
+              <div className="d-flex justify-content-between">
+                <TextField
+                  className="my-2"
+                  label="Start day"
+                  variant="filled"
+                  size="small"
+                  name="startDay"
+                  type={"date"}
+                  defaultValue={new Date().toISOString().slice(0, 10)}
+                  onChange={(event) => {
+                    console.log("event", event.target.value);
+                    setStartDayNewProject(event.target.value);
                   }}
                 />
-              )}
-            </div>
-            <div className="d-flex">
-              <Button
-                variant="secondary"
-                onClick={handleClose}
-                className="mr-2"
-              >
-                Cancel
-              </Button>
-              <Button
-                className="ml-2"
-                variant="primary"
-                onClick={handleClose}
-                style={{
-                  backgroundColor: "rgb(164,114,254)",
-                  border: "none",
-                  marginLeft: "2px",
-                }}
-                type="submit"
-              >
-                Create
-              </Button>
-            </div>
-          </form>
-        </Modal.Body>
-      </Modal>
-    </div>
+
+                <TextField
+                  className="my-2"
+                  label="End day"
+                  variant="filled"
+                  size="small"
+                  name="endDay"
+                  type={"date"}
+                  defaultValue={new Date().toISOString().slice(0, 10)}
+                  onChange={(event) => {
+                    console.log("event", event.target.value);
+                    setEndDayNewProject(event.target.value);
+                  }}
+                />
+              </div>
+              <div className="my-2">
+                <Button
+                  variant="warning"
+                  onClick={() => getFreeProjectManager()}
+                  className="mr-2"
+                >
+                  Find ProjectManager
+                </Button>
+              </div>
+
+              <div className="d-flex justify-content-start">
+                {FreeProjectManager.length > 0 && (
+                  <SearchAutoCompletePM
+                    searchData={FreeProjectManager}
+                    setManager={async (result) => {
+                      console.log("result", result);
+                      setPMInNewProject(result);
+                    }}
+                  />
+                )}
+              </div>
+              <div className="d-flex">
+                <Button
+                  variant="secondary"
+                  onClick={handleClose}
+                  className="mr-2"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="ml-2"
+                  variant="primary"
+                  onClick={handleClose}
+                  style={{
+                    backgroundColor: "rgb(164,114,254)",
+                    border: "none",
+                    marginLeft: "2px",
+                  }}
+                  type="submit"
+                >
+                  Create
+                </Button>
+              </div>
+            </form>
+          </Modal.Body>
+        </Modal>
+      </div>
+    </>
   );
 }
 
