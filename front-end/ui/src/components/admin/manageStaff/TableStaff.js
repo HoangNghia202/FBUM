@@ -124,12 +124,12 @@ function TableStaff(props) {
 
   const handleUpdate = async () => {
     console.log("updateStaff", updateStaff);
-    let res = await handleUpdateStaff(updateStaff);
+    let res = await handleUpdateStaff(updateStaff, token);
     if (res.errCode === 0) {
       toast.success(res.message);
-      dispatch(fetchAllStaff(token));
-      dispatch(fetchFreeStaff(token));
-      dispatch(fetchInProjectStaff(token));
+      dispatch(fetchAllStaff(1, token));
+      dispatch(fetchFreeStaff(1, token));
+      dispatch(fetchInProjectStaff(1, token));
       handleCloseUpdate(token);
     } else {
       toast.error(res.message);

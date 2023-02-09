@@ -53,7 +53,7 @@ const productSliderSlice = createSlice({
 });
 
 export const fetchProjects = (pageNum, token) => {
-  console.log("token in fecch project >>> ", token);
+  console.log("token in fetch project >>> ", token);
 
   return async (dispatch, getState) => {
     console.log("run in to thunk action creator");
@@ -80,7 +80,7 @@ export const fetchProjects = (pageNum, token) => {
       });
       console.log("res4 >>> ", res4);
 
-      const res5 = await axios.get(`${baseUrl}/api/projectInProgress`, {
+      const res5 = await axios.get(`${baseUrl}/api/projectInProgressPage`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log("res5 >>> ", res5.data);
@@ -105,7 +105,7 @@ export const fetchProjects = (pageNum, token) => {
       console.log("res >>> ", res);
       dispatch(setProjectSlider(res));
     } catch (error) {
-      throw error;
+      console.error("error >>> ", error);
     }
   };
 };

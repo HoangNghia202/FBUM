@@ -115,7 +115,7 @@ function ManageStaff(props) {
   const createNewStaff = async () => {
     console.log("run into createNewStaff");
 
-    delete newStaff.ConfirmPassword;
+    // delete newStaff.ConfirmPassword;
     console.log("newStaff>>>", newStaff);
     let res = await handleCreateNewStaff(newStaff, token);
     console.log("res>>>", res);
@@ -130,21 +130,21 @@ function ManageStaff(props) {
         MainPosition: "1",
         Level: "1",
       });
-      dispatch(fetchAllStaff(token));
-      dispatch(fetchFreeStaff(token));
-      dispatch(fetchInProjectStaff(token));
+      dispatch(fetchAllStaff(1, token));
+      dispatch(fetchFreeStaff(1, token));
+      dispatch(fetchInProjectStaff(1, token));
     } else {
       toast.error(res.message);
     }
   };
 
   const deleteStaff = async (id) => {
-    let res = await handleDeleteStaff(id);
+    let res = await handleDeleteStaff(id, token);
     if (res.errCode === 0) {
       toast.success(res.message);
-      dispatch(fetchAllStaff(token));
-      dispatch(fetchFreeStaff(token));
-      dispatch(fetchInProjectStaff(token));
+      dispatch(fetchAllStaff(1, token));
+      dispatch(fetchFreeStaff(1, token));
+      dispatch(fetchInProjectStaff(1, token));
     } else {
       toast.error(res.message);
     }

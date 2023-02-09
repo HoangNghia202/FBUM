@@ -45,15 +45,11 @@ function DynamicSearchProject(props) {
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setSearchItem(value);
-    // if (!onSearchChange) return;
-
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
-
     typingTimeoutRef.current = setTimeout(() => {
       console.log("search content after 500ms: ", value);
-
       findAndDisplayItem(value.trim());
     }, 500);
   };

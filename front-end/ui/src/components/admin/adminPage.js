@@ -24,10 +24,11 @@ function AdminPage(props) {
   const token = cookies.token;
 
   useEffect(() => {
+    console.log("hello em o day ne");
     dispatch(fetchProjects(1, token));
-    dispatch(fetchAllStaff(token));
-    dispatch(fetchInProjectStaff(token));
-    dispatch(fetchFreeStaff(token));
+    dispatch(fetchAllStaff(1, token));
+    dispatch(fetchInProjectStaff(1, token));
+    dispatch(fetchFreeStaff(1, token));
   }, []);
 
   useEffect(() => {

@@ -475,3 +475,144 @@ export const handleUpdateStaff = async (staff, token) => {
     console.log("error update staff>>>", error);
   }
 };
+
+export const advanceSearchProject = async (searchInput, token) => {
+  try {
+    let payload = {
+      ProjectName: searchInput.projectName,
+      ProjectManager: searchInput.PM,
+      BusinessAnalysis: searchInput.BA,
+      SoftwareDeveloper: searchInput.dev,
+      SoftwareTester: searchInput.tester,
+      TimeStart: searchInput.startDate,
+      TimeEnd: searchInput.endDate,
+    };
+    console.log("payload>>>", payload);
+    let res = await axios.post(
+      `${baseUrl}/api/project/multiOptionSearch`,
+      payload,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    console.log("res search project>>>", res.data);
+    if (res.data.length > 0) {
+      return {
+        errCode: 0,
+        data: res.data,
+        message: "Project found",
+      };
+    } else
+      return {
+        errCode: 1,
+        data: [],
+        message: "Project not found",
+      };
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const searchStaff = async (searchInput, type, token) => {
+  try {
+    let result = [];
+    let res = await axios.get(`${baseUrl}/api/staff/search/${searchInput}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    switch (type) {
+      case "PM":
+        result = res.data.filter(
+          (staff) => staff.StaffRole === "Project Manager"
+        );
+        if (result.length > 0) {
+          return {
+            errCode: 0,
+            data: result,
+            message: "PM found",
+          };
+        }
+        return {
+          errCode: 1,
+          staffs: [],
+          message: "PM not found",
+        };
+
+      case "dev":
+        result = res.data.filter(
+          (staff) =>
+            staff.StaffRole === "Staff" &&
+            staff.MainPosition === "Software Developer"
+        );
+        if (result.length > 0) {
+          return {
+            errCode: 0,
+            data: result,
+            message: "dev found",
+          };
+        }
+        return {
+          errCode: 1,
+          data: [],
+          message: "dev not found",
+        };
+      case "tester":
+        result = res.data.filter(
+          (staff) =>
+            staff.StaffRole === "Staff" &&
+            staff.MainPosition === "Software Tester"
+        );
+        if (result.length > 0) {
+          return {
+            errCode: 0,
+            data: result,
+            message: "tester found",
+          };
+        }
+        return {
+          errCode: 1,
+          data: [],
+          message: "tester not found",
+        };
+
+      case "BA":
+        result = res.data.filter(
+          (staff) =>
+            staff.StaffRole === "Staff" &&
+            staff.MainPosition === "Business Analysis"
+        );
+        if (result.length > 0) {
+          return {
+            errCode: 0,
+            data: result,
+            message: "BA found",
+          };
+        }
+        return {
+          errCode: 1,
+          data: [],
+          message: "BA not found",
+        };
+
+      default:
+        return {
+          errCode: 2,
+          data: result,
+          message: "error in find progress",
+        };
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const exportExcel = async (id, path, token) => {
+  try {
+    let res = await axios.get(`${baseUrl}/api/Export/Project/${id}/${path}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return {
+      errCode: 0,
+      message: "Export excel successfully",
+    };
+  } catch (error) {
+    console.log("error export excel>>>", error);
+  }
+};

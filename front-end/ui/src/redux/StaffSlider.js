@@ -25,12 +25,12 @@ const StaffSlice = createSlice({
   },
 });
 
-export const fetchAllStaff = (token) => {
+export const fetchAllStaff = (pageNum, token) => {
   return async (dispatch) => {
     console.log("run in to thunk action creator for fetchAllStaff", {
       headers: { Authorization: `Bearer ${token}` },
     });
-    const res = await axios.get(`${baseUrl}/api/staff`, {
+    const res = await axios.get(`${baseUrl}/api/staff/${pageNum}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     console.log("res>>>", res.data);
@@ -65,10 +65,10 @@ export const fetchAllStaff = (token) => {
   };
 };
 
-export const fetchFreeStaff = (token) => {
+export const fetchFreeStaff = (pageNum, token) => {
   return async (dispatch) => {
     console.log("run in to thunk action creator for fetchFreeStaff");
-    const res = await axios.get(`${baseUrl}/api/staffFree`, {
+    const res = await axios.get(`${baseUrl}/api/staffFree/${pageNum}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     console.log("res>>>", res.data);
@@ -103,10 +103,10 @@ export const fetchFreeStaff = (token) => {
   };
 };
 
-export const fetchInProjectStaff = (token) => {
+export const fetchInProjectStaff = (pageNum, token) => {
   return async (dispatch) => {
     console.log("run in to thunk action creator for fetchInProcessStaff");
-    const res = await axios.get(`${baseUrl}/api/staffInProject`, {
+    const res = await axios.get(`${baseUrl}/api/allStaffInProject/${pageNum}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     console.log("res inprogress staff>>>", res.data);

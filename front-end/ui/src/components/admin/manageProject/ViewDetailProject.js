@@ -15,6 +15,7 @@ import {
 import { fetchProjects } from "../../../redux/ProjectSlider";
 import { toast } from "react-toastify";
 import { useCookies } from "react-cookie";
+import { exportExcel } from "../../../services/adminServices/AdminServices";
 
 function ViewDetailProject(props) {
   const dispatch = useDispatch();
@@ -25,6 +26,19 @@ function ViewDetailProject(props) {
   let navigate = useNavigate();
   const { projectId } = useParams();
   console.log("projectId>>>", projectId);
+
+  const handleClickExport = async (projectId) => {
+    let path = "h";
+    console.log("click export");
+    let res = await exportExcel(projectId, path, token);
+    console.log("res", res);
+    if (res.errCode === 0) {
+      toast.success("Export excel successfully!");
+    } else {
+      console.log("error", res);
+      toast.error("Export excel failed!");
+    }
+  };
 
   const mainProject = [
     ...projectEnded,
@@ -134,6 +148,13 @@ function ViewDetailProject(props) {
             >
               Transfer Member
             </Button>
+
+            <Button
+              variant="contained"
+              color="warning"
+              className="my-1"
+              onClick={() => handleClickExport(mainProject.ProjectID)}
+            ></Button>
           </div>
         </div>
         <div className="col-md-8 mt-2 p-0">
