@@ -608,11 +608,18 @@ namespace BUResourcesManagementAPI.Controllers
         public IEnumerable<Project> MultiOptionSearch([FromBody] SearchProject searchProject)
         {
             if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
-
             try
             {
                 var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString);
                 connection.Open();
+
+                if (searchProject.ProjectName.Equals("") &&
+                    searchProject.ProjectManager == 0 &&
+                    searchProject.BusinessAnalysis.Length == 0 &&
+                    searchProject.SoftwareDeveloper.Length == 0 &&
+                    searchProject.SoftwareTester.Length == 0 &&
+                    searchProject.TimeStart.Equals("") &&
+                    searchProject.TimeEnd.Equals("")) return new List<Project>();
 
                 List<Project> listProject = new List<Project>();
                 if (true)
