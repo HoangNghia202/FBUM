@@ -287,3 +287,7 @@ D:\Visual Studio 2022\FBUM\back-end\BUResourcesManagementAPI\bin\EPPlus.Core.xml
 D:\Visual Studio 2022\FBUM\back-end\BUResourcesManagementAPI\bin\Microsoft.IO.RecyclableMemoryStream.xml
 D:\Visual Studio 2022\FBUM\back-end\BUResourcesManagementAPI\bin\System.Memory.Data.dll
 D:\Visual Studio 2022\FBUM\back-end\BUResourcesManagementAPI\bin\System.Memory.Data.xml
+D:\Visual Studio 2022\FBUM\back-end\BUResourcesManagementAPI\bin\Microsoft.AspNetCore.StaticFiles.dll
+D:\Visual Studio 2022\FBUM\back-end\BUResourcesManagementAPI\bin\Microsoft.Extensions.WebEncoders.dll
+D:\Visual Studio 2022\FBUM\back-end\BUResourcesManagementAPI\bin\Microsoft.AspNetCore.StaticFiles.xml
+D:\Visual Studio 2022\FBUM\back-end\BUResourcesManagementAPI\bin\Microsoft.Extensions.WebEncoders.xml

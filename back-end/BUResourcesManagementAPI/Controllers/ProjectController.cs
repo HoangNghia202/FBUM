@@ -14,6 +14,11 @@ using System.Web.Management;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using ClosedXML.Excel;
 using System.IO;
+using DocumentFormat.OpenXml.Wordprocessing;
+using OfficeOpenXml;
+using DocumentFormat.OpenXml.Spreadsheet;
+using System.Threading.Tasks;
+using System.Web.Configuration;
 
 namespace BUResourcesManagementAPI.Controllers
 {
@@ -603,6 +608,61 @@ namespace BUResourcesManagementAPI.Controllers
             }
         }
 
+        [HttpGet] //api/Dowload/Project/{id}
+        [Route("api/Download/Project/{id}")]
+        public HttpResponseMessage GetExcelFile(int id)
+        {
+            try
+            {
+                ProjectController projectController = new ProjectController();
+                Project project = projectController.Get(id);
+                List<Staff> staffs = projectController.GetStaff(id);
+
+                DataTable projectTable = new DataTable();
+                projectTable.TableName = "Project Information";
+
+                projectTable.Columns.Add("Project ID");
+                projectTable.Columns.Add("Project Name");
+                projectTable.Columns.Add("Manager");
+                projectTable.Columns.Add("Start Date");
+                projectTable.Columns.Add("End Date");
+                projectTable.Columns.Add("Export Date");
+
+                projectTable.Rows.Add(project.ProjectID, project.ProjectName, project.Manager, project.TimeStart, project.TimeEnd, String.Format("{0:yyyy-MM-dd hh:mm:ss}", DateTimeOffset.Now));
+
+                DataTable staffTable = new DataTable();
+                staffTable.TableName = "Staff In Project";
+
+                staffTable.Columns.Add("Staff ID", typeof(int));
+                staffTable.Columns.Add("Staff Name", typeof(String));
+
+                foreach (Staff staff in staffs) staffTable.Rows.Add(staff);
+
+                XLWorkbook wb = new XLWorkbook();
+                wb.Worksheets.Add(projectTable);
+                wb.Worksheets.Add(staffTable);
+
+                var workbookBytes = new byte[0];
+                var ms = new MemoryStream();
+                wb.SaveAs(ms);
+                workbookBytes = ms.ToArray();
+
+                //adding bytes to memory stream   
+                var dataStream = new MemoryStream(workbookBytes);
+                Models.Values values = new Models.Values("Projects.xlsx");
+                HttpResponseMessage httpResponseMessage = Request.CreateResponse(HttpStatusCode.OK);
+                httpResponseMessage.Content = new StreamContent(dataStream);
+                httpResponseMessage.Content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment");
+                httpResponseMessage.Content.Headers.ContentDisposition.FileName = values.Value;
+                httpResponseMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
+                return httpResponseMessage;
+            }
+            catch (Exception ex)
+            {
+                return Request.CreateErrorResponse(HttpStatusCode.Unauthorized, "Unauthorized");
+            }
+        }
+
         [HttpPost] // api/project/multiOptionSearch
         [Route("api/project/multiOptionSearch")]
         public IEnumerable<Project> MultiOptionSearch([FromBody] SearchProject searchProject)
@@ -710,7 +770,7 @@ namespace BUResourcesManagementAPI.Controllers
                     for (int i = 0; i < searchProject.BusinessAnalysis.Length; i++)
                     {
                         String query = @"SELECT Project.ProjectID, ProjectName, Manager, TimeStart, TimeEnd FROM Project, WorkOn 
-                                        WHERE Project.ProjectID = WorkOn.ProjectID AND WorkOn.StaffID = @StaffID";
+                                        WHERE Project.ProjectID = WorkOn.ProjectID AND WorkOn.StaffID = @StaffID AND WorkOn.WorkEnd = Project.TimeEnd;";
                         var command = new SqlCommand(query, connection);
                         command.CommandType = CommandType.Text;
                         command.Parameters.AddWithValue("@StaffID", searchProject.BusinessAnalysis[i]);
@@ -744,7 +804,7 @@ namespace BUResourcesManagementAPI.Controllers
                     for (int i = 0; i < searchProject.SoftwareDeveloper.Length; i++)
                     {
                         String query = @"SELECT Project.ProjectID, ProjectName, Manager, TimeStart, TimeEnd FROM Project, WorkOn 
-                                        WHERE Project.ProjectID = WorkOn.ProjectID AND WorkOn.StaffID = @StaffID";
+                                        WHERE Project.ProjectID = WorkOn.ProjectID AND WorkOn.StaffID = @StaffID AND WorkOn.WorkEnd = Project.TimeEnd;";
                         var command = new SqlCommand(query, connection);
                         command.CommandType = CommandType.Text;
                         command.Parameters.AddWithValue("@StaffID", searchProject.SoftwareDeveloper[i]);
@@ -778,7 +838,7 @@ namespace BUResourcesManagementAPI.Controllers
                     for (int i = 0; i < searchProject.SoftwareTester.Length; i++)
                     {
                         String query = @"SELECT Project.ProjectID, ProjectName, Manager, TimeStart, TimeEnd FROM Project, WorkOn 
-                                        WHERE Project.ProjectID = WorkOn.ProjectID AND WorkOn.StaffID = @StaffID";
+                                        WHERE Project.ProjectID = WorkOn.ProjectID AND WorkOn.StaffID = @StaffID AND WorkOn.WorkEnd = Project.TimeEnd;";
                         var command = new SqlCommand(query, connection);
                         command.CommandType = CommandType.Text;
                         command.Parameters.AddWithValue("@StaffID", searchProject.SoftwareTester[i]);
@@ -943,7 +1003,7 @@ namespace BUResourcesManagementAPI.Controllers
 
         [HttpPost] // api/transfer/{fromId}/{toId}
         [Route("api/transfer/{fromId}/{toId}")]
-        public String MoveStaff(int fromID, int toID, [FromBody] Values staffIDs)
+        public String MoveStaff(int fromID, int toID, [FromBody] Models.Values staffIDs)
         {
             if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return "Can't access this resource";
             try
@@ -1041,6 +1101,8 @@ namespace BUResourcesManagementAPI.Controllers
             try
             {
                 Project project = Get(projectID);
+
+                if (new StaffController().Get(staffID).StaffRole.Equals("Project Manager")) return "Can't delete project manager";
 
                 String query = @"UPDATE WorkOn SET WorkEnd = @WorkEnd WHERE ProjectID = @ProjectID AND StaffID = @StaffID;";
 
