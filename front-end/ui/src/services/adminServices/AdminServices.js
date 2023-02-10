@@ -603,16 +603,37 @@ export const searchStaff = async (searchInput, type, token) => {
   }
 };
 
-export const exportExcel = async (id, path, token) => {
+export const exportExcel = async (id, token) => {
   try {
-    let res = await axios.get(`${baseUrl}/api/Export/Project/${id}/${path}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    // let res = await axios.get(`${baseUrl}/api/Download/Project/${id}`, {
+    //   headers: { Authorization: `Bearer ${token}` },
+    // });
+    // console.log("res export excel>>>", res.data);
+    // return {
+    //   errCode: 0,
+    //   message: "Export excel successfully",
+    // };
+    axios
+      .get({
+        url: `${baseUrl}/api/Download/Project/${id}`,
+        method: "GET",
+        responseType: "blob",
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        const url = window.URL.createObjectURL(new Blob([res.data]));
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.setAttribute("download", "file.xlsx");
+        document.body.appendChild(link);
+        link.click();
+      });
     return {
       errCode: 0,
       message: "Export excel successfully",
     };
   } catch (error) {
-    console.log("error export excel>>>", error);
+    console.error("error export excel>>>", error);
   }
 };

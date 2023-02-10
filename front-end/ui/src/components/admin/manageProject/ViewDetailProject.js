@@ -28,9 +28,8 @@ function ViewDetailProject(props) {
   console.log("projectId>>>", projectId);
 
   const handleClickExport = async (projectId) => {
-    let path = "h";
     console.log("click export");
-    let res = await exportExcel(projectId, path, token);
+    let res = await exportExcel(projectId, token);
     console.log("res", res);
     if (res.errCode === 0) {
       toast.success("Export excel successfully!");
@@ -154,7 +153,9 @@ function ViewDetailProject(props) {
               color="warning"
               className="my-1"
               onClick={() => handleClickExport(mainProject.ProjectID)}
-            ></Button>
+            >
+              export excel
+            </Button>
           </div>
         </div>
         <div className="col-md-8 mt-2 p-0">

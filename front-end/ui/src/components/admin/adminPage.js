@@ -11,6 +11,7 @@ import {
   fetchAllStaff,
   fetchInProjectStaff,
   fetchFreeStaff,
+  fetchPageNumOfStaff,
 } from "../../redux/StaffSlider";
 
 import { Cookies, useCookies } from "react-cookie";
@@ -29,6 +30,7 @@ function AdminPage(props) {
     dispatch(fetchAllStaff(1, token));
     dispatch(fetchInProjectStaff(1, token));
     dispatch(fetchFreeStaff(1, token));
+    dispatch(fetchPageNumOfStaff(token));
   }, []);
 
   useEffect(() => {

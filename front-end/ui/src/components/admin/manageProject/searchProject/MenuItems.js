@@ -27,6 +27,9 @@ function MenuFilterItem(props) {
     handleResetSearchResultStaff,
   } = props;
 
+  const [buttonName, setButtonName] = useState({
+    PM: "",
+  });
   const [anchor, setAnchor] = useState(null);
   const [allResult, setAllResult] = useState([]);
 
@@ -100,7 +103,7 @@ function MenuFilterItem(props) {
     console.log("check", e.target.checked);
     console.log("staff", staff);
     console.log("type", type);
-
+    setButtonName({ ...buttonName, [type]: staff.StaffName });
     if (e.target.checked) {
       if (type !== "PM") {
         setResultChecked(type, [...resultChecked, staff]);
@@ -128,7 +131,10 @@ function MenuFilterItem(props) {
         onClick={handleClick}
       >
         <span>
-          {icon} {name} <KeyboardArrowDownIcon />
+          {icon} {type === "PM" && buttonName.PM && buttonName.PM}
+          {type === "PM" && !buttonName.PM && name}
+          {type !== "PM" && name}
+          <KeyboardArrowDownIcon />
         </span>
       </Button>
       <Menu
@@ -155,21 +161,6 @@ function MenuFilterItem(props) {
           />
 
           <Box className="pm-search-result" sx={{ mt: 2 }}>
-            {/* <Paper elevation={6} sx={{ backgroundColor: "", mt: 1, p: 1 }}>
-              <input
-                type="radio"
-                id="PM"
-                name="PM"
-                value={""}
-                onChange={(event) => handleCheck(event, item)}
-                checked
-              />
-              <label for="PM" style={{ margin: "0 10px" }}>
-                None
-              </label>
-              <br></br>
-            </Paper>
-            ; */}
             {type === "PM" &&
               allResult.map((item) => {
                 return (
