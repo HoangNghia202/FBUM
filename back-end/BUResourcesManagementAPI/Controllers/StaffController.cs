@@ -12,6 +12,7 @@ using System.Web.ModelBinding;
 using Antlr.Runtime.Misc;
 using BUResourcesManagementAPI.TokenAuthentication;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace BUResourcesManagementAPI.Controllers
 {
@@ -23,35 +24,73 @@ namespace BUResourcesManagementAPI.Controllers
         {
             try
             {
-                List<Staff> listStaff = null;
+                List<Staff> listStaff = new List<Staff>();
 
-                String query = @"WITH NewTable AS (SELECT ROW_NUMBER() OVER(ORDER BY StaffName) AS RowNumber, StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition 
+                String query1 = @"WITH NewTable AS (SELECT ROW_NUMBER() OVER(ORDER BY StaffName) AS RowNumber, StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition 
                                 FROM Staff, Role, Position
-                                WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID) 
+                                WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND Staff.StaffRole = 2)
+                                SELECT * FROM NewTable WHERE RowNumber BETWEEN @Start AND @End";
+
+                String query2 = @"WITH NewTable AS (SELECT ROW_NUMBER() OVER(ORDER BY StaffName) AS RowNumber, StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition 
+                                FROM Staff, Role, Position
+                                WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND Staff.StaffRole = 3 AND Staff.MainPosition = @Position)
                                 SELECT * FROM NewTable WHERE RowNumber BETWEEN @Start AND @End";
 
                 using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
-                using (var command = new SqlCommand(query, connection))
                 {
+                    var command1 = new SqlCommand(query1, connection);
+                    command1.CommandType = CommandType.Text;
+                    var command2 = new SqlCommand(query2, connection);
+                    command2.CommandType = CommandType.Text;
+
                     connection.Open();
-                    command.CommandType = CommandType.Text;
-                    command.Parameters.AddWithValue("@Start", (page - 1) * 100 + 1);
-                    command.Parameters.AddWithValue("@End", page * 100);
-                    var reader = command.ExecuteReader();
-                    if (reader.HasRows)
+
+                    for (int i = 0; i < 4; i++)
                     {
-                        listStaff = new List<Staff>();
-                        while (reader.Read())
+                        if (i == 0)
                         {
-                            int staffID = reader.GetInt32(1);
-                            String staffName = reader.GetString(2);
-                            String password = reader.GetString(3);
-                            String staffRole = reader.GetString(4);
-                            int level = reader.GetInt32(5);
-                            String mainPosition = reader.GetString(6);
-                            listStaff.Add(new Staff(staffID, staffName, password, staffRole, level, mainPosition));
+                            command1.Parameters.AddWithValue("@Start", (page - 1) * 25 + 1);
+                            command1.Parameters.AddWithValue("@End", page * 25);
+                            var reader = command1.ExecuteReader();
+                            if (reader.HasRows)
+                            {
+                                while (reader.Read())
+                                {
+                                    int staffID = reader.GetInt32(1);
+                                    String staffName = reader.GetString(2);
+                                    String password = reader.GetString(3);
+                                    String staffRole = reader.GetString(4);
+                                    int level = reader.GetInt32(5);
+                                    String mainPosition = reader.GetString(6);
+                                    listStaff.Add(new Staff(staffID, staffName, password, staffRole, level, mainPosition));
+                                }
+                            }
+                            reader.Close();
+                        }
+                        else
+                        {
+                            command2.Parameters.AddWithValue("@Start", (page - 1) * 25 + 1);
+                            command2.Parameters.AddWithValue("@End", page * 25);
+                            command2.Parameters.AddWithValue("@Position", i);
+                            var reader = command2.ExecuteReader();
+                            if (reader.HasRows)
+                            {
+                                while (reader.Read())
+                                {
+                                    int staffID = reader.GetInt32(1);
+                                    String staffName = reader.GetString(2);
+                                    String password = reader.GetString(3);
+                                    String staffRole = reader.GetString(4);
+                                    int level = reader.GetInt32(5);
+                                    String mainPosition = reader.GetString(6);
+                                    listStaff.Add(new Staff(staffID, staffName, password, staffRole, level, mainPosition));
+                                }
+                            }
+                            command2.Parameters.Clear();
+                            reader.Close();
                         }
                     }
+
                     connection.Close();
                 }
 
@@ -69,32 +108,71 @@ namespace BUResourcesManagementAPI.Controllers
         {
             try
             {
-                int rows = 0;
+                int[] page = new int[4];
 
-                String query = @"WITH NewTable AS (SELECT ROW_NUMBER() OVER(ORDER BY StaffName) AS RowNumber, StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition 
+                String query1 = @"WITH NewTable AS (SELECT ROW_NUMBER() OVER(ORDER BY StaffName) AS RowNumber, StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition 
                                 FROM Staff, Role, Position
-                                WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID) 
-                                SELECT COUNT(*) FROM Staff";
+                                WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND Staff.StaffRole = 2)
+                                SELECT COUNT(*) FROM NewTable";
+
+                String query2 = @"WITH NewTable AS (SELECT ROW_NUMBER() OVER(ORDER BY StaffName) AS RowNumber, StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition 
+                                FROM Staff, Role, Position
+                                WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND Staff.StaffRole = 3 AND Staff.MainPosition = @Position)
+                                SELECT COUNT(*) FROM NewTable";
 
                 using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
-                using (var command = new SqlCommand(query, connection))
                 {
+                    var command1 = new SqlCommand(query1, connection);
+                    command1.CommandType = CommandType.Text;
+                    var command2 = new SqlCommand(query2, connection);
+                    command2.CommandType = CommandType.Text;
+
                     connection.Open();
-                    command.CommandType = CommandType.Text;
-                    var reader = command.ExecuteReader();
-                    if (reader.HasRows)
+
+                    for (int i = 0; i < 4; i++)
                     {
-                        while (reader.Read())
+                        if (i == 0)
                         {
-                            rows = reader.GetInt32(0);
-                            if (rows % 100 == 0) return rows / 100;
-                            else return rows / 100 + 1;
+                            var reader = command1.ExecuteReader();
+                            if (reader.HasRows)
+                            {
+                                while (reader.Read())
+                                {
+                                    int rows = reader.GetInt32(0);
+                                    if (rows % 25 == 0) page[i] = rows / 25;
+                                    else return page[i] = rows / 25 + 1;
+                                }
+                            }
+                            reader.Close();
+                        }
+                        else
+                        {
+                            command2.Parameters.AddWithValue("@Position", i);
+                            var reader = command2.ExecuteReader();
+                            if (reader.HasRows)
+                            {
+                                while (reader.Read())
+                                {
+                                    int rows = reader.GetInt32(0);
+                                    if (rows % 25 == 0) page[i] = rows / 25;
+                                    else return page[i] = rows / 25 + 1;
+                                }
+                            }
+                            command2.Parameters.Clear();
+                            reader.Close();
                         }
                     }
+
                     connection.Close();
                 }
 
-                return rows;
+                int result = page[0];
+
+                for (int i = 1; i < 4; i++)
+                {
+                    if (page[i] > result) result = page[i];
+                }
+                return result;
             }
             catch (Exception ex)
             {
@@ -383,7 +461,7 @@ namespace BUResourcesManagementAPI.Controllers
 
         [HttpPost] // api/staffManagerFree
         [Route("api/staffManagerFree")]
-        public List<Staff> GetManagerFree([FromBody] Values time)
+        public List<Staff> GetManagerFree([FromBody] Models.Values time)
         {
             if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
             try

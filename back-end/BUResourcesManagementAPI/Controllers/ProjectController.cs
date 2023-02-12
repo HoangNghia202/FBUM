@@ -67,7 +67,7 @@ namespace BUResourcesManagementAPI.Controllers
         [HttpGet] // api/project/{id}
         public Project Get(int id)
         {
-            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
+            //if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
             try
             {
                 String query = @"SELECT * FROM Project WHERE ProjectID = @ProjectID";
@@ -106,7 +106,7 @@ namespace BUResourcesManagementAPI.Controllers
         [Route("api/staffInProject/{id}")]
         public List<Staff> GetStaff(int id)
         {
-            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
+            //if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
             try
             {
                 List<Staff> listStaff = null;
@@ -636,7 +636,7 @@ namespace BUResourcesManagementAPI.Controllers
                 staffTable.Columns.Add("Staff ID", typeof(int));
                 staffTable.Columns.Add("Staff Name", typeof(String));
 
-                foreach (Staff staff in staffs) staffTable.Rows.Add(staff);
+                foreach (Staff staff in staffs) staffTable.Rows.Add(staff.StaffID, staff.StaffName);
 
                 XLWorkbook wb = new XLWorkbook();
                 wb.Worksheets.Add(projectTable);
@@ -659,7 +659,7 @@ namespace BUResourcesManagementAPI.Controllers
             }
             catch (Exception ex)
             {
-                return Request.CreateErrorResponse(HttpStatusCode.Unauthorized, "Unauthorized");
+                return Request.CreateErrorResponse(HttpStatusCode.Unauthorized, ex.ToString());
             }
         }
 
