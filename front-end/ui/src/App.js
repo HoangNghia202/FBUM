@@ -57,53 +57,50 @@ function App() {
   return (
     <div className="App">
       <div className="app-body">
-        <CustomScrollbars style={{ height: "100vh", width: "100%" }}>
-          <Routes>
+        {/* <CustomScrollbars style={{ height: "100vh", width: "100%" }}> */}
+        <Routes>
+          <Route
+            path="/admin"
+            element={<AdminPage userInfo={userLogin.userInfo} />}
+          >
             <Route
-              path="/admin"
-              element={<AdminPage userInfo={userLogin.userInfo} />}
-            >
-              <Route
-                path="project"
-                element={<Project projects={projects} />}
-              ></Route>
-              <Route
-                path="project/:projectId"
-                element={<ViewDetailProject projects={projects} />}
-              />
-              <Route
-                path="project/transfer/:projectId"
-                element={<TransferList projects={projects} />}
-              />
-
-              <Route
-                path="project/addStaffsToProject/:projectId"
-                element={<AddStaffsToProject projects={projects} />}
-              />
-
-              <Route path="leader" element={<ManageLeader />} />
-              <Route path="staff" element={<ManageStaff staffs={staffs} />} />
-            </Route>
-
-            <Route path="/PM" element={<PMPage />}>
-              <Route path="nowProject" element={<NowProject />} />
-            </Route>
-            <Route path="/login" element={<LoginPage />}></Route>
-
+              path="project"
+              element={<Project projects={projects} />}
+            ></Route>
             <Route
-              path="*"
-              element={
-                <div>
-                  <h1>404 not found</h1>
-                </div>
-              }
+              path="project/:projectId"
+              element={<ViewDetailProject projects={projects} />}
             />
             <Route
-              path="/"
-              element={<HomePage userLogin={userLogin} />}
-            ></Route>
-          </Routes>
-        </CustomScrollbars>
+              path="project/transfer/:projectId"
+              element={<TransferList projects={projects} />}
+            />
+
+            <Route
+              path="project/addStaffsToProject/:projectId"
+              element={<AddStaffsToProject projects={projects} />}
+            />
+
+            <Route path="leader" element={<ManageLeader />} />
+            <Route path="staff" element={<ManageStaff staffs={staffs} />} />
+          </Route>
+
+          <Route path="/PM" element={<PMPage />}>
+            <Route path="nowProject" element={<NowProject />} />
+          </Route>
+          <Route path="/login" element={<LoginPage />}></Route>
+
+          <Route
+            path="*"
+            element={
+              <div>
+                <h1>404 not found</h1>
+              </div>
+            }
+          />
+          <Route path="/" element={<HomePage userLogin={userLogin} />}></Route>
+        </Routes>
+        {/* </CustomScrollbars> */}
       </div>
       <div className="app-footer"></div>
       <ToastContainer

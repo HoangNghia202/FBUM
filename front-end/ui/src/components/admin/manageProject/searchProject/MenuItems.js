@@ -1,7 +1,7 @@
 import Button from "@mui/material/Button";
 import Menu from "@mui/material/Menu";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { Box, Checkbox, Paper, TextField } from "@mui/material";
+import { Box, Checkbox, Grid, Paper, TextField } from "@mui/material";
 import AccountBoxIcon from "@mui/icons-material/AccountBox";
 import Fade from "@mui/material/Fade";
 import Radio from "@mui/material/Radio";
@@ -160,13 +160,22 @@ function MenuFilterItem(props) {
             onChange={(event) => handleChangeField(event)}
           />
 
-          <Box className="pm-search-result" sx={{ mt: 2 }}>
+          <Box
+            className="pm-search-result"
+            sx={{ mt: 2, height: "200px", overflowY: "scroll" }}
+          >
             {type === "PM" &&
               allResult.map((item) => {
                 return (
                   <Paper
                     elevation={6}
-                    sx={{ backgroundColor: "", mt: 1, p: 1 }}
+                    sx={{
+                      backgroundColor: "",
+                      mt: 1,
+                      mx: 1,
+                      p: 1,
+                      display: "flex",
+                    }}
                   >
                     <input
                       type="radio"
@@ -183,7 +192,10 @@ function MenuFilterItem(props) {
                       }}
                     >
                       {item.StaffName}
-                      {checkChecked(item.StaffID) ? (
+                    </label>
+
+                    {checkChecked(item.StaffID) ? (
+                      <Box sx={{ marginLeft: "auto" }}>
                         <Button
                           size="small"
                           color="error"
@@ -191,10 +203,10 @@ function MenuFilterItem(props) {
                         >
                           <DeleteForeverIcon />{" "}
                         </Button>
-                      ) : (
-                        <span></span>
-                      )}
-                    </label>
+                      </Box>
+                    ) : (
+                      <span></span>
+                    )}
 
                     <br></br>
                   </Paper>

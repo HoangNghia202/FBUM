@@ -2,7 +2,7 @@ import NavLeftAdmin from "./NavLeftAdmin";
 import { Outlet } from "react-router-dom";
 import Project from "./manageProject/Project";
 import React from "react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import NavHeader from "../../contain/NavHeader";
 import { fetchProjects } from "../../redux/ProjectSlider";
@@ -25,7 +25,6 @@ function AdminPage(props) {
   const token = cookies.token;
 
   useEffect(() => {
-    console.log("hello em o day ne");
     dispatch(fetchProjects(1, token));
     dispatch(fetchAllStaff(1, token));
     dispatch(fetchInProjectStaff(1, token));
@@ -36,6 +35,7 @@ function AdminPage(props) {
   useEffect(() => {
     navigate("/admin/project");
   }, []);
+
   return (
     <div className="row" style={{ marginTop: "5%" }}>
       <div className="app-nav">

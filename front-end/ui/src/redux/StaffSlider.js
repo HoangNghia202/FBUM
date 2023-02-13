@@ -39,14 +39,14 @@ const StaffSlice = createSlice({
 
 export const fetchAllStaff = (pageNum, token) => {
   return async (dispatch) => {
-    console.log("run in to thunk action creator for fetchAllStaff", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    console.log("run in to thunk action creator for fetchAllStaff");
 
     dispatch(setPageNumAllStaff(pageNum.data));
     const res = await axios.get(`${baseUrl}/api/staff/${pageNum}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+
+    console.log("res all staff page 1>>>", res.data);
 
     if (res.data) {
       let allPM = res.data.filter(
@@ -84,7 +84,7 @@ export const fetchFreeStaff = (pageNum, token) => {
     const res = await axios.get(`${baseUrl}/api/staffFree/${pageNum}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    console.log("res>>>", res.data);
+    console.log("res free staff page 1>>>", res.data);
 
     if (res.data) {
       let allPM = res.data.filter(
@@ -123,7 +123,7 @@ export const fetchInProjectStaff = (pageNum, token) => {
     const res = await axios.get(`${baseUrl}/api/allStaffInProject/${pageNum}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    console.log("res inprogress staff>>>", res.data);
+    console.log("res inprogress staff page 1>>>", res.data);
 
     if (res.data) {
       let allPM = res.data.filter(

@@ -9,14 +9,15 @@ import Tooltip from "@mui/material/Tooltip";
 import Fab from "@mui/material/Fab";
 import AddIcon from "@mui/icons-material/Add";
 import Modal from "react-bootstrap/Modal";
-import TableStaff from "./TableStaff";
+import ContentStaff from "./ContentStaff";
 import axios from "axios";
 import TextField from "@mui/material/TextField";
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import { useDispatch } from "react-redux";
-
 import { Cookies, useCookies } from "react-cookie";
+import { useSelector } from "react-redux";
+import { useState, useEffect } from "react";
 
 import {
   fetchAllStaff,
@@ -28,8 +29,12 @@ import {
   handleDeleteStaff,
 } from "../../../services/adminServices/AdminServices";
 import { toast } from "react-toastify";
+import LazyLoadContent from "./LazyLoadContent";
 const baseUrl = process.env.REACT_APP_JSON_API;
+
 function ManageStaff(props) {
+  const { pageNumAllStaff, pageNumFreeStaff, pageNumInProjectStaff } =
+    useSelector((state) => state.staffSlider);
   const [cookies, setCookie, removeCookie] = useCookies(["token"]);
   const token = cookies.token;
   const { staffs } = props;
@@ -37,7 +42,6 @@ function ManageStaff(props) {
   console.log("prop in manage staff: ", staffs);
 
   const [value, setValue] = React.useState("1");
-  const [callUseEffect, setCallUseEffect] = React.useState(1);
   const [selectType, setSelectType] = React.useState({
     selectTypeAllStaff: "1",
     selectTypeFreeStaff: "1",
@@ -151,7 +155,10 @@ function ManageStaff(props) {
   };
 
   return (
-    <div className="manage-project col-9">
+    <div
+      className="manage-project col-9"
+      style={{ height: "100%", overflowY: "scroll" }}
+    >
       <div className="sticky-btn">
         <Box sx={{ "& > :not(style)": { m: 1 } }}>
           <Tooltip
@@ -189,33 +196,37 @@ function ManageStaff(props) {
           </Box>
           <TabPanel value="1">
             {
-              <TableStaff
+              <ContentStaff
                 staffs={staffs.allStaff}
                 selectType={selectType.selectTypeAllStaff}
                 changeSelectType={handleChangeSelectType}
                 itemType="allStaff"
+                totalPage={pageNumAllStaff}
               />
+              // <LazyLoadContent staffs={staffs.allStaff.allPM}></LazyLoadContent>
             }
           </TabPanel>
           <TabPanel value="2">
             {
-              <TableStaff
+              <ContentStaff
                 staffs={staffs.freeStaffs}
                 selectType={selectType.selectTypeFreeStaff}
                 changeSelectType={handleChangeSelectType}
                 itemType="freeStaff"
                 deleteStaff={(id) => deleteStaff(id)}
+                totalPage={pageNumFreeStaff}
               />
             }
           </TabPanel>
           <TabPanel value="3">
             {
-              <TableStaff
+              <ContentStaff
                 staffs={staffs.inProjectStaffs}
                 selectType={selectType.selectTypeInProjectStaff}
                 changeSelectType={handleChangeSelectType}
                 itemType="inProjectStaff"
                 deleteStaff={(id) => deleteStaff(id)}
+                totalPage={pageNumInProjectStaff}
               />
             }
           </TabPanel>

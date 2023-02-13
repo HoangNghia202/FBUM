@@ -6,8 +6,9 @@
 .sticky-btn {
   position: fixed;
   bottom: 30px;
-  right: 30px;
+  right: 60px;
   width: 60px;
+  z-index: 1000;
 }
 
 .sticky-btn-viewAll {

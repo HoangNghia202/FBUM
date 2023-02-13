@@ -637,3 +637,154 @@ export const exportExcel = async (id, token) => {
     console.error("error export excel>>>", error);
   }
 };
+
+export const loadMoreData = async (itemType, page, token) => {
+  try {
+    let res = [];
+    if (itemType === "allStaff") {
+      await axios
+        .get(`${baseUrl}/api/staff/${page}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((response) => {
+          res = response.data;
+          return res;
+        });
+    } else if (itemType === "freeStaff") {
+      await axios
+        .get(`${baseUrl}/api/staffFree/${page}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((response) => {
+          res = response.data;
+
+          return res;
+        });
+    } else if (itemType === "inProjectStaff") {
+      await axios
+        .get(`${baseUrl}/api/allStaffInProject/${page}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((response) => {
+          res = response.data;
+
+          return res;
+        });
+    }
+    return res;
+  } catch (error) {
+    console.error("error fetch more>>>", error);
+  }
+};
+
+export const ConCatDataFetched = async (page, itemType, selectType, token) => {
+  console.log("run into concat");
+  console.log("itemType load more>>", itemType);
+  console.log("page load more>>", page);
+  console.log("selectType>>", selectType);
+
+  let data = await loadMoreData(itemType, page, token);
+  console.log(`data ${itemType}>>`, data);
+
+  console.log("currentSelectType>>", selectType);
+
+  if (data.length > 0) {
+    console.log("data.length>>", data.length);
+
+    // switch (selectType) {
+    // case "1":
+    if (selectType === "1") {
+      console.log("run into case 1");
+
+      let PMs = data.filter((staff) => staff.StaffRole === "Project Manager");
+      console.log("PMs>>", PMs);
+      if (PMs.length === 0) {
+        return {
+          errCode: 1,
+          message: "You have reached the end of the list",
+          newData: [],
+        };
+      }
+
+      return {
+        errCode: 0,
+        message: "Load more success",
+        newData: PMs,
+      };
+    }
+
+    // case "2":
+    if (selectType === "2") {
+      console.log("run into case 2");
+      let devs = data.filter(
+        (staff) =>
+          staff.StaffRole === "Staff" &&
+          staff.MainPosition === "Software Developer"
+      );
+      console.log("devs>>", devs);
+      if (devs.length === 0) {
+        return {
+          errCode: 1,
+          message: "You have reached the end of the list",
+          newData: [],
+        };
+      }
+
+      return {
+        errCode: 0,
+        message: "Load more success",
+        newData: devs,
+      };
+    }
+    // case "3":
+    if (selectType === "3") {
+      console.log("run into case 3");
+      let testers = data.filter(
+        (staff) =>
+          staff.StaffRole === "Staff" &&
+          staff.MainPosition === "Software Tester"
+      );
+      console.log("testers>>", testers);
+      if (testers.length === 0) {
+        return {
+          errCode: 1,
+          message: "You have reached the end of the list",
+          newData: [],
+        };
+      }
+
+      return {
+        errCode: 0,
+        message: "Load more success",
+        newData: testers,
+      };
+    }
+    // case "4":
+    if (selectType === "4") {
+      console.log("run into case 4");
+      let BAs = data.filter(
+        (staff) =>
+          staff.StaffRole === "Staff" &&
+          staff.MainPosition === "Business Analysis"
+      );
+
+      console.log("BAs>>", BAs);
+      if (BAs.length === 0) {
+        return {
+          errCode: 1,
+          message: "You have reached the end of the list",
+          newData: [],
+        };
+      }
+
+      return {
+        errCode: 0,
+        message: "Load more success",
+        newData: BAs,
+      };
+    }
+    // default:
+    //   break;
+  }
+  // }
+};

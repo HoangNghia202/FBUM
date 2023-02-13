@@ -198,32 +198,12 @@ function Project(props) {
                 </TabList>
               </Box>
               <TabPanel value="1">
-                <Button variant="outlined" onClick={handleOpenSearchDialog}>
-                  Open dialog
-                </Button>
-                {projectInprogressToDisPlay.length <
-                  projectInprogress.length && (
-                  <div className="sticky-btn-viewAll">
-                    <Box sx={{ "& > :not(style)": { m: 1 } }}>
-                      <Tooltip
-                        title="View All"
-                        color="info"
-                        placement="left"
-                        variant={"soft"}
-                      >
-                        <Fab size="small" color="secondary" aria-label="add">
-                          <GridOnRoundedIcon
-                            onClick={() => {
-                              setProjectInprogressToDisPlay(projectInprogress);
-                            }}
-                          />
-                        </Fab>
-                      </Tooltip>
-                    </Box>
-                  </div>
-                )}
-
-                <div className="d-flex justify-content-end align-items-center">
+                <div className="d-flex justify-content-between align-items-center">
+                  <Box>
+                    <Button variant="outlined" onClick={handleOpenSearchDialog}>
+                      Advanced Search
+                    </Button>
+                  </Box>
                   <DynamicSearchProject
                     setProject={(data) => setProjectInprogressToDisPlay(data)}
                     typeProject="projectInprogress"
@@ -318,30 +298,6 @@ function Project(props) {
               </TabPanel>
 
               <TabPanel value="3">
-                {projectIncomingToDisPlay.length < projectIncoming.length && (
-                  <div className="sticky-btn-viewAll">
-                    <Box sx={{ "& > :not(style)": { m: 1 } }}>
-                      <Tooltip
-                        title="View All"
-                        color="info"
-                        placement="left"
-                        variant={"soft"}
-                      >
-                        <Fab
-                          size="small"
-                          color="secondary"
-                          aria-label="add"
-                          onClick={() => {
-                            setProjectIncomingToDisPlay(projectIncoming);
-                          }}
-                        >
-                          <GridOnRoundedIcon />
-                        </Fab>
-                      </Tooltip>
-                    </Box>
-                  </div>
-                )}
-
                 <div>
                   <DynamicSearchProject
                     setProject={(data) => setProjectIncomingToDisPlay(data)}
@@ -435,30 +391,6 @@ function Project(props) {
               </TabPanel>
 
               <TabPanel value="2">
-                {projectIncomingToDisPlay.length < projectIncoming.length && (
-                  <div className="sticky-btn-viewAll">
-                    <Box sx={{ "& > :not(style)": { m: 1 } }}>
-                      <Tooltip
-                        title="View All"
-                        color="info"
-                        placement="left"
-                        variant={"soft"}
-                      >
-                        <Fab
-                          size="small"
-                          color="secondary"
-                          aria-label="add"
-                          onClick={() => {
-                            setProjectEndedToDisPlay(projectEnded);
-                          }}
-                        >
-                          <GridOnRoundedIcon />
-                        </Fab>
-                      </Tooltip>
-                    </Box>
-                  </div>
-                )}
-
                 <DynamicSearchProject
                   setProject={(data) => setProjectEndedToDisPlay(data)}
                   typeProject="projectEnded"
