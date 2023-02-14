@@ -14,6 +14,8 @@ using BUResourcesManagementAPI.TokenAuthentication;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 using DocumentFormat.OpenXml.Spreadsheet;
 using System.Web.UI;
+using DocumentFormat.OpenXml.Drawing.Charts;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 
 namespace BUResourcesManagementAPI.Controllers
 {
@@ -285,7 +287,8 @@ namespace BUResourcesManagementAPI.Controllers
                                 GETDATE() >= Project.TimeStart)) 
 								SELECT * FROM NewTable WHERE RowNumber BETWEEN @Start AND @End;";
 
-                String query2 = @"WITH NewTable AS (SELECT ROW_NUMBER() OVER(ORDER BY StaffName) AS RowNumber, StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition FROM Staff, Role, Position
+                String query2 =
+                    @"WITH NewTable AS (SELECT ROW_NUMBER() OVER(ORDER BY StaffName) AS RowNumber, StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition FROM Staff, Role, Position
                                 WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND Staff.StaffRole = 3 AND Staff.MainPosition = @Position AND StaffID NOT IN (
                                 SELECT Staff.StaffID FROM Staff, WorkOn, Project 
                                 WHERE Staff.StaffID = WorkOn.StaffID AND 
@@ -627,6 +630,230 @@ namespace BUResourcesManagementAPI.Controllers
                     if (page[i] > result) result = page[i];
                 }
                 return result;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [HttpGet] // api/staff/search/{option}/{position}/{keyword}/{page}
+        [Route("api/staff/search/{option}/{position}/{keyword}/{page}")]
+        public IEnumerable<Staff> Search(int option, int position, String keyword, int page)
+        {
+            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
+            try
+            {
+                List<Staff> listStaffOption = new List<Staff>();
+                String query = "";
+
+                if (option == 1)
+                {
+                    query = @"SELECT StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition 
+                            FROM Staff, Role, Position
+                            WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID";
+                }
+                else if (option == 2)
+                {
+                    query = @"SELECT StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition FROM Staff, Role, Position
+                            WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND StaffID NOT IN (
+                            SELECT Staff.StaffID FROM Staff, WorkOn, Project 
+                            WHERE Staff.StaffID = WorkOn.StaffID AND 
+                            Project.ProjectID = WorkOn.ProjectID AND 
+                            WorkOn.WorkEnd = Project.TimeEnd AND 
+                            GETDATE() <= Project.TimeEnd AND 
+                            GETDATE() >= Project.TimeStart);";
+                }
+                else
+                {
+                    query = @"SELECT StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition FROM Staff, Role, Position
+                            WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND StaffID IN (
+                            SELECT Staff.StaffID FROM Staff, WorkOn, Project 
+                            WHERE Staff.StaffID = WorkOn.StaffID AND 
+                            Project.ProjectID = WorkOn.ProjectID AND
+                            WorkOn.WorkEnd = Project.TimeEnd AND 
+                            GETDATE() <= Project.TimeEnd AND 
+                            GETDATE() >= Project.TimeStart)";
+                }
+
+                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    command.CommandType = CommandType.Text;
+                    var reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            int staffID = reader.GetInt32(0);
+                            String staffName = reader.GetString(1);
+                            String password = reader.GetString(2);
+                            String staffRole = reader.GetString(3);
+                            int level = reader.GetInt32(4);
+                            String mainPosition = reader.GetString(5);
+                            listStaffOption.Add(new Staff(staffID, staffName, password, staffRole, level, mainPosition));
+
+                        }
+                    }
+                    connection.Close();
+                }
+
+
+                IEnumerable<Staff> listStaffPosition = Enumerable.Empty<Staff>();
+
+                if (position == 1)
+                {
+                    listStaffPosition = (from list in listStaffOption
+                                         where
+                                         list.StaffRole.Equals("Project Manager") &&
+                                         list.StaffName.ToLower().Contains(keyword.ToLower())
+                                         select list);
+                }
+                else if (position == 2)
+                {
+                    listStaffPosition = (from list in listStaffOption
+                                         where
+                                         list.MainPosition.Equals("Business Analysis") &&
+                                         list.StaffRole.Equals("Staff") &&
+                                         list.StaffName.ToLower().Contains(keyword.ToLower())
+                                         select list);
+                }
+                else if (position == 3)
+                {
+                    listStaffPosition = (from list in listStaffOption
+                                         where
+                                         list.MainPosition.Equals("Software Developer") &&
+                                         list.StaffRole.Equals("Staff") &&
+                                         list.StaffName.ToLower().Contains(keyword.ToLower())
+                                         select list);
+                }
+                else if (position == 4)
+                {
+                    listStaffPosition = (from list in listStaffOption
+                                         where
+                                         list.MainPosition.Equals("Software Tester") &&
+                                         list.StaffRole.Equals("Staff") &&
+                                         list.StaffName.ToLower().Contains(keyword.ToLower())
+                                         select list);
+                }
+
+                IEnumerable<Staff> listStaff = Enumerable.Empty<Staff>();
+
+                for (int i = (page - 1) * 50; i < listStaffPosition.Count() && i < page * 50; i++)
+                {
+                    listStaff = listStaff.Append(listStaffPosition.ElementAt(i));
+                }
+
+                return listStaff;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [HttpGet] // api/staff/searchPage/{option}/{position}/{keyword}
+        [Route("api/staff/searchPage/{option}/{position}/{keyword}")]
+        public int SearchPage(int option, int position, String keyword)
+        {
+            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return 0;
+            try
+            {
+                List<Staff> listStaffOption = new List<Staff>();
+                String query = "";
+
+                if (option == 1)
+                {
+                    query = @"SELECT StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition 
+                            FROM Staff, Role, Position
+                            WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID";
+                }
+                else if (option == 2)
+                {
+                    query = @"SELECT StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition FROM Staff, Role, Position
+                            WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND StaffID NOT IN (
+                            SELECT Staff.StaffID FROM Staff, WorkOn, Project 
+                            WHERE Staff.StaffID = WorkOn.StaffID AND 
+                            Project.ProjectID = WorkOn.ProjectID AND 
+                            WorkOn.WorkEnd = Project.TimeEnd AND 
+                            GETDATE() <= Project.TimeEnd AND 
+                            GETDATE() >= Project.TimeStart);";
+                }
+                else
+                {
+                    query = @"SELECT StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition FROM Staff, Role, Position
+                            WHERE Staff.StaffRole = Role.RoleID AND Staff.MainPosition = Position.PositionID AND StaffID IN (
+                            SELECT Staff.StaffID FROM Staff, WorkOn, Project 
+                            WHERE Staff.StaffID = WorkOn.StaffID AND 
+                            Project.ProjectID = WorkOn.ProjectID AND
+                            WorkOn.WorkEnd = Project.TimeEnd AND 
+                            GETDATE() <= Project.TimeEnd AND 
+                            GETDATE() >= Project.TimeStart)";
+                }
+
+                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    command.CommandType = CommandType.Text;
+                    var reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            int staffID = reader.GetInt32(0);
+                            String staffName = reader.GetString(1);
+                            String password = reader.GetString(2);
+                            String staffRole = reader.GetString(3);
+                            int level = reader.GetInt32(4);
+                            String mainPosition = reader.GetString(5);
+                            listStaffOption.Add(new Staff(staffID, staffName, password, staffRole, level, mainPosition));
+                        }
+                    }
+                    connection.Close();
+                }
+
+                IEnumerable<Staff> listStaffPosition = Enumerable.Empty<Staff>();
+
+                if (position == 1)
+                {
+                    listStaffPosition = (from list in listStaffOption
+                                         where
+                                         list.StaffRole.Equals("Project Manager") &&
+                                         list.StaffName.Contains(keyword)
+                                         select list);
+                }
+                else if (position == 2)
+                {
+                    listStaffPosition = (from list in listStaffOption
+                                         where
+                                         list.MainPosition.Equals("Business Analysis") &&
+                                         list.StaffRole.Equals("Staff") &&
+                                         list.StaffName.Contains(keyword)
+                                         select list);
+                }
+                else if (position == 3)
+                {
+                    listStaffPosition = (from list in listStaffOption
+                                         where
+                                         list.MainPosition.Equals("Software Developer") &&
+                                         list.StaffRole.Equals("Staff") &&
+                                         list.StaffName.Contains(keyword)
+                                         select list);
+                }
+                else if (position == 4)
+                {
+                    listStaffPosition = (from list in listStaffOption
+                                         where
+                                         list.MainPosition.Equals("Software Tester") &&
+                                         list.StaffRole.Equals("Staff") &&
+                                         list.StaffName.Contains(keyword)
+                                         select list);
+                }
+
+                if (listStaffPosition.Count() % 50 == 0) return listStaffPosition.Count() / 50;
+                else return listStaffPosition.Count() / 50 + 1;
             }
             catch (Exception ex)
             {
