@@ -2,29 +2,68 @@ import { useState, useEffect } from "react";
 import { Button } from "@mui/material";
 import { Box } from "@mui/system";
 import CircularProgress from "@mui/material/CircularProgress";
+import { getPageOfSearchStaffByName } from "../../../services/adminServices/AdminServices";
 
-function TableStaff(props) {
+function SearchStaffResultTable(props) {
   const {
     staffsToDisPlay,
     itemType,
     deleteStaff,
     handleClickUpdate,
-    totalPage,
+    // totalPage,
     selectType,
     handleLoadMoreData,
+    keyWord,
+    token,
   } = props;
+
   // const [type, setType] = useState(0);
 
   // useEffect(() => {
   //   console.log("selectType in useEffect", type);
   //   setType(selectType);
   // }, [selectType]);
-  console.log("props in TableStaff: ", props);
+  console.log("props in SearchStaffResultTable: ", props);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
   const [endPageMessage, setEndPageMessage] = useState("");
+  const [totalPage, setTotalPage] = useState(0);
+  //   const [item_type, setItem_type] = useState(0);
   console.log("selectType", selectType);
   console.log("current page: ", page);
+
+  useEffect(() => {
+    const getTotalPage = async () => {
+      let item_type = 0;
+
+      if (itemType === "allStaff") {
+        item_type = 1;
+      }
+      if (itemType === "freeStaff") {
+        item_type = 2;
+      }
+      if (itemType === "inProjectStaff") {
+        item_type = 3;
+      }
+
+      let res = await getPageOfSearchStaffByName(
+        item_type,
+        selectType,
+        keyWord,
+        token
+      );
+      console.log("res in useEffect getTotalPage", res);
+      if (res && res.errCode === 0) {
+        setTotalPage(res.data);
+      } else {
+        console.log(res.message);
+      }
+    };
+    getTotalPage();
+  }, [staffsToDisPlay]);
+
+  console.log("total page: ", totalPage);
+
   useEffect(() => {
     setPage(1);
     setEndPageMessage("");
@@ -33,8 +72,24 @@ function TableStaff(props) {
   useEffect(() => {
     const loadMoreData = async () => {
       setLoading(true);
+      let item_type = 0;
+
+      if (itemType === "allStaff") {
+        item_type = 1;
+      }
+      if (itemType === "freeStaff") {
+        item_type = 2;
+      }
+      if (itemType === "inProjectStaff") {
+        item_type = 3;
+      }
       setTimeout(async () => {
-        let res = await handleLoadMoreData(page, selectType);
+        let res = await handleLoadMoreData(
+          item_type,
+          selectType,
+          keyWord,
+          page
+        );
         console.log("res in useEffect loadMoreData", res);
         if (res && res.errorCode === 0) {
           setLoading(false);
@@ -176,4 +231,4 @@ function TableStaff(props) {
   );
 }
 
-export default TableStaff;
+export default SearchStaffResultTable;

@@ -37,7 +37,9 @@ import SearchAutoCompletePM from "./SearchAutoCompletePM";
 import { toast } from "react-toastify";
 import DynamicSearchProject from "./DynamicSearchProject";
 import { useCookies } from "react-cookie";
+import readXlsxFile from "read-excel-file";
 import SearchDialog from "./searchProject/SearchDialog";
+import { handleCreateNewStaff } from "../../../services/adminServices/AdminServices";
 
 function Project(props) {
   const dispatch = useDispatch();
@@ -104,7 +106,7 @@ function Project(props) {
 
     console.log("values", values);
     try {
-      const res = await handleCreateProject(values);
+      const res = await handleCreateProject(values, token);
       console.log("res>>>", res);
       if (res.errCode === 0) {
         dispatch(fetchProjects(1, token));
@@ -152,9 +154,33 @@ function Project(props) {
   console.log("startDayNewProject", startDayNewProject);
   console.log("endDayNewProject", endDayNewProject);
 
+  const handleChoseFile = async (event) => {
+    const file = event.target.files[0];
+    readXlsxFile(file).then((rows) => {
+      rows.forEach(async (row) => {
+        let staff = {
+          StaffName: row[0],
+          Password: row[1],
+          StaffRole: row[2],
+          MainPosition: row[3],
+          Level: row[4],
+        };
+        // console.log("staff", staff);
+        await handleCreateNewStaff(staff, token);
+      });
+    });
+  };
+
   return (
     <>
       <div className="manage-project col-9 ">
+        <input
+          type="file"
+          id="input"
+          onChange={(event) => {
+            handleChoseFile(event);
+          }}
+        />
         <SearchDialog
           open={openSearchDialog}
           handleClose={handleCloseSearchDialog}
@@ -298,7 +324,12 @@ function Project(props) {
               </TabPanel>
 
               <TabPanel value="3">
-                <div>
+                <div className="d-flex justify-content-between align-items-center">
+                  <Box>
+                    <Button variant="outlined" onClick={handleOpenSearchDialog}>
+                      Advanced Search
+                    </Button>
+                  </Box>
                   <DynamicSearchProject
                     setProject={(data) => setProjectIncomingToDisPlay(data)}
                     typeProject="projectIncoming"
@@ -391,13 +422,20 @@ function Project(props) {
               </TabPanel>
 
               <TabPanel value="2">
-                <DynamicSearchProject
-                  setProject={(data) => setProjectEndedToDisPlay(data)}
-                  typeProject="projectEnded"
-                  resetScreen={() => {
-                    setProjectEndedToDisPlay(projectEnded);
-                  }}
-                ></DynamicSearchProject>
+                <div className="d-flex justify-content-between align-items-center">
+                  <Box>
+                    <Button variant="outlined" onClick={handleOpenSearchDialog}>
+                      Advanced Search
+                    </Button>
+                  </Box>
+                  <DynamicSearchProject
+                    setProject={(data) => setProjectEndedToDisPlay(data)}
+                    typeProject="projectEnded"
+                    resetScreen={() => {
+                      setProjectEndedToDisPlay(projectEnded);
+                    }}
+                  ></DynamicSearchProject>
+                </div>
                 <div className="ended-proj row">
                   <div className="processing-proj row d-flex">
                     {projectEndedToDisPlay.length === 0 && (

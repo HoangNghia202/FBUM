@@ -30,6 +30,7 @@ export default function SearchAutoCompletePM(props) {
             onChange={(event, newValue) => {
               handleChange(newValue);
             }}
+            key={searchData.StaffID}
             renderInput={(params) => (
               <TextField
                 {...params}

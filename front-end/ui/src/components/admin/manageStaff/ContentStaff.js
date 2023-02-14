@@ -14,6 +14,8 @@ import Alert from "@mui/material/Alert";
 import { handleUpdateStaff } from "../../../services/adminServices/AdminServices";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
+import SearchStaffResultTable from "./SearchStaffResultTable";
+import DynamicSearchStaff from "./DynamicSearchStaff";
 
 import {
   fetchAllStaff,
@@ -24,7 +26,10 @@ import { useCookies } from "react-cookie";
 import { height } from "@mui/system";
 import TableStaff from "./TableStaff";
 import axios from "axios";
-import { ConCatDataFetched } from "../../../services/adminServices/AdminServices";
+import {
+  ConCatDataFetched,
+  searchStaffByName,
+} from "../../../services/adminServices/AdminServices";
 
 const baseUrl = process.env.REACT_APP_JSON_API;
 function ContentStaff(props) {
@@ -45,6 +50,11 @@ function ContentStaff(props) {
   const [staffsToDisPlay, setStaffsToDisPlay] = useState([]);
   const [searchData, setSearchData] = useState([]);
   const [searchResult, setSearchResult] = useState([]);
+  const [statusSearchStaff, setStatusSearchStaff] = useState({
+    searchResult: [],
+    message: "",
+    keyword: "",
+  });
   const [showUpdate, setShowUpdate] = useState(false);
 
   const handleCloseUpdate = () => setShowUpdate(false);
@@ -152,30 +162,6 @@ function ContentStaff(props) {
     }
   };
 
-  const handleLoadMore = async (page, selectType) => {
-    console.log("page>>>", page);
-    console.log("itemType>>>", itemType);
-    console.log("selectType>>>", selectType);
-    // let res= await ConCatDataFetched(page, itemType, selectType, token);
-    // if (res.errCode===0) {
-    //   console.log('res', res);
-    //   setStaffsToDisPlay((prev) => [...prev, ...res.newData]);
-    //   return{
-    //     errCode: 0,
-    //     message: 'Load more success'
-    //   }
-    // }else{
-    //   return{
-    //     errCode: 1,
-    //     message: 'You have reached the end of the list'
-    //   }
-    // }
-    return {
-      errCode: 0,
-      message: "Load more success",
-    };
-  };
-
   const handleLoadMoreData = async (page, selectType) => {
     let res = await ConCatDataFetched(page, itemType, selectType, token);
     console.log(" res>>>", res);
@@ -185,6 +171,35 @@ function ContentStaff(props) {
       return { errCode: 0, message: res.message };
     } else {
       return { errCode: 1, message: res.message };
+    }
+  };
+
+  const handleLoadMoreDataSearchStaff = async (
+    itemType,
+    selectType,
+    name,
+    page
+  ) => {
+    try {
+      let res = await searchStaffByName(
+        itemType,
+        selectType,
+        name,
+        page,
+        token
+      );
+      if (res.errCode === 0) {
+        // concat data
+        setStatusSearchStaff({
+          ...statusSearchStaff,
+          searchResult: [...statusSearchStaff.searchResult, ...res.data],
+        });
+        return { errCode: 0, message: res.message };
+      } else {
+        return { errCode: 1, message: res.message };
+      }
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -235,113 +250,54 @@ function ContentStaff(props) {
           <option value="3">Software Tester</option>
           <option value="4">Business Analysis</option>
         </select>
-        <SearchAutoComplete
+        {/* <SearchAutoComplete
           searchData={searchData}
           showResult={(searchResult) => {
             showResult(searchResult);
           }}
+        /> */}
+        <DynamicSearchStaff
+          itemType={itemType}
+          selectType={selectType}
+          setStatusSearchStaff={(keyword, searchResult) => {
+            setStatusSearchStaff({
+              ...statusSearchStaff,
+              keyword: keyword,
+              searchResult: searchResult,
+            });
+          }}
+          resetScreen={() => {
+            setStatusSearchStaff({
+              ...statusSearchStaff,
+              searchResult: [],
+              keyword: "",
+            });
+          }}
         />
       </div>
-      {/* <div className="table-wrapper-scroll-y my-custom-scrollbar">
-        <table
-          class="table table-striped table-hover"
-          style={{ borderRadius: "10px" }}
-        >
-          <thead
-            className="bg-primary text-white rounded-top"
-            style={{ zIndex: "1", position: "sticky", top: "0px" }}
-          >
-            <tr>
-              <th scope="col">#</th>
-              <th scope="col">Id</th>
-              <th scope="col">Name</th>
-              <th scope="col">Position</th>
-              <th scope="col">level</th>
 
-              <th scope="col">Action</th>
-
-          
-            </tr>
-          </thead>
-          <tbody>
-            {staffsToDisPlay.map((item, index) => {
-              return (
-                <tr>
-                  <th scope="row">{index + 1}</th>
-                  <td>{item.StaffID}</td>
-                  <td>{item.StaffName}</td>
-                  <td>{item.MainPosition}</td>
-                  <td>{item.Level}</td>
-                  {itemType === "freeStaff" && (
-                    <td>
-                      <Button
-                        variant="outlined"
-                        color="error"
-                        size="small"
-                        style={{ marginRight: "5px" }}
-                        onClick={() => {
-                          let confirm = window.confirm(
-                            "Are you sure to delete this staff? "
-                          );
-                          if (confirm) {
-                            deleteStaff(item.StaffID);
-                          }
-                        }}
-                      >
-                        Delete
-                      </Button>
-                    </td>
-                  )}
-
-                  {itemType === "inProjectStaff" && (
-                    <td>
-                      <Button
-                        variant="outlined"
-                        color="error"
-                        size="small"
-                        style={{ marginRight: "5px" }}
-                        onClick={() => {
-                          let confirm = window.confirm(
-                            "Are you sure to delete this staff? This action will also delete this staff from project he/she is working on."
-                          );
-                          deleteStaff(item.StaffID);
-                        }}
-                      >
-                        Delete
-                      </Button>
-                    </td>
-                  )}
-
-                  {itemType === "allStaff" && (
-                    <td>
-                      <Button
-                        variant="outlined"
-                        color="warning"
-                        size="small"
-                        style={{ marginRight: "5px" }}
-                        onClick={() => {
-                          handleClickUpdate(item);
-                        }}
-                      >
-                        Update
-                      </Button>
-                    </td>
-                  )}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div> */}
-      <TableStaff
-        staffsToDisPlay={staffsToDisPlay}
-        itemType={itemType}
-        deleteStaff={deleteStaff}
-        handleClickUpdate={handleClickUpdate}
-        totalPage={totalPage}
-        selectType={selectType}
-        handleLoadMoreData={handleLoadMoreData}
-      />
+      {statusSearchStaff.searchResult.length > 0 ? (
+        <SearchStaffResultTable
+          staffsToDisPlay={statusSearchStaff.searchResult}
+          itemType={itemType}
+          deleteStaff={deleteStaff}
+          handleClickUpdate={handleClickUpdate}
+          selectType={selectType}
+          handleLoadMoreData={handleLoadMoreDataSearchStaff}
+          keyWord={statusSearchStaff.keyword}
+          token={token}
+        />
+      ) : (
+        <TableStaff
+          staffsToDisPlay={staffsToDisPlay}
+          itemType={itemType}
+          deleteStaff={deleteStaff}
+          handleClickUpdate={handleClickUpdate}
+          totalPage={totalPage}
+          selectType={selectType}
+          handleLoadMoreData={handleLoadMoreData}
+        />
+      )}
 
       <Modal show={showUpdate} onHide={handleCloseUpdate} size="lg">
         <Modal.Header closeButton>

@@ -8,7 +8,7 @@ import Checkbox from "@mui/material/Checkbox";
 import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { getStaffsAvailableForAdding } from "../../../services/adminServices/AdminServices";
-import { Button } from "@mui/material";
+import { Button, CircularProgress } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import RemoveIcon from "@mui/icons-material/Remove";
 import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
@@ -31,6 +31,7 @@ function AddStaffsToProject() {
   const [selectedStaffs, setSelectedStaffs] = useState([]);
   const [value, setValue] = useState("1");
   const [callUseEffect, setCallUseEffect] = useState(1);
+  const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
 
   const handleChange = (event, newValue) => {
@@ -73,7 +74,13 @@ function AddStaffsToProject() {
   };
 
   useEffect(() => {
-    getStaffsAvailable();
+    const fetchData = async () => {
+      setTimeout(async () => {
+        await getStaffsAvailable();
+        setLoading(false);
+      }, 700);
+    };
+    fetchData();
   }, [callUseEffect]);
 
   useEffect(() => {
@@ -86,6 +93,7 @@ function AddStaffsToProject() {
   console.log("businessAnalysts", businessAnalysts);
   console.log("testers", testers);
   console.log("selectedStaffs", selectedStaffs);
+  console.log("loading", loading);
 
   const handleChoseStaff = (staff) => {
     setSelectedStaffs([...selectedStaffs, staff]);
@@ -145,8 +153,23 @@ function AddStaffsToProject() {
                     overflowY: "scroll",
                     borderRadius: "10px 0 0 10px",
                     border: "1px solid #ccc",
+                    position: "relative",
                   }}
                 >
+                  {loading && (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        position: "absolute",
+                        top: "45%",
+                        left: "50%",
+                      }}
+                    >
+                      <CircularProgress />
+                    </Box>
+                  )}
+
                   {/* project manager */}
                   <table className="table  table-striped mb-0">
                     <thead>

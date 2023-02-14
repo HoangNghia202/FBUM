@@ -28,15 +28,10 @@ function ViewDetailProject(props) {
   console.log("projectId>>>", projectId);
 
   const handleClickExport = async (projectId) => {
+    console.log("projectId>>>>", projectId);
+
     console.log("click export");
     let res = await exportExcel(projectId, token);
-    console.log("res", res);
-    if (res.errCode === 0) {
-      toast.success("Export excel successfully!");
-    } else {
-      console.log("error", res);
-      toast.error("Export excel failed!");
-    }
   };
 
   const mainProject = [
@@ -128,6 +123,15 @@ function ViewDetailProject(props) {
             >
               Add Member
             </Button>
+
+            <Button
+              variant="contained"
+              color="info"
+              className="my-1"
+              onClick={() => handleClickExport(mainProject.ProjectID)}
+            >
+              export excel
+            </Button>
             {Date.parse(mainProject.TimeEnd) > Date.now() &&
               Date.parse(mainProject.TimeStart) > Date.now() && (
                 <Button
@@ -147,18 +151,12 @@ function ViewDetailProject(props) {
             >
               Transfer Member
             </Button>
-
-            <Button
-              variant="contained"
-              color="warning"
-              className="my-1"
-              onClick={() => handleClickExport(mainProject.ProjectID)}
-            >
-              export excel
-            </Button>
           </div>
         </div>
-        <div className="col-md-8 mt-2 p-0">
+        <div
+          className="col-md-8 mt-2 p-0 h-100"
+          style={{ backgroundColor: "#f0f8ff", borderRadius: "10px " }}
+        >
           <StaffOfProject
             staffs={mainProject.Staffs}
             removeStaffOutOfProject={removeStaffOutOfProject}

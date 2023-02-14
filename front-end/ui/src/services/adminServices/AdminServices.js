@@ -605,34 +605,19 @@ export const searchStaff = async (searchInput, type, token) => {
 
 export const exportExcel = async (id, token) => {
   try {
-    // let res = await axios.get(`${baseUrl}/api/Download/Project/${id}`, {
-    //   headers: { Authorization: `Bearer ${token}` },
-    // });
-    // console.log("res export excel>>>", res.data);
-    // return {
-    //   errCode: 0,
-    //   message: "Export excel successfully",
-    // };
-    axios
-      .get({
-        url: `${baseUrl}/api/Download/Project/${id}`,
-        method: "GET",
-        responseType: "blob",
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => {
-        const url = window.URL.createObjectURL(new Blob([res.data]));
-        const link = document.createElement("a");
+    let res = await axios.get(`${baseUrl}/api/Download/Project/${id}`, {
+      responseType: "blob",
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-        link.href = url;
-        link.setAttribute("download", "file.xlsx");
-        document.body.appendChild(link);
-        link.click();
-      });
-    return {
-      errCode: 0,
-      message: "Export excel successfully",
-    };
+    console.log("res>>>   ", res);
+    const url = window.URL.createObjectURL(new Blob([res.data]));
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.setAttribute("download", "file.xlsx");
+    document.body.appendChild(link);
+    link.click();
   } catch (error) {
     console.error("error export excel>>>", error);
   }
@@ -787,4 +772,64 @@ export const ConCatDataFetched = async (page, itemType, selectType, token) => {
     //   break;
   }
   // }
+};
+
+export const searchStaffByName = async (option, type, name, page, token) => {
+  try {
+    console.log(
+      "link will be called>>",
+      `${baseUrl}/api/staff/search/${option}/${type}/${name}/${page} `
+    );
+
+    let res = await axios.get(
+      `${baseUrl}/api/staff/search/${option}/${type}/${name}/${page}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    console.log("res search staff by name>>", res);
+    if (res.data && res.data.length > 0) {
+      return {
+        errCode: 0,
+        data: res.data,
+        message: "search staff by name success",
+      };
+    } else {
+      return {
+        errCode: 1,
+        data: [],
+        message: "search staff by name fail",
+      };
+    }
+  } catch (error) {
+    console.error("error search staff by name>>", error);
+  }
+};
+
+export const getPageOfSearchStaffByName = async (option, type, name, token) => {
+  console.log(
+    "link>>",
+    `${baseUrl}/api/staff/searchPage/${option}/${type}/${name} `
+  );
+
+  try {
+    let res = await axios.get(
+      `${baseUrl}/api/staff/searchPage/${option}/${type}/${name}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    console.log("page search staff by name>>", res);
+    if (res.data && res.data > 0) {
+      return {
+        errCode: 0,
+        data: res.data,
+        message: "page search staff by name success",
+      };
+    } else {
+      return {
+        errCode: 1,
+        data: 0,
+        message: "not page to get",
+      };
+    }
+  } catch (error) {
+    console.error("error page of search staff by name>>", error);
+  }
 };
