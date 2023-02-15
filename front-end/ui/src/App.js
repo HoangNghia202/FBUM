@@ -26,6 +26,8 @@ import {
 } from "./redux/StaffSlider";
 import PMPage from "./components/project mananger/PMPage";
 import NowProject from "./components/project mananger/now project/Nowproject";
+import IncomingProject from "./components/project mananger/incoming project/IncomingPorject";
+import DetailIncomingProject from "./components/project mananger/incoming project/DetailIncomingProject";
 function App() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -81,12 +83,17 @@ function App() {
               element={<AddStaffsToProject projects={projects} />}
             />
 
-            <Route path="leader" element={<ManageLeader />} />
+            {/* <Route path="leader" element={<ManageLeader />} /> */}
             <Route path="staff" element={<ManageStaff staffs={staffs} />} />
           </Route>
 
           <Route path="/PM" element={<PMPage />}>
             <Route path="nowProject" element={<NowProject />} />
+            <Route path="incomingProject" element={<IncomingProject />}></Route>
+            <Route
+              path="incomingProject/:projectID"
+              element={<DetailIncomingProject />}
+            />
           </Route>
           <Route path="/login" element={<LoginPage />}></Route>
 

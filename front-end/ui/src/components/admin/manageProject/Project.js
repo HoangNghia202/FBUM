@@ -42,6 +42,7 @@ import SearchDialog from "./searchProject/SearchDialog";
 import { handleCreateNewStaff } from "../../../services/adminServices/AdminServices";
 
 function Project(props) {
+  const currentUser = useSelector((state) => state.auth.authReducer.userInfo);
   const dispatch = useDispatch();
   console.log("props >>>", props);
   const [cookies, setCookie, removeCookie] = useCookies(["token"]);
@@ -69,6 +70,12 @@ function Project(props) {
   const handleCloseSearchDialog = () => {
     setOpenSearchDialog(false);
   };
+
+  useEffect(() => {
+    if (currentUser.StaffRole !== "Admin") {
+      navigate("/");
+    }
+  });
 
   useEffect(() => {
     setProjectEnded(projects.projectEnded);
@@ -174,13 +181,13 @@ function Project(props) {
   return (
     <>
       <div className="manage-project col-9 ">
-        <input
+        {/* <input
           type="file"
           id="input"
           onChange={(event) => {
             handleChoseFile(event);
           }}
-        />
+        /> */}
         <SearchDialog
           open={openSearchDialog}
           handleClose={handleCloseSearchDialog}

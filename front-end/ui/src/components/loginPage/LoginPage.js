@@ -57,6 +57,10 @@ function LoginPage(props) {
         dispatch(setUserSlider(res.data));
         if (res.data.StaffRole === "Admin") {
           navigate("/admin/project");
+        } else {
+          if (res.data.StaffRole === "Project Manager") {
+            navigate("/PM/nowProject");
+          }
         }
         toast.success("Login successfully!");
         localStorage.setItem("token", res.data.JWTToken);

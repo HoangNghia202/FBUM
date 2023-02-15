@@ -16,11 +16,40 @@ function HomePage(props) {
   const { userLogin } = props;
   const [cookies, setCookie, removeCookie] = useCookies(["userId", "password"]);
   const checkLogin = () => {
-    if (isUserLogin && currentUser.StaffRole === "Admin") {
-      navigate("/admin/project");
+    if (isUserLogin) {
+      if (currentUser.StaffRole === "Admin") {
+        navigate("/admin/project");
+      }
+
+      if (currentUser.StaffRole === "Project Manager") {
+        navigate("PM/nowProject");
+      }
+
+      // if (currentUser.StaffRole==='Staff') {
+      //   navigate("")
+      // }
     } else {
       navigate("/login");
     }
+
+    // }
+    // if (isUserLogin) {
+    //   switch (currentUser.StaffRole) {
+    //     case "Admin":
+    //       navigate("admin/project");
+    //       break;
+    //     case "Project Manager":
+    //       navigate("PM/nowProject");
+    //       break;
+    //     case "Staff":
+    //       navigate("/staff");
+    //       break;
+    //     default:
+    //       break;
+    //   }
+    // } else {
+    //   navigate("/login");
+    // }
   };
 
   // const checkCookiesUser = async () => {
