@@ -25,9 +25,9 @@ function HomePage(props) {
         navigate("PM/nowProject");
       }
 
-      // if (currentUser.StaffRole==='Staff') {
-      //   navigate("")
-      // }
+      if (currentUser.StaffRole === "Staff") {
+        navigate("/staff");
+      }
     } else {
       navigate("/login");
     }

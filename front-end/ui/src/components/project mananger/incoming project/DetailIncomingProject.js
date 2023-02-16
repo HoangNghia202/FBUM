@@ -53,71 +53,61 @@ function DetailIncomingProject(props) {
               height: "100%",
               backgroundColor: "#BAE9EE",
               borderRadius: "10px",
-              padding: "0 10px 0 10px",
+
+              background: "rgb(169,34,195)",
+              background:
+                "linear-gradient(0deg, rgba(169,34,195,1) 0%, rgba(45,245,253,1) 100%)",
             }}
           >
-            <h4 className="pt-2">{incomingProject.ProjectName}</h4>
-            <h6>(ID: {incomingProject.ProjectID})</h6>
-            <div className="Project Manager my-5">
-              <Divider textAlign="left">Project Manager</Divider>
-              <h5 className="mt-2">{incomingProject.Manager}</h5>
-            </div>
-            <div className="team-size">
-              <Divider textAlign="left">
-                {" "}
-                Team Size - {incomingProject.Staffs?.length}
-              </Divider>
-              <table
-                className="text-start mt-2"
-                style={{ backgroundColor: "#BAE9EE" }}
-              >
-                <tr>
-                  <td>
-                    <b> Software Developer:</b>
-                  </td>
-                  <td>
-                    <b className="p-2">
-                      {
-                        incomingProject.Staffs?.filter(
-                          (item) => item.MainPosition == "Software Developer"
-                        ).length
-                      }
-                    </b>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    {" "}
-                    <b>Software Tester:</b>{" "}
-                  </td>
-                  <td>
-                    {" "}
-                    <b className="p-2">
-                      {
-                        incomingProject.Staffs?.filter(
-                          (item) => item.MainPosition == "Software Tester"
-                        ).length
-                      }
-                    </b>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    {" "}
-                    <b>Business Analysis</b>{" "}
-                  </td>
-                  <td>
-                    {" "}
-                    <b className="px-2">
-                      {
-                        incomingProject.Staffs?.filter(
-                          (item) => item.MainPosition == "Business Analysis"
-                        ).length
-                      }
-                    </b>
-                  </td>
-                </tr>
-              </table>
+            <div
+              style={{
+                backgroundColor: "rgb(255,255,255,0.3)",
+                padding: "0 10px 0 10px",
+
+                height: "100%",
+              }}
+            >
+              <h4 className="pt-2">{incomingProject.ProjectName}</h4>
+              <h6>(ID: {incomingProject.ProjectID})</h6>
+              <div className="Project Manager my-5">
+                <Divider textAlign="left">Project Manager</Divider>
+                <h5 className="mt-2">{incomingProject.Manager}</h5>
+              </div>
+              <div className="team-size">
+                <Divider textAlign="left">
+                  {" "}
+                  Team Size - {incomingProject.Staffs?.length}
+                </Divider>
+                <b>
+                  Software Developer{" "}
+                  {
+                    incomingProject.Staffs?.filter(
+                      (item) => item.MainPosition == "Software Developer"
+                    ).length
+                  }
+                </b>
+                <br />
+
+                <b>
+                  Software Tester{" "}
+                  {
+                    incomingProject.Staffs?.filter(
+                      (item) => item.MainPosition == "Software Tester"
+                    ).length
+                  }
+                </b>
+
+                <br />
+
+                <b>
+                  Business Analysis{" "}
+                  {
+                    incomingProject.Staffs?.filter(
+                      (item) => item.MainPosition == "Business Analysis"
+                    ).length
+                  }
+                </b>
+              </div>
             </div>
           </div>
         </div>

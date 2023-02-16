@@ -615,7 +615,7 @@ export const exportExcel = async (id, token) => {
     const link = document.createElement("a");
 
     link.href = url;
-    link.setAttribute("download", "file.xlsx");
+    link.setAttribute("download", `Project_${id}.xlsx`);
     document.body.appendChild(link);
     link.click();
   } catch (error) {

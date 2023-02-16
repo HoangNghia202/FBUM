@@ -160,7 +160,12 @@ function NavBar(props) {
         transformOrigin={{ horizontal: "right", vertical: "top" }}
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       >
-        <MenuItem onClick={handleClose}>
+        <MenuItem
+          onClick={() => {
+            navigate("profile");
+            handleClose();
+          }}
+        >
           <Avatar /> {userInfo.StaffName}
         </MenuItem>
 

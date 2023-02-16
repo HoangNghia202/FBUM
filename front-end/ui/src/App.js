@@ -28,6 +28,9 @@ import PMPage from "./components/project mananger/PMPage";
 import NowProject from "./components/project mananger/now project/Nowproject";
 import IncomingProject from "./components/project mananger/incoming project/IncomingPorject";
 import DetailIncomingProject from "./components/project mananger/incoming project/DetailIncomingProject";
+import StaffPage from "./components/staff/StaffPage";
+import YourProject from "./components/staff/YourProject";
+import Profile from "./components/Profile";
 function App() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -85,6 +88,7 @@ function App() {
 
             {/* <Route path="leader" element={<ManageLeader />} /> */}
             <Route path="staff" element={<ManageStaff staffs={staffs} />} />
+            <Route path="profile" element={<Profile />} />
           </Route>
 
           <Route path="/PM" element={<PMPage />}>
@@ -94,6 +98,11 @@ function App() {
               path="incomingProject/:projectID"
               element={<DetailIncomingProject />}
             />
+            <Route path="profile" element={<Profile />} />
+          </Route>
+          <Route path="/staff" element={<StaffPage />}>
+            <Route path="profile" element={<Profile />} />
+            <Route path="yourProject" element={<YourProject />} />
           </Route>
           <Route path="/login" element={<LoginPage />}></Route>
 

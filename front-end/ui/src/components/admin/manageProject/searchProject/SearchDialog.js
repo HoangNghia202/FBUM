@@ -360,12 +360,12 @@ const SearchDialog = (props) => {
             </div>
           </div>
         </DialogContent>
-        <DialogActions>
+        {/* <DialogActions>
           <Button onClick={props.handleClose}>Disagree</Button>
           <Button onClick={props.handleClose} autoFocus>
             Agree
           </Button>
-        </DialogActions>
+        </DialogActions> */}
       </Dialog>
     </div>
   );

@@ -60,6 +60,8 @@ function LoginPage(props) {
         } else {
           if (res.data.StaffRole === "Project Manager") {
             navigate("/PM/nowProject");
+          } else {
+            navigate("/staff/yourProject");
           }
         }
         toast.success("Login successfully!");
