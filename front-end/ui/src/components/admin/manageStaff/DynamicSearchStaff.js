@@ -72,7 +72,7 @@ function DynamicSearchStaff(props) {
         <Box sx={{ display: "flex", justifyContent: "end", marginY: "20px" }}>
           <TextField
             id="outlined-search"
-            label="Search project"
+            label="Search staff's name"
             type="search"
             variant="outlined"
             size="small"

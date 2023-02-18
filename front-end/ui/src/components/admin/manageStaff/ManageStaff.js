@@ -37,7 +37,7 @@ function ManageStaff(props) {
     useSelector((state) => state.staffSlider);
   const [cookies, setCookie, removeCookie] = useCookies(["token"]);
   const token = cookies.token;
-  const { staffs } = props;
+  const staffs = useSelector((state) => state.staffSlider);
   const dispatch = useDispatch();
   console.log("prop in manage staff: ", staffs);
 

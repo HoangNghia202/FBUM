@@ -78,7 +78,7 @@ export default function TransferList(props) {
   // end modal
 
   console.log("props", props);
-  const { projects } = props;
+  const projects = useSelector((state) => state.projectSlider);
   const { projectId } = useParams();
   console.log("projectId", projectId);
   const inprogressPrj = projects.projectInprogress;

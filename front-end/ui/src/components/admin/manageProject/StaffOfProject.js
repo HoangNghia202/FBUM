@@ -20,6 +20,25 @@ const StaffOfProject = (props) => {
   }, [staffs]);
   console.log("data>>>>", data);
 
+  const handleScrollInfinite = () => {
+    console.log("scrolling");
+
+    if (
+      window.document.documentElement.scrollHeight -
+        Math.round(window.document.documentElement.scrollTop) ===
+      window.document.documentElement.clientHeight
+    ) {
+      console.log("do some thing");
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("scroll", handleScrollInfinite);
+    return () => {
+      window.removeEventListener("scroll", handleScrollInfinite);
+    };
+  }, []);
+
   return (
     <>
       <div className="table-wrapper-scroll-y my-custom-scrollbar">
@@ -38,17 +57,23 @@ const StaffOfProject = (props) => {
           <tbody>
             {data.map((item, index) => (
               <tr key={index}>
-                <th scope="row">{index + 1}</th>
-                <td className="text-left">{item.StaffName}</td>
-                <td className="text-left">{item.MainPosition}</td>
+                <th className="text-start" scope="row">
+                  {index + 1}
+                </th>
+                <td className="text-start">{item.StaffName}</td>
+                <td className="text-start">
+                  {item.MainPosition}{" "}
+                  {item.StaffRole === "Project Manager" && "(PM)"}
+                </td>
                 <td>{item.Level}</td>
 
                 {(props.type === "inprogress" || props.type === "incoming") && (
                   <td>
                     {" "}
                     <Button
-                      color="primary"
+                      color="error"
                       variant="outlined"
+                      disabled={item.StaffRole === "Project Manager"}
                       onClick={() =>
                         props.removeStaffOutOfProject(item.StaffID)
                       }

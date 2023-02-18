@@ -15,7 +15,7 @@ import GridOnRoundedIcon from "@mui/icons-material/GridOnRounded";
 import { useState } from "react";
 
 import Modal from "react-bootstrap/Modal";
-import { AlertTitle, Button } from "@mui/material";
+import { AlertTitle, Button, CircularProgress } from "@mui/material";
 import moment from "moment/moment";
 import { dataProject } from "../dataAdmin";
 import { Alert, Progress } from "reactstrap";
@@ -31,6 +31,7 @@ import {
   fetchProjectsInprogress,
   fetchProjectsEnded,
   fetchProjectsIncoming,
+  setTabPanel,
 } from "../../../redux/ProjectSlider";
 import PaginationOutlined from "./Pagination";
 import SearchAutoCompletePM from "./SearchAutoCompletePM";
@@ -40,14 +41,15 @@ import { useCookies } from "react-cookie";
 import readXlsxFile from "read-excel-file";
 import SearchDialog from "./searchProject/SearchDialog";
 import { handleCreateNewStaff } from "../../../services/adminServices/AdminServices";
+import { height } from "@mui/system";
 
 function Project(props) {
   const currentUser = useSelector((state) => state.auth.authReducer.userInfo);
   const dispatch = useDispatch();
-  console.log("props >>>", props);
+
   const [cookies, setCookie, removeCookie] = useCookies(["token"]);
   const token = cookies.token;
-  const { projects } = props;
+  const projects = useSelector((state) => state.projectSlider);
 
   const [projectEnded, setProjectEnded] = useState([]);
   const [projectInprogress, setProjectInprogress] = useState([]);
@@ -58,6 +60,7 @@ function Project(props) {
     []
   );
   const [projectIncomingToDisPlay, setProjectIncomingToDisPlay] = useState([]);
+
   const [startDayNewProject, setStartDayNewProject] = useState("");
   const [endDayNewProject, setEndDayNewProject] = useState("");
   const [FreeProjectManager, setFreeProjectManager] = useState([]);
@@ -91,9 +94,9 @@ function Project(props) {
   console.log("projectIncoming", projectIncoming);
 
   const handleChange = (event, newValue) => {
-    setValue(newValue);
+    dispatch(setTabPanel(newValue));
   };
-  const [value, setValue] = useState("1");
+  const value = projects.tabPanel;
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = () => {
@@ -137,10 +140,15 @@ function Project(props) {
   };
 
   const getFreeProjectManager = async () => {
+    if (Date.parse(startDayNewProject) < Date.now()) {
+      toast.error("Start day must be after today");
+      return;
+    }
     if (Date.parse(startDayNewProject) >= Date.parse(endDayNewProject)) {
       toast.error("Start day must be before end day");
       return;
     }
+
     let startDay = moment(startDayNewProject).format("YYYY-MM-DD hh:mm:ss");
     let endDay = moment(endDayNewProject).format("YYYY-MM-DD hh:mm:ss");
     let time = startDay + " , " + endDay;
@@ -178,6 +186,8 @@ function Project(props) {
     });
   };
 
+  console.log("loading>>>", projects.loading);
+
   return (
     <>
       <div className="manage-project col-9 ">
@@ -212,197 +222,209 @@ function Project(props) {
             </Tooltip>
           </Box>
         </div>
-        <div className="container row">
-          <Box sx={{ width: "100%", typography: "body1" }}>
-            <TabContext value={value}>
-              <Box
-                sx={{
-                  borderBottom: 1,
-                  borderColor: "divider",
-                }}
-              >
-                <TabList
-                  onChange={handleChange}
-                  aria-label="lab API tabs example"
+
+        {projects.loading ? (
+          <div className="d-flex justify-content-center align-items-center">
+            <CircularProgress />
+          </div>
+        ) : (
+          <div className="container row">
+            <Box sx={{ width: "100%", typography: "body1" }}>
+              <TabContext value={value}>
+                <Box
+                  sx={{
+                    borderBottom: 1,
+                    borderColor: "divider",
+                  }}
                 >
-                  <Tab label="Project in progressing" value="1" />
-                  <Tab label="Project incoming" value="3" />
-                  <Tab label="Project ended" value="2" />
-                </TabList>
-              </Box>
-              <TabPanel value="1">
-                <div className="d-flex justify-content-between align-items-center">
-                  <Box>
-                    <Button variant="outlined" onClick={handleOpenSearchDialog}>
-                      Advanced Search
-                    </Button>
-                  </Box>
-                  <DynamicSearchProject
-                    setProject={(data) => setProjectInprogressToDisPlay(data)}
-                    typeProject="projectInprogress"
-                    resetScreen={() => {
-                      setProjectInprogressToDisPlay(projectInprogress);
-                    }}
-                  ></DynamicSearchProject>
-                  {/* <Button color="danger" style={{ height: "40px" }}>
+                  <TabList
+                    onChange={handleChange}
+                    aria-label="lab API tabs example"
+                  >
+                    <Tab label="Project in progressing" value="1" />
+                    <Tab label="Project incoming" value="3" />
+                    <Tab label="Project ended" value="2" />
+                  </TabList>
+                </Box>
+                <TabPanel value="1">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <Box>
+                      <Button
+                        variant="outlined"
+                        onClick={handleOpenSearchDialog}
+                      >
+                        Advanced Search
+                      </Button>
+                    </Box>
+                    <DynamicSearchProject
+                      setProject={(data) => setProjectInprogressToDisPlay(data)}
+                      typeProject="projectInprogress"
+                      resetScreen={() => {
+                        setProjectInprogressToDisPlay(projectInprogress);
+                      }}
+                    ></DynamicSearchProject>
+                    {/* <Button color="danger" style={{ height: "40px" }}>
                   Clear
                 </Button> */}
-                </div>
-                <div className="processing-proj row d-flex flex-row align-items-stretch">
-                  {projectInprogressToDisPlay.map((item) => {
-                    let percent = Math.floor(
-                      ((Date.now() - Date.parse(item.TimeStart)) /
-                        (Date.parse(item.TimeEnd) -
-                          Date.parse(item.TimeStart))) *
-                        100
-                    );
+                  </div>
+                  <div className="processing-proj row d-flex flex-row align-items-stretch">
+                    {projectInprogressToDisPlay.map((item) => {
+                      let percent = Math.floor(
+                        ((Date.now() - Date.parse(item.TimeStart)) /
+                          (Date.parse(item.TimeEnd) -
+                            Date.parse(item.TimeStart))) *
+                          100
+                      );
 
-                    console.log("percent", percent);
+                      console.log("percent", percent);
 
-                    return (
-                      <div
-                        className="col-2 col-md-4 row"
-                        onClick={() => {
-                          ViewDetailProject(item.ProjectID);
-                        }}
-                      >
-                        <div className="container">
-                          <div className="card ">
-                            <div className="card-body">
-                              <h5
-                                className="card-title"
-                                style={{ height: "50px" }}
-                              >
-                                {item.ProjectName}
-                              </h5>
-                              <div className="row px-2 cart-content">
-                                <div className="text-black row">
-                                  <div className="col-6">
-                                    {" "}
-                                    <b>Project ID</b>{" "}
-                                  </div>
-                                  <div className="col-6 text-end">
-                                    {item.ProjectID}
-                                  </div>
-                                  <div className="col-6">
-                                    {" "}
-                                    <b>PM</b>{" "}
-                                  </div>
-                                  <div
-                                    className="col-6 text-end card-text text-truncate"
-                                    style={{ maxWidth: "500px" }}
-                                  >
-                                    {item.Manager}
-                                  </div>
-                                  <div className="col-6">
-                                    {" "}
-                                    <b>Team size</b>{" "}
-                                  </div>
-                                  <div className="col-6 text-end">
-                                    {item.Staffs.length}
+                      return (
+                        <div
+                          className="col-2 col-md-4 row"
+                          onClick={() => {
+                            ViewDetailProject(item.ProjectID);
+                          }}
+                        >
+                          <div className="container">
+                            <div className="card ">
+                              <div className="card-body">
+                                <h5
+                                  className="card-title"
+                                  style={{ height: "50px" }}
+                                >
+                                  {item.ProjectName}
+                                </h5>
+                                <div className="row px-2 cart-content">
+                                  <div className="text-black row">
+                                    <div className="col-6">
+                                      {" "}
+                                      <b>Project ID</b>{" "}
+                                    </div>
+                                    <div className="col-6 text-end">
+                                      {item.ProjectID}
+                                    </div>
+                                    <div className="col-6">
+                                      {" "}
+                                      <b>PM</b>{" "}
+                                    </div>
+                                    <div
+                                      className="col-6 text-end card-text text-truncate"
+                                      style={{ maxWidth: "500px" }}
+                                    >
+                                      {item.Manager}
+                                    </div>
+                                    <div className="col-6">
+                                      {" "}
+                                      <b>Team size</b>{" "}
+                                    </div>
+                                    <div className="col-6 text-end">
+                                      {item.Staffs.length}
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
 
-                              <Progress
-                                striped
-                                animated
-                                color="warning"
-                                value={percent > 0 ? percent : 0}
-                                className="my-3 mx-2"
-                              >
-                                {percent}%
-                              </Progress>
+                                <Progress
+                                  striped
+                                  animated
+                                  color="warning"
+                                  value={percent > 0 ? percent : 0}
+                                  className="my-3 mx-2"
+                                >
+                                  {percent}%
+                                </Progress>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                  <div className="d-flex justify-content-center my-5 col-md-11 ">
-                    <PaginationOutlined
-                      totalPage={props.projects.totalPageProjectInProgress}
-                      onChangePage={(pageNum) =>
-                        dispatch(fetchProjectsInprogress(pageNum, token))
-                      }
-                    />
+                      );
+                    })}
+                    <div className="d-flex justify-content-center my-5 col-md-11 ">
+                      <PaginationOutlined
+                        totalPage={projects.totalPageProjectInProgress}
+                        onChangePage={(pageNum) =>
+                          dispatch(fetchProjectsInprogress(pageNum, token))
+                        }
+                      />
+                    </div>
                   </div>
-                </div>
-              </TabPanel>
+                </TabPanel>
 
-              <TabPanel value="3">
-                <div className="d-flex justify-content-between align-items-center">
-                  <Box>
-                    <Button variant="outlined" onClick={handleOpenSearchDialog}>
-                      Advanced Search
-                    </Button>
-                  </Box>
-                  <DynamicSearchProject
-                    setProject={(data) => setProjectIncomingToDisPlay(data)}
-                    typeProject="projectIncoming"
-                    resetScreen={() => {
-                      setProjectIncomingToDisPlay(projectIncoming);
-                    }}
-                  ></DynamicSearchProject>
-                </div>
-                <div className="incoming-proj row d-flex flex-row align-items-stretch">
-                  {projectIncomingToDisPlay.map((item) => {
-                    let percent = Math.floor(
-                      ((Date.now() - Date.parse(item.TimeStart)) /
-                        (Date.parse(item.TimeEnd) -
-                          Date.parse(item.TimeStart))) *
-                        100
-                    );
-
-                    console.log("percent", percent);
-
-                    return (
-                      <div
-                        className="col-2 col-md-4 row"
-                        onClick={() => {
-                          ViewDetailProject(item.ProjectID);
-                        }}
+                <TabPanel value="3">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <Box>
+                      <Button
+                        variant="outlined"
+                        onClick={handleOpenSearchDialog}
                       >
-                        <div className="container">
-                          <div className="card ">
-                            <div className="card-body">
-                              <h5
-                                className="card-incoming"
-                                style={{ height: "50px" }}
-                              >
-                                {item.ProjectName}
-                              </h5>
+                        Advanced Search
+                      </Button>
+                    </Box>
+                    <DynamicSearchProject
+                      setProject={(data) => setProjectIncomingToDisPlay(data)}
+                      typeProject="projectIncoming"
+                      resetScreen={() => {
+                        setProjectIncomingToDisPlay(projectIncoming);
+                      }}
+                    ></DynamicSearchProject>
+                  </div>
+                  <div className="incoming-proj row d-flex flex-row align-items-stretch">
+                    {projectIncomingToDisPlay.map((item) => {
+                      let percent = Math.floor(
+                        ((Date.now() - Date.parse(item.TimeStart)) /
+                          (Date.parse(item.TimeEnd) -
+                            Date.parse(item.TimeStart))) *
+                          100
+                      );
 
-                              <div className="row px-2 cart-content">
-                                <div className="text-black row">
-                                  <div className="col-6">
-                                    {" "}
-                                    <b>Project ID</b>{" "}
-                                  </div>
-                                  <div className="col-6 text-end">
-                                    {item.ProjectID}
-                                  </div>
-                                  <div className="col-6">
-                                    {" "}
-                                    <b>PM</b>{" "}
-                                  </div>
-                                  <div
-                                    className="col-6 text-end card-text text-truncate"
-                                    style={{ maxWidth: "500px" }}
-                                  >
-                                    {item.Manager}
-                                  </div>
-                                  <div className="col-6">
-                                    {" "}
-                                    <b>Team size</b>{" "}
-                                  </div>
-                                  <div className="col-6 text-end">
-                                    {item.Staffs.length}
+                      console.log("percent", percent);
+
+                      return (
+                        <div
+                          className="col-2 col-md-4 row"
+                          onClick={() => {
+                            ViewDetailProject(item.ProjectID);
+                          }}
+                        >
+                          <div className="container">
+                            <div className="card ">
+                              <div className="card-body">
+                                <h5
+                                  className="card-incoming"
+                                  style={{ height: "50px" }}
+                                >
+                                  {item.ProjectName}
+                                </h5>
+
+                                <div className="row px-2 cart-content">
+                                  <div className="text-black row">
+                                    <div className="col-6">
+                                      {" "}
+                                      <b>Project ID</b>{" "}
+                                    </div>
+                                    <div className="col-6 text-end">
+                                      {item.ProjectID}
+                                    </div>
+                                    <div className="col-6">
+                                      {" "}
+                                      <b>PM</b>{" "}
+                                    </div>
+                                    <div
+                                      className="col-6 text-end card-text text-truncate"
+                                      style={{ maxWidth: "500px" }}
+                                    >
+                                      {item.Manager}
+                                    </div>
+                                    <div className="col-6">
+                                      {" "}
+                                      <b>Team size</b>{" "}
+                                    </div>
+                                    <div className="col-6 text-end">
+                                      {item.Staffs.length}
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
 
-                              {/* <Progress
+                                {/* <Progress
                               striped
                               animated
                               color="warning"
@@ -411,86 +433,90 @@ function Project(props) {
                             >
                               {percent}%
                             </Progress> */}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                  <div className="d-flex justify-content-center my-5 col-md-11 ">
-                    <PaginationOutlined
-                      totalPage={props.projects.totalPageProjectIncoming}
-                      onChangePage={(pageNum) =>
-                        dispatch(fetchProjectsIncoming(pageNum, token))
-                      }
-                    />
-                  </div>
-                </div>
-              </TabPanel>
-
-              <TabPanel value="2">
-                <div className="d-flex justify-content-between align-items-center">
-                  <Box>
-                    <Button variant="outlined" onClick={handleOpenSearchDialog}>
-                      Advanced Search
-                    </Button>
-                  </Box>
-                  <DynamicSearchProject
-                    setProject={(data) => setProjectEndedToDisPlay(data)}
-                    typeProject="projectEnded"
-                    resetScreen={() => {
-                      setProjectEndedToDisPlay(projectEnded);
-                    }}
-                  ></DynamicSearchProject>
-                </div>
-                <div className="ended-proj row">
-                  <div className="processing-proj row d-flex">
-                    {projectEndedToDisPlay.length === 0 && (
-                      <Alert severity="error" className="w-100">
-                        <AlertTitle>Info</AlertTitle>
-                        <strong>There is no project ended!</strong>
-                      </Alert>
-                    )}
-                    {projectEndedToDisPlay.length > 0 &&
-                      projectEndedToDisPlay.map((item, index) => {
-                        return (
-                          <div
-                            key={index}
-                            className="col-2 col-md-3 row"
-                            onClick={() => {
-                              ViewDetailProject(item.ProjectID);
-                            }}
-                          >
-                            <div className="container">
-                              <div className="card card-end">
-                                <div className="card-body">
-                                  <h5
-                                    className="card-title"
-                                    style={{ height: "70px" }}
-                                  >
-                                    {item.ProjectName}
-                                  </h5>
-                                  <hr className="m-0"></hr>
-                                </div>
                               </div>
                             </div>
                           </div>
-                        );
-                      })}
+                        </div>
+                      );
+                    })}
                     <div className="d-flex justify-content-center my-5 col-md-11 ">
                       <PaginationOutlined
-                        totalPage={props.projects.totalPageProjectEnded}
+                        totalPage={projects.totalPageProjectIncoming}
                         onChangePage={(pageNum) =>
-                          dispatch(fetchProjectsInprogress(pageNum, token))
+                          dispatch(fetchProjectsIncoming(pageNum, token))
                         }
                       />
                     </div>
                   </div>
-                </div>
-              </TabPanel>
-            </TabContext>
-          </Box>
-        </div>
+                </TabPanel>
+
+                <TabPanel value="2">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <Box>
+                      <Button
+                        variant="outlined"
+                        onClick={handleOpenSearchDialog}
+                      >
+                        Advanced Search
+                      </Button>
+                    </Box>
+                    <DynamicSearchProject
+                      setProject={(data) => setProjectEndedToDisPlay(data)}
+                      typeProject="projectEnded"
+                      resetScreen={() => {
+                        setProjectEndedToDisPlay(projectEnded);
+                      }}
+                    ></DynamicSearchProject>
+                  </div>
+                  <div className="ended-proj row">
+                    <div className="processing-proj row d-flex">
+                      {projectEndedToDisPlay.length === 0 && (
+                        <Alert severity="error" className="w-100">
+                          <AlertTitle>Info</AlertTitle>
+                          <strong>There is no project ended!</strong>
+                        </Alert>
+                      )}
+                      {projectEndedToDisPlay.length > 0 &&
+                        projectEndedToDisPlay.map((item, index) => {
+                          return (
+                            <div
+                              key={index}
+                              className="col-2 col-md-3 row"
+                              onClick={() => {
+                                ViewDetailProject(item.ProjectID);
+                              }}
+                            >
+                              <div className="container">
+                                <div className="card card-end">
+                                  <div className="card-body">
+                                    <h5
+                                      className="card-title"
+                                      style={{ height: "70px" }}
+                                    >
+                                      {item.ProjectName}
+                                    </h5>
+                                    <hr className="m-0"></hr>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      <div className="d-flex justify-content-center my-5 col-md-11 ">
+                        <PaginationOutlined
+                          totalPage={projects.totalPageProjectEnded}
+                          onChangePage={(pageNum) =>
+                            dispatch(fetchProjectsInprogress(pageNum, token))
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </TabPanel>
+              </TabContext>
+            </Box>
+          </div>
+        )}
 
         {/* modal input create new project */}
         <Modal show={show} onHide={handleClose}>

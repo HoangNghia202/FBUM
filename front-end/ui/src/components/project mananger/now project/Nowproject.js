@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
+import moment from "moment";
 
 function NowProject(props) {
   const navigate = useNavigate();
@@ -60,7 +61,7 @@ function NowProject(props) {
               >
                 <h4 className="pt-2">{nowProject.ProjectName}</h4>
                 <h6>(ID: {nowProject.ProjectID})</h6>
-                <div className="Project Manager my-5">
+                <div className="Project Manager py-2">
                   <Divider textAlign="left">Project Manager</Divider>
                   <h5 className="mt-2">{nowProject.Manager}</h5>
                 </div>
@@ -87,9 +88,7 @@ function NowProject(props) {
                       ).length
                     }
                   </b>
-
                   <br />
-
                   <b>
                     Business Analysis{" "}
                     {
@@ -98,57 +97,18 @@ function NowProject(props) {
                       ).length
                     }
                   </b>
-                  {/* <table
-                  className="text-start mt-2"
-                  style={{ backgroundColor: "#BAE9EE" }}
-                >
-                  <tr>
-                    <td>
-                      <b> Software Developer:</b>
-                    </td>
-                    <td>
-                      <b className="p-2">
-                        {
-                          nowProject.Staffs?.filter(
-                            (item) => item.MainPosition == "Software Developer"
-                          ).length
-                        }
-                      </b>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      {" "}
-                      <b>Software Tester:</b>{" "}
-                    </td>
-                    <td>
-                      {" "}
-                      <b className="p-2">
-                        {
-                          nowProject.Staffs?.filter(
-                            (item) => item.MainPosition == "Software Tester"
-                          ).length
-                        }
-                      </b>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      {" "}
-                      <b>Business Analysis</b>{" "}
-                    </td>
-                    <td>
-                      {" "}
-                      <b className="px-2">
-                        {
-                          nowProject.Staffs?.filter(
-                            (item) => item.MainPosition == "Business Analysis"
-                          ).length
-                        }
-                      </b>
-                    </td>
-                  </tr>
-                </table> */}
+                  <div className="mt-2">
+                    <Divider textAlign="left">Project Duration</Divider>
+                    <b>
+                      Date Start:{" "}
+                      {moment(nowProject.TimeStart).format("MM-DD-YYYY")}
+                    </b>
+                    <br />
+                    <b>
+                      Date End:{" "}
+                      {moment(nowProject.TimeEnd).format("MM-DD-YYYY")}
+                    </b>
+                  </div>
                 </div>
               </div>
             </div>

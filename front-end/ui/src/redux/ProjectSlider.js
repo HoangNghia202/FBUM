@@ -4,13 +4,15 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 
 const initialState = {
+  loading: false,
+  error: "",
   projectInprogress: [],
   projectEnded: [],
   projectIncoming: [],
-  allProjectName: [],
   totalPageProjectInProgress: 0,
   totalPageProjectEnded: 0,
   totalPageProjectIncoming: 0,
+  tabPanel: "1",
 };
 
 const baseUrl = process.env.REACT_APP_JSON_API;
@@ -31,10 +33,6 @@ const productSliderSlice = createSlice({
         state.projectIncoming = action.payload.projectIncoming;
       }
 
-      if (action.payload.allProjectName) {
-        state.allProjectName = action.payload.allProjectName;
-      }
-
       if (action.payload.totalPageProjectInProgress) {
         state.totalPageProjectInProgress =
           action.payload.totalPageProjectInProgress;
@@ -48,6 +46,21 @@ const productSliderSlice = createSlice({
         state.totalPageProjectIncoming =
           action.payload.totalPageProjectIncoming;
       }
+    },
+
+    setTabPanel(state, action) {
+      state.tabPanel = action.payload;
+    },
+    startLoadingProject(state) {
+      state.loading = true;
+    },
+    loadingProjectFailed(state) {
+      state.loading = false;
+      state.error = "Loading project failed, please try again later";
+    },
+    loadingProjectSuccess(state) {
+      state.loading = false;
+      state.error = "";
     },
   },
 });
@@ -75,11 +88,6 @@ export const fetchProjects = (pageNum, token) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       console.log("res3 >>> ", res3);
-      const res4 = await axios.get(`${baseUrl}/api/project`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      console.log("res4 >>> ", res4);
-
       const res5 = await axios.get(`${baseUrl}/api/projectInProgressPage`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -97,7 +105,6 @@ export const fetchProjects = (pageNum, token) => {
         projectInprogress: res1.data,
         projectEnded: res2.data,
         projectIncoming: res3.data,
-        allProjectName: res4.data,
         totalPageProjectInProgress: res5.data,
         totalPageProjectEnded: res6.data,
         totalPageProjectIncoming: res7.data,
@@ -121,7 +128,13 @@ export const fetchProjectsInprogress = (pageNum, token) => {
         // `${baseUrl}/projectInProgress`
       );
       console.log("res >>> ", res.data);
-      let result = { projectInprogress: res.data };
+      const res1 = await axios.get(`${baseUrl}/api/projectInProgressPage`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      let result = {
+        projectInprogress: res.data,
+        totalPageProjectInProgress: res1.data,
+      };
       dispatch(setProjectSlider(result));
     } catch (error) {
       throw error;
@@ -140,7 +153,11 @@ export const fetchProjectsEnded = (pageNum, token) => {
         // `${baseUrl}/projectEnded`
       );
       console.log("fetch project ended >>> ", res.data);
-      let result = { projectEnded: res.data };
+      const res1 = await axios.get(`${baseUrl}/api/projectEndedPage`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      let result = { projectEnded: res.data, totalPageProjectEnded: res1.data };
       dispatch(setProjectSlider(result));
     } catch (error) {
       throw error;
@@ -153,14 +170,20 @@ export const fetchProjectsIncoming = (pageNum, token) => {
     console.log("run in to thunk action creator");
     console.log("state:", getState());
     try {
-      const res1 = await axios.get(
+      const res = await axios.get(
         `${baseUrl}/api/projectInComing/page/${pageNum}`,
         { headers: { Authorization: `Bearer ${token}` } }
         // `${baseUrl}/projectInProgress`
       );
-      console.log("res1 >>> ", res1.data);
+      console.log("res >>> ", res.data);
+      const res1 = await axios.get(`${baseUrl}/api/projectInComingPage`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-      const result = { projectIncoming: res1.data };
+      const result = {
+        projectIncoming: res.data,
+        totalPageProjectIncoming: res1.data,
+      };
       console.log("res >>> ", result);
       dispatch(setProjectSlider(result));
     } catch (error) {
@@ -168,5 +191,11 @@ export const fetchProjectsIncoming = (pageNum, token) => {
     }
   };
 };
-export const { setProjectSlider } = productSliderSlice.actions;
+export const {
+  setProjectSlider,
+  setTabPanel,
+  startLoadingProject,
+  loadingProjectFailed,
+  loadingProjectSuccess,
+} = productSliderSlice.actions;
 export default productSliderSlice.reducer;

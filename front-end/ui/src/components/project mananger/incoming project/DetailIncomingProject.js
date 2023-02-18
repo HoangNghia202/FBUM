@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import Divider from "@mui/material/Divider";
 import { findProjectByPMID } from "../../../services/PMServices/PMServices";
 import { useNavigate } from "react-router-dom";
+import moment from "moment";
 function DetailIncomingProject(props) {
   const navigate = useNavigate();
   const [cookies] = useCookies(["token"]);
@@ -63,13 +64,13 @@ function DetailIncomingProject(props) {
               style={{
                 backgroundColor: "rgb(255,255,255,0.3)",
                 padding: "0 10px 0 10px",
-
                 height: "100%",
               }}
             >
+              {" "}
               <h4 className="pt-2">{incomingProject.ProjectName}</h4>
               <h6>(ID: {incomingProject.ProjectID})</h6>
-              <div className="Project Manager my-5">
+              <div className="Project Manager py-2">
                 <Divider textAlign="left">Project Manager</Divider>
                 <h5 className="mt-2">{incomingProject.Manager}</h5>
               </div>
@@ -96,9 +97,7 @@ function DetailIncomingProject(props) {
                     ).length
                   }
                 </b>
-
                 <br />
-
                 <b>
                   Business Analysis{" "}
                   {
@@ -107,6 +106,18 @@ function DetailIncomingProject(props) {
                     ).length
                   }
                 </b>
+                <div className="mt-2">
+                  <Divider textAlign="left">Project Duration</Divider>
+                  <b>
+                    Date Start:{" "}
+                    {moment(incomingProject.TimeStart).format("MM-DD-YYYY")}
+                  </b>
+                  <br />
+                  <b>
+                    Date End:{" "}
+                    {moment(incomingProject.TimeEnd).format("MM-DD-YYYY")}
+                  </b>
+                </div>
               </div>
             </div>
           </div>

@@ -5,7 +5,12 @@ import React from "react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import NavHeader from "../../contain/NavHeader";
-import { fetchProjects } from "../../redux/ProjectSlider";
+import {
+  fetchProjects,
+  startLoadingProject,
+  loadingProjectSuccess,
+  loadingProjectFailed,
+} from "../../redux/ProjectSlider";
 import { useDispatch } from "react-redux";
 import {
   fetchAllStaff,
@@ -26,6 +31,9 @@ function AdminPage(props) {
 
   useEffect(() => {
     dispatch(fetchProjects(1, token));
+  }, []);
+
+  useEffect(() => {
     dispatch(fetchAllStaff(1, token));
     dispatch(fetchInProjectStaff(1, token));
     dispatch(fetchFreeStaff(1, token));

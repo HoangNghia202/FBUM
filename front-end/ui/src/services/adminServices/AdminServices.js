@@ -1,4 +1,5 @@
 import axios from "axios";
+import { Await } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const baseUrl = process.env.REACT_APP_JSON_API;
@@ -353,11 +354,12 @@ export const transferStaffBetweenProject = async (
 export const handleAddStaffToProject = async (staffs, projectId, token) => {
   try {
     if (staffs.length > 0) {
-      await staffs.forEach((element) => {
-        axios.put(
+      staffs.forEach(async (element) => {
+        let res = await axios.put(
           `${baseUrl}/api/insertToProject/${projectId}/${element.StaffID}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
+        console.log("res add staff>>>", res);
       });
       return {
         errCode: 0,
