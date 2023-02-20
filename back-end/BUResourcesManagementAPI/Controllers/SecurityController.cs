@@ -32,6 +32,7 @@ namespace BUResourcesManagementAPI.Controllers
         // POST: api/Security/Authentication
         [HttpPost]
         [Route("api/Security/Authentication")]
+        [AllowAnonymous]
         public Staff Authentication([FromBody] Staff staff)
         {
             if (new TokenManager().Authenticate(staff.StaffID, staff.Password))

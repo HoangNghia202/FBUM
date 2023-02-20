@@ -26,7 +26,7 @@ namespace BUResourcesManagementAPI.TokenAuthentication
         public bool Authenticate(int staffID, String password)
         {
             Staff staff = new Staff(staffID, password);
-            if (new StaffController().Login(staff) != null) return true;
+            if (new ValuesController().Login(staff) != null) return true;
             return false;
         }
 
@@ -89,6 +89,14 @@ namespace BUResourcesManagementAPI.TokenAuthentication
             String token;
             if (GetToken().Split(' ').Length == 2) token = GetToken().Split(' ')[1];
             else token = GetToken().Split(' ')[0];
+            if (!VerifyToken(token)) return null;
+            var jwt = new JwtSecurityTokenHandler().ReadJwtToken(token);
+            int staffID = int.Parse(jwt.Claims.First(c => c.Type == "StaffID").Value);
+            return new StaffController().Get(staffID);
+        }
+
+        public Staff GetStaff(String token)
+        {
             if (!VerifyToken(token)) return null;
             var jwt = new JwtSecurityTokenHandler().ReadJwtToken(token);
             int staffID = int.Parse(jwt.Claims.First(c => c.Type == "StaffID").Value);

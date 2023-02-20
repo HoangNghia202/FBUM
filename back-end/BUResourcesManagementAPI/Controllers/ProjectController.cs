@@ -25,9 +25,9 @@ namespace BUResourcesManagementAPI.Controllers
     public class ProjectController : ApiController
     {
         [HttpGet] // api/project
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public List<Project> Get()
         {
-            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
             try
             {
                 List<Project> listProject = null;
@@ -65,9 +65,9 @@ namespace BUResourcesManagementAPI.Controllers
         }
 
         [HttpGet] // api/project/{id}
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public Project Get(int id)
         {
-            //if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
             try
             {
                 String query = @"SELECT * FROM Project WHERE ProjectID = @ProjectID";
@@ -88,7 +88,8 @@ namespace BUResourcesManagementAPI.Controllers
                             String manager = new StaffController().Get(reader.GetInt32(2)).StaffName;
                             String dateStart = reader.GetDateTime(3).ToString("yyyy-MM-dd HH:mm:ss");
                             String dateEnd = reader.GetDateTime(4).ToString("yyyy-MM-dd HH:mm:ss");
-                            return new Project(projectID, projectName, manager, dateStart, dateEnd);
+                            List<Staff> staffs = new ProjectController().GetStaff(projectID);
+                            return new Project(projectID, projectName, manager, dateStart, dateEnd, staffs);
                         }
                     }
                     connection.Close();
@@ -104,9 +105,9 @@ namespace BUResourcesManagementAPI.Controllers
 
         [HttpGet] // api/staffInProject/{id}
         [Route("api/staffInProject/{id}")]
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public List<Staff> GetStaff(int id)
         {
-            //if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
             try
             {
                 List<Staff> listStaff = null;
@@ -155,9 +156,9 @@ namespace BUResourcesManagementAPI.Controllers
 
         [HttpGet] // api/project/staff_available/{id}
         [Route("api/project/staff_available/{id}")]
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public List<Staff> GetStaffAvailable(int id)
         {
-            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
             try
             {
                 List<Staff> listStaff = null;
@@ -211,9 +212,9 @@ namespace BUResourcesManagementAPI.Controllers
 
         [HttpGet] // api/project/staff_available/{fromID}/{toID}
         [Route("api/project/staff_available/{fromID}/{toID}")]
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public List<Staff> GetStaffAvailable(int fromID, int toID)
         {
-            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
             try
             {
                 List<Staff> listStaff = null;
@@ -272,9 +273,9 @@ namespace BUResourcesManagementAPI.Controllers
 
         [HttpGet] // api/projectInProgress/page/{id}
         [Route("api/projectInProgress/page/{id}")]
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public List<Project> GetProjectInProgress(int id)
         {
-            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
             try
             {
                 List<Project> listProject = null;
@@ -317,9 +318,9 @@ namespace BUResourcesManagementAPI.Controllers
 
         [HttpGet] // api/projectInProgressPage
         [Route("api/projectInProgressPage")]
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public int GetProjectInProgressPage()
         {
-            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return 0;
             try
             {
                 int rows = 0;
@@ -355,9 +356,9 @@ namespace BUResourcesManagementAPI.Controllers
 
         [HttpGet] // api/projectEnded/page/{id}
         [Route("api/projectEnded/page/{id}")]
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public List<Project> GetProjectEnded(int id)
         {
-            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
             try
             {
                 List<Project> listProject = null;
@@ -400,9 +401,9 @@ namespace BUResourcesManagementAPI.Controllers
 
         [HttpGet] // api/projectEndedPage
         [Route("api/projectEndedPage")]
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public int GetProjectEndedPage()
         {
-            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return 0;
             try
             {
                 int rows = 0;
@@ -438,9 +439,10 @@ namespace BUResourcesManagementAPI.Controllers
 
         [HttpGet] // api/projectInComing/page/{id}
         [Route("api/projectInComing/page/{id}")]
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public List<Project> GetProjectInComing(int id)
         {
-            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
+
             try
             {
                 List<Project> listProject = null;
@@ -483,9 +485,9 @@ namespace BUResourcesManagementAPI.Controllers
 
         [HttpGet] // api/projectInComingPage
         [Route("api/projectInComingPage")]
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public int GetProjectInComingPage()
         {
-            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return 0;
             try
             {
                 int rows = 0;
@@ -521,9 +523,9 @@ namespace BUResourcesManagementAPI.Controllers
 
         [HttpGet] // api/project/search/{keyword}
         [Route("api/project/search/{keyword}")]
+        [Filters.CustomAuthentication(Roles = "Admin, Project Manager")]
         public List<Project> Search(String keyword)
         {
-            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
             try
             {
                 List<Project> listProject = null;
@@ -564,6 +566,7 @@ namespace BUResourcesManagementAPI.Controllers
 
         [HttpGet] // api/Export/Project/{id}/{path}
         [Route("api/Export/Project/{id}/{path}")]
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public String ExportExcel(int id, String path)
         {
             try
@@ -610,6 +613,7 @@ namespace BUResourcesManagementAPI.Controllers
 
         [HttpGet] //api/Dowload/Project/{id}
         [Route("api/Download/Project/{id}")]
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public HttpResponseMessage GetExcelFile(int id)
         {
             try
@@ -662,12 +666,14 @@ namespace BUResourcesManagementAPI.Controllers
                 return Request.CreateErrorResponse(HttpStatusCode.Unauthorized, ex.ToString());
             }
         }
+        [Filters.CustomAuthentication(Roles = "Admin")]
 
         [HttpPost] // api/project/multiOptionSearch
         [Route("api/project/multiOptionSearch")]
+        [Filters.CustomAuthentication]
+        [AllowAnonymous]
         public IEnumerable<Project> MultiOptionSearch([FromBody] SearchProject searchProject)
         {
-            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
             try
             {
                 var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString);
@@ -947,6 +953,7 @@ namespace BUResourcesManagementAPI.Controllers
 
         [HttpPost] // api/createProject
         [Route("api/createProject")]
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public String Post(Project project)
         {
             if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return "Can't access this resource";
@@ -1003,9 +1010,9 @@ namespace BUResourcesManagementAPI.Controllers
 
         [HttpPost] // api/transfer/{fromId}/{toId}
         [Route("api/transfer/{fromId}/{toId}")]
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public String MoveStaff(int fromID, int toID, [FromBody] Models.Values staffIDs)
         {
-            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return "Can't access this resource";
             try
             {
                 String[] ids = staffIDs.Value.Split(',');
@@ -1025,9 +1032,9 @@ namespace BUResourcesManagementAPI.Controllers
 
         [HttpPut] // api/insertToProject/{projectID}/{staffID}
         [Route("api/insertToProject/{projectID}/{staffID}")]
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public String PutStaff(int projectID, int staffID)
         {
-            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return "Can't access this resource";
             try
             {
                 Project project = Get(projectID);
@@ -1068,9 +1075,9 @@ namespace BUResourcesManagementAPI.Controllers
 
         [HttpDelete] // api/deleteProject/{id}
         [Route("api/deleteProject/{id}")]
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public String Delete(int id)
         {
-            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return "Can't access this resource";
             try
             {
                 String query1 = @"DELETE FROM WorkOn WHERE ProjectID = @ProjectID;";
@@ -1095,9 +1102,9 @@ namespace BUResourcesManagementAPI.Controllers
 
         [HttpDelete] // api/deleteStaffInProject/{projectID}/{staffID}
         [Route("api/deleteStaffInProject/{projectID}/{staffID}")]
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public String Delete(int projectID, int staffID)
         {
-            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return "Can't access this resource";
             try
             {
                 Project project = Get(projectID);

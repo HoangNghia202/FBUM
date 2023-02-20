@@ -366,7 +366,6 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
-    <Compile Include="Controllers\EbookController.cs" />
     <Compile Include="Controllers\SecurityController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\PositionController.cs" />
@@ -374,6 +373,7 @@
     <Compile Include="Controllers\RoleController.cs" />
     <Compile Include="Controllers\StaffController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
+    <Compile Include="Filters\CustomAuthentication.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -385,7 +385,6 @@
     <Compile Include="Models\Values.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TokenAuthentication\ITokenManager.cs" />
-    <Compile Include="TokenAuthentication\Token.cs" />
     <Compile Include="TokenAuthentication\TokenManager.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -441,7 +440,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Filters\" />
     <Folder Include="Views\ExportExcel\" />
   </ItemGroup>
   <ItemGroup>

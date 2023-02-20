@@ -19,10 +19,12 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 
 namespace BUResourcesManagementAPI.Controllers
 {
+    [Filters.CustomAuthentication]
     public class StaffController : ApiController
     {
         [HttpGet] // api/staff/{page}
         [Route("api/staff/{page}")]
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public List<Staff> GetAllStaff(int page)
         {
             try
@@ -107,6 +109,7 @@ namespace BUResourcesManagementAPI.Controllers
 
         [HttpGet] // api/staffPage
         [Route("api/staffPage")]
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public int GetAllStaffPage()
         {
             try
@@ -184,6 +187,7 @@ namespace BUResourcesManagementAPI.Controllers
         }
 
         [HttpGet] // api/staff/id
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public Staff Get(int id)
         {
             try
@@ -225,9 +229,9 @@ namespace BUResourcesManagementAPI.Controllers
 
         [HttpGet] // api/staff/search/{keyword}
         [Route("api/staff/search/{keyword}")]
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public List<Staff> Search(String keyword)
         {
-            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
             try
             {
                 List<Staff> listStaff = null;
@@ -270,9 +274,9 @@ namespace BUResourcesManagementAPI.Controllers
 
         [HttpGet] // api/staffFree/{page}
         [Route("api/staffFree/{page}")]
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public List<Staff> GetFreeStaff(int page)
         {
-            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
             try
             {
                 List<Staff> listStaff = new List<Staff>();
@@ -366,9 +370,9 @@ namespace BUResourcesManagementAPI.Controllers
 
         [HttpGet] // api/staffFreePage
         [Route("api/staffFreePage")]
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public int GetFreeStaffPage()
         {
-            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return 0;
             try
             {
                 int[] page = new int[4];
@@ -455,9 +459,9 @@ namespace BUResourcesManagementAPI.Controllers
 
         [HttpGet] // api/allStaffInProject/{page}
         [Route("api/allStaffInProject/{page}")]
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public List<Staff> GetInProjectStaff(int page)
         {
-            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
             try
             {
                 List<Staff> listStaff = new List<Staff>();
@@ -550,9 +554,9 @@ namespace BUResourcesManagementAPI.Controllers
 
         [HttpGet] // api/allStaffInProjectPage
         [Route("api/allStaffInProjectPage")]
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public int GetInProjectStaffPage()
         {
-            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return 0;
             try
             {
                 int[] page = new int[4];
@@ -639,9 +643,9 @@ namespace BUResourcesManagementAPI.Controllers
 
         [HttpGet] // api/staff/search/{option}/{position}/{keyword}/{page}
         [Route("api/staff/search/{option}/{position}/{keyword}/{page}")]
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public IEnumerable<Staff> Search(int option, int position, String keyword, int page)
         {
-            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
             try
             {
                 List<Staff> listStaffOption = new List<Staff>();
@@ -710,7 +714,7 @@ namespace BUResourcesManagementAPI.Controllers
                                          list.StaffName.ToLower().Contains(keyword.ToLower())
                                          select list);
                 }
-                else if (position == 2)
+                else if (position == 4)
                 {
                     listStaffPosition = (from list in listStaffOption
                                          where
@@ -719,7 +723,7 @@ namespace BUResourcesManagementAPI.Controllers
                                          list.StaffName.ToLower().Contains(keyword.ToLower())
                                          select list);
                 }
-                else if (position == 3)
+                else if (position == 2)
                 {
                     listStaffPosition = (from list in listStaffOption
                                          where
@@ -728,7 +732,7 @@ namespace BUResourcesManagementAPI.Controllers
                                          list.StaffName.ToLower().Contains(keyword.ToLower())
                                          select list);
                 }
-                else if (position == 4)
+                else if (position == 3)
                 {
                     listStaffPosition = (from list in listStaffOption
                                          where
@@ -755,9 +759,9 @@ namespace BUResourcesManagementAPI.Controllers
 
         [HttpGet] // api/staff/searchPage/{option}/{position}/{keyword}
         [Route("api/staff/searchPage/{option}/{position}/{keyword}")]
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public int SearchPage(int option, int position, String keyword)
         {
-            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return 0;
             try
             {
                 List<Staff> listStaffOption = new List<Staff>();
@@ -861,11 +865,56 @@ namespace BUResourcesManagementAPI.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("api/login")] // api/login
+        public Staff Login([FromBody] Staff staff)
+        {
+            try
+            {
+                String query = @"SELECT StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition 
+                                FROM Staff, Role, Position  
+                                WHERE 
+                                Staff.StaffRole = Role.RoleID AND 
+                                Staff.MainPosition = Position.PositionID AND
+                                StaffID = @StaffID AND 
+                                Password = @Password;";
+
+                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
+                using (var command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    command.Parameters.AddWithValue("@StaffID", staff.StaffID);
+                    command.Parameters.AddWithValue("@Password", staff.Password);
+                    var reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            int staffID = reader.GetInt32(0);
+                            String staffName = reader.GetString(1);
+                            String password = reader.GetString(2);
+                            String staffRole = reader.GetString(3);
+                            int level = reader.GetInt32(4);
+                            String mainPosition = reader.GetString(5);
+                            return new Staff(staffID, staffName, password, staffRole, level, mainPosition);
+                        }
+                    }
+                    connection.Close();
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         [HttpPost] // api/staffManagerFree
         [Route("api/staffManagerFree")]
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public List<Staff> GetManagerFree([FromBody] Models.Values time)
         {
-            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return null;
             try
             {
                 String timeStart = time.Value.Split(',')[0].Trim();
@@ -917,9 +966,9 @@ namespace BUResourcesManagementAPI.Controllers
 
         [HttpPost] // api/createNewStaff
         [Route("api/createNewStaff")]
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public String Post([FromBody] Staff staff)
         {
-            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return "Can not access this resource";
             try
             {
                 if (!staff.CheckValidStaff()) return "Staff's information is invalid";
@@ -945,56 +994,11 @@ namespace BUResourcesManagementAPI.Controllers
             }
         }
 
-        [HttpPost]
-        [Route("api/login")] // api/login
-        public Staff Login([FromBody] Staff staff)
-        {
-            try
-            {
-                String query = @"SELECT StaffID, StaffName, Password, RoleName AS StaffRole, Level, PositionName AS MainPosition 
-                                FROM Staff, Role, Position  
-                                WHERE 
-                                Staff.StaffRole = Role.RoleID AND 
-                                Staff.MainPosition = Position.PositionID AND
-                                StaffID = @StaffID AND 
-                                Password = @Password;";
-
-                using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["BUResourcesManagement"].ConnectionString))
-                using (var command = new SqlCommand(query, connection))
-                {
-                    connection.Open();
-                    command.Parameters.AddWithValue("@StaffID", staff.StaffID);
-                    command.Parameters.AddWithValue("@Password", staff.Password);
-                    var reader = command.ExecuteReader();
-                    if (reader.HasRows)
-                    {
-                        while (reader.Read())
-                        {
-                            int staffID = reader.GetInt32(0);
-                            String staffName = reader.GetString(1);
-                            String password = reader.GetString(2);
-                            String staffRole = reader.GetString(3);
-                            int level = reader.GetInt32(4);
-                            String mainPosition = reader.GetString(5);
-                            return new Staff(staffID, staffName, password, staffRole, level, mainPosition);
-                        }
-                    }
-                    connection.Close();
-                }
-
-                return null;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
-
         [HttpPut] // api/updateStaff
         [Route("api/updateStaff")]
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public String Put([FromBody] Staff staff)
         {
-            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return "Can not access this resource";
             try
             {
                 if (!staff.CheckValidStaff()) return "Staff's information is invalid";
@@ -1029,9 +1033,9 @@ namespace BUResourcesManagementAPI.Controllers
 
         [HttpDelete] // api/deleteStaff/{id}
         [Route("api/deleteStaff/{id}")]
+        [Filters.CustomAuthentication(Roles = "Admin")]
         public String Delete(int id)
         {
-            if (new SecurityController().Authorization(new List<String>() { "Admin" }) == false) return "Can not access this resource";
             try
             {
                 String query1 = @"DELETE FROM WorkOn WHERE StaffID = @StaffID;";

@@ -1,9 +1,14 @@
-﻿using System;
+﻿using BUResourcesManagementAPI.Models;
+using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Claims;
+using System.Threading;
 using System.Web.Http;
 
 namespace BUResourcesManagementAPI.Controllers
@@ -12,33 +17,22 @@ namespace BUResourcesManagementAPI.Controllers
     {
         // GET api/values
         [HttpGet]
-        public HttpResponseMessage Get()
+        [Filters.CustomAuthentication(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
+        public String Get()
         {
-            DataTable data = new DataTable();
-
-            data.Columns.Add("DepID");
-            data.Columns.Add("DepName");
-
-            data.Rows.Add(1, "IT");
-            data.Rows.Add(2, "Support");
-
-            return Request.CreateResponse(HttpStatusCode.OK, data);
+            if (Thread.CurrentPrincipal.IsInRole("PM")) return "OK";
+            else return "Not OK";
         }
 
         // GET api/values/5
         [HttpGet]
-        public HttpResponseMessage Get(int id)
+        [Filters.CustomAuthentication]
+        [AllowAnonymous]
+        public String Get(int id)
         {
-            DataTable data = new DataTable();
-
-            data.Columns.Add("DepID");
-            data.Columns.Add("DepName");
-
-            data.Rows.Add(1, "IT");
-            data.Rows.Add(2, "Support");
-            data.Rows.Add(3, "ID");
-
-            return Request.CreateResponse(HttpStatusCode.OK, data);
+            if (Thread.CurrentPrincipal.IsInRole("PM")) return "OK";
+            else return "Not OK";
         }
 
         // POST api/values

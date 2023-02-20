@@ -26,6 +26,9 @@ namespace BUResourcesManagementAPI
             config.Formatters.JsonFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("text/html"));
 
             config.EnableCors(new EnableCorsAttribute("*", "*", "*"));
+
+            //config.Filters.Add(new Filters.CustomAuthentication());
+            //config.Filters.Add(new AuthorizeAttribute());
         }
     }
 }
