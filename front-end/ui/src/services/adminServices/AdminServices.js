@@ -351,27 +351,25 @@ export const transferStaffBetweenProject = async (
   }
 };
 
-export const handleAddStaffToProject = async (staffs, projectId, token) => {
+export const handleAddStaffToProject = async (staffId, projectId, token) => {
   try {
-    if (staffs.length > 0) {
-      staffs.forEach(async (element) => {
-        let res = await axios.put(
-          `${baseUrl}/api/insertToProject/${projectId}/${element.StaffID}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        console.log("res add staff>>>", res);
-      });
-      return {
-        errCode: 0,
-        message: "Add staffs to project successfully",
-      };
-    } else {
-      return {
-        errCode: 1,
-        message: "Add staffs to project failed, empty list to add",
-      };
-    }
-  } catch (error) {}
+    let res = await axios.put(
+      `${baseUrl}/api/insertToProject/${projectId}/${staffId}`,
+      {},
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    console.log("res in loop>>> ", res.data);
+    return {
+      errCode: 0,
+      message: "Add staff to project successfully",
+    };
+  } catch (error) {
+    console.error("error add staff to project>>>", error);
+    return {
+      errCode: 1,
+      message: "Add staff to project failed",
+    };
+  }
 };
 
 export const handleGetFreeProjectManager = async (time, token) => {

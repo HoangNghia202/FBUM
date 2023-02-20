@@ -110,17 +110,16 @@ function AddStaffsToProject() {
 
   const handleAddStaff = async () => {
     console.log("selectedStaffs in handle add", selectedStaffs);
-    let res = await handleAddStaffToProject(selectedStaffs, projectId, token);
-    console.log("res!", res);
-
-    if (res.errCode === 0) {
-      dispatch(fetchProjects(1, token));
-      setSelectedStaffs([]);
-      await getStaffsAvailable();
-      toast.success(res.message);
-    } else {
-      toast.error(res.message);
-    }
+    // let res = await handleAddStaffToProject(selectedStaffs, projectId, token);
+    let res;
+    selectedStaffs.forEach(async (element) => {
+      res = await handleAddStaffToProject(element.StaffID, projectId, token);
+    });
+    console.log("res<<<", res);
+    dispatch(fetchProjects(1, token));
+    setSelectedStaffs([]);
+    await getStaffsAvailable();
+    toast.success(res.message);
   };
   return (
     <>
@@ -145,47 +144,60 @@ function AddStaffsToProject() {
               </Box>
 
               <TabPanel value="1">
-                {/* developer */}
-                <div
-                  style={{
-                    height: "400px",
-                    backgroundColor: "aliceblue",
-                    overflowY: "scroll",
-                    borderRadius: "10px 0 0 10px",
-                    border: "1px solid #ccc",
-                  }}
-                >
-                  <table className="table  table-striped mb-0">
-                    <thead>
-                      <tr style={{ textAlign: "left" }}>
-                        <th scope="col">#</th>
-                        <th scope="col">Name</th>
-                        <th scope="col">Position</th>
-                        <th scope="col">Level</th>
-                        <th scope="col">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody style={{ textAlign: "left" }}>
-                      {developers.map((staff, index) => (
-                        <tr>
-                          <th scope="row">{index + 1}</th>
-                          <td>{staff.StaffName}</td>
-                          <td>{staff.MainPosition}</td>
-                          <td>{staff.Level}</td>
-                          <td>
-                            <Button
-                              variant="contained"
-                              color="warning"
-                              onClick={() => handleChoseStaff(staff)}
-                            >
-                              <PersonAddAlt1Icon />
-                            </Button>{" "}
-                          </td>
+                {loading ? (
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      height: "100%",
+                    }}
+                  >
+                    <CircularProgress />
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      height: "400px",
+                      backgroundColor: "aliceblue",
+                      overflowY: "scroll",
+                      borderRadius: "10px 0 0 10px",
+                      border: "1px solid #ccc",
+                    }}
+                  >
+                    <table className="table  table-striped mb-0">
+                      <thead>
+                        <tr style={{ textAlign: "left" }}>
+                          <th scope="col">#</th>
+                          <th scope="col">Name</th>
+                          <th scope="col">Position</th>
+                          <th scope="col">Level</th>
+                          <th scope="col">Action</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody style={{ textAlign: "left" }}>
+                        {developers.map((staff, index) => (
+                          <tr>
+                            <th scope="row">{index + 1}</th>
+                            <td>{staff.StaffName}</td>
+                            <td>{staff.MainPosition}</td>
+                            <td>{staff.Level}</td>
+                            <td>
+                              <Button
+                                variant="contained"
+                                color="warning"
+                                onClick={() => handleChoseStaff(staff)}
+                              >
+                                <PersonAddAlt1Icon />
+                              </Button>{" "}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+                {/* developer */}
               </TabPanel>
               <TabPanel value="2">
                 {/* business analysis */}

@@ -137,7 +137,7 @@ export const fetchProjectsInprogress = (pageNum, token) => {
       };
       dispatch(setProjectSlider(result));
     } catch (error) {
-      throw error;
+      console.error("error server>>>", error);
     }
   };
 };
@@ -160,7 +160,7 @@ export const fetchProjectsEnded = (pageNum, token) => {
       let result = { projectEnded: res.data, totalPageProjectEnded: res1.data };
       dispatch(setProjectSlider(result));
     } catch (error) {
-      throw error;
+      console.error("error server>>> ", error);
     }
   };
 };
