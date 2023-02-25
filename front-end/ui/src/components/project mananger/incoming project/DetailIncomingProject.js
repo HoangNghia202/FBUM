@@ -5,7 +5,12 @@ import { useEffect, useState } from "react";
 import Divider from "@mui/material/Divider";
 import { findProjectByPMID } from "../../../services/PMServices/PMServices";
 import { useNavigate } from "react-router-dom";
+import { handleRemoveStaffOutOfProject } from "../../../services/adminServices/AdminServices";
+import { Button, Tooltip, Typography } from "@mui/material";
+import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
+
 import moment from "moment";
+import { toast } from "react-toastify";
 function DetailIncomingProject(props) {
   const navigate = useNavigate();
   const [cookies] = useCookies(["token"]);
@@ -19,23 +24,48 @@ function DetailIncomingProject(props) {
   //       navigate("/");
   //     }
   //   });
+  const findProject = async () => {
+    let res = await findProjectByPMID(PMInfo.StaffID, token);
+    console.log("ress>>", res);
+
+    if (res.errCode === 0) {
+      let project = res.data.incomingProject.filter(
+        (item) => item.ProjectID == projectID
+      )[0];
+
+      setIncomingProject(project);
+    }
+  };
 
   useEffect(() => {
-    const findProject = async () => {
-      let res = await findProjectByPMID(PMInfo.StaffID, token);
-      console.log("ress>>", res);
-
-      if (res.errCode === 0) {
-        let project = res.data.incomingProject.filter(
-          (item) => item.ProjectID == projectID
-        )[0];
-
-        setIncomingProject(project);
-      }
-    };
     findProject();
   }, []);
+
+  const handleClickDeleteProject = async (staff) => {
+    console.log("delete staff", staff);
+
+    let confirmDelete = window.confirm(
+      `Are you sure to delete this staff ${staff.StaffName}`
+    );
+    if (confirmDelete) {
+      let res = await handleRemoveStaffOutOfProject(
+        staff.StaffID,
+        incomingProject.ProjectID,
+        token
+      );
+      if (res.errCode === 0) {
+        toast.success(res.message);
+        findProject();
+      } else {
+        toast.error(res.message);
+      }
+    }
+  };
   console.log("incomingProject>>>", incomingProject);
+
+  const handleClickAddMember = () => {
+    navigate(`/PM/addStaff/${incomingProject.ProjectID}`);
+  };
 
   return (
     <div className="col-9 mt-5 pt-5" style={{ height: "100%" }}>
@@ -119,6 +149,11 @@ function DetailIncomingProject(props) {
                   </b>
                 </div>
               </div>
+              <div className="mt-3">
+                <Button variant="contained" onClick={handleClickAddMember}>
+                  Add member
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -145,6 +180,7 @@ function DetailIncomingProject(props) {
                     <th scope="col">Name</th>
                     <th scope="col">Position</th>
                     <th scope="col">Level</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -158,6 +194,24 @@ function DetailIncomingProject(props) {
                           {item.StaffID === PMInfo.StaffID ? "(PM)" : ""}
                         </td>
                         <td>{item.Level}</td>
+                        <td style={{ cursor: "pointer" }}>
+                          <Tooltip placement="left" title={"Delete"}>
+                            <Button
+                              disabled={item.StaffID === PMInfo.StaffID}
+                              variant="outlined"
+                              color="error"
+                              onClick={() => handleClickDeleteProject(item)}
+                            >
+                              <DeleteSweepIcon
+                                color={
+                                  item.StaffID === PMInfo.StaffID
+                                    ? "disabled"
+                                    : "error"
+                                }
+                              />
+                            </Button>
+                          </Tooltip>
+                        </td>
                       </tr>
                     ))}
                   {incomingProject.Staffs?.length === 0 && (

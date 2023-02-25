@@ -4,13 +4,10 @@ const baseUrl = process.env.REACT_APP_JSON_API;
 export const handleLogin = async (userId, password) => {
   console.log("userId >>> ", userId, "password>>>", password);
   try {
-    const res = await axios.post(
-      `https://localhost:44396/api/Security/Authentication`,
-      {
-        StaffID: userId,
-        Password: password,
-      }
-    );
+    const res = await axios.post(`${baseUrl}/api/Security/Authentication`, {
+      StaffID: userId,
+      Password: password,
+    });
     console.log("res >>> ", res.data);
     if (res.data) {
       return {

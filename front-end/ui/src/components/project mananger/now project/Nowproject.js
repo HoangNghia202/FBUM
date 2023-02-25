@@ -1,4 +1,4 @@
-import { Typography } from "@mui/material";
+import { Button, Tooltip, Typography } from "@mui/material";
 import { positions } from "@mui/system";
 import Divider from "@mui/material/Divider";
 import { findProjectByPMID } from "../../../services/PMServices/PMServices";
@@ -6,7 +6,10 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
+import { handleRemoveStaffOutOfProject } from "../../../services/adminServices/AdminServices";
+import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 import moment from "moment";
+import { toast } from "react-toastify";
 
 function NowProject(props) {
   const navigate = useNavigate();
@@ -16,18 +19,44 @@ function NowProject(props) {
   const [nowProject, setNowProject] = useState({});
   console.log("now project>>>", nowProject);
 
-  useEffect(() => {
-    const findProject = async () => {
-      let res = await findProjectByPMID(PMInfo.StaffID, token);
-      console.log("ress>>", res);
+  const findProject = async () => {
+    let res = await findProjectByPMID(PMInfo.StaffID, token);
+    console.log("ress>>", res);
 
-      if (res.errCode === 0) {
-        setNowProject(res.data.nowProject);
-      }
-    };
+    if (res.errCode === 0) {
+      setNowProject(res.data.nowProject);
+    }
+  };
+
+  useEffect(() => {
     findProject();
   }, []);
   console.log("now project>>>", nowProject);
+
+  const handleClickDeleteProject = async (staff) => {
+    console.log("delete staff", staff);
+
+    let confirmDelete = window.confirm(
+      `Are you sure to delete this staff ${staff.StaffName}`
+    );
+    if (confirmDelete) {
+      let res = await handleRemoveStaffOutOfProject(
+        staff.StaffID,
+        nowProject.ProjectID,
+        token
+      );
+      if (res.errCode === 0) {
+        toast.success(res.message);
+        findProject();
+      } else {
+        toast.error(res.message);
+      }
+    }
+  };
+
+  const handleClickAddMember = () => {
+    navigate(`/PM/addStaff/${nowProject.ProjectID}`);
+  };
 
   return (
     <>
@@ -110,6 +139,14 @@ function NowProject(props) {
                     </b>
                   </div>
                 </div>
+                <div className="mt-3">
+                  <Button
+                    variant="contained"
+                    onClick={() => handleClickAddMember()}
+                  >
+                    Add member
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -138,10 +175,8 @@ function NowProject(props) {
                       <th scope="col">Name</th>
                       <th scope="col">Position</th>
                       <th scope="col">Level</th>
-                      {(props.type === "inprogress" ||
-                        props.type === "incoming") && (
-                        <th scope="col">Action</th>
-                      )}
+
+                      <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -155,6 +190,24 @@ function NowProject(props) {
                             {item.StaffID === PMInfo.StaffID ? "(PM)" : ""}
                           </td>
                           <td>{item.Level}</td>
+                          <td style={{ cursor: "pointer" }}>
+                            <Tooltip placement="left" title={"Delete"}>
+                              <Button
+                                disabled={item.StaffID === PMInfo.StaffID}
+                                variant="outlined"
+                                color="error"
+                                onClick={() => handleClickDeleteProject(item)}
+                              >
+                                <DeleteSweepIcon
+                                  color={
+                                    item.StaffID === PMInfo.StaffID
+                                      ? "disabled"
+                                      : "error"
+                                  }
+                                />
+                              </Button>
+                            </Tooltip>
+                          </td>
                         </tr>
                       ))}
                     {nowProject.Staffs?.length === 0 && (

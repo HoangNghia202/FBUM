@@ -53,6 +53,10 @@ function App() {
               element={<DetailIncomingProject />}
             />
             <Route path="profile" element={<Profile />} />
+            <Route
+              path="addStaff/:projectId"
+              element={<AddStaffsToProject />}
+            />
           </Route>
           <Route path="/staff" element={<StaffPage />}>
             <Route path="profile" element={<Profile />} />

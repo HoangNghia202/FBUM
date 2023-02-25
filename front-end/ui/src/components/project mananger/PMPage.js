@@ -14,7 +14,9 @@ function PMPage(props) {
   });
   return (
     <>
-      <NavHeader />
+      <div style={{ marginBottom: "5rem" }}>
+        <NavHeader />
+      </div>
       <div className="row mx-0">
         <div className="col-3">
           <NavLeft />
