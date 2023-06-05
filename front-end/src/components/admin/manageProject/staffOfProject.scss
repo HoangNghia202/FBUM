@@ -1,0 +1,14 @@
+.my-custom-scrollbar {
+  position: relative;
+  height: 400px;
+  overflow: auto;
+  margin-bottom: 10px;
+}
+.table-wrapper-scroll-y {
+  display: block;
+  border-radius: 10px;
+}
+
+table {
+  background-color: aliceblue;
+}
