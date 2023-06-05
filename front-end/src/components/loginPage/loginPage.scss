@@ -1,0 +1,37 @@
+.wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f3f2f2;
+  .login-container {
+    background-color: blanchedalmond;
+
+    width: 700px;
+    border-radius: 10px;
+    background-image: url("../../assets/imgs/pexels-photo-114979.webp");
+    background-size: cover;
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+    .login-form {
+      background-color: #fefefe;
+      border-radius: 0 10px 10px 0;
+      button {
+        background-color: #c090f0;
+        outline: non;
+        border: none;
+        &:hover {
+          background-color: #8861ae;
+        }
+      }
+    }
+  }
+
+  keyframes App-logo-spin {
+    from {
+      transform: p;
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}

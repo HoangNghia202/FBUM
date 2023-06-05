@@ -1,0 +1,16 @@
+.wrapper-staffs {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.table-fixed {
+  width: 100%;
+  background-color: #f3f3f3;
+  tbody {
+    height: 200px;
+    overflow-y: scroll;
+    width: 100%;
+  }
+}
